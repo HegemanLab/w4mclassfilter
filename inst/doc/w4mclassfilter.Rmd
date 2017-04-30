@@ -1,0 +1,90 @@
+---
+title: "Filter W4M data by sample class"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Filter W4M data by sample class}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+### Purpose of the `w4mclassfilter` package
+
+The purpose of the 
+[w4mclassfilter](https://github.com/HegemanLab/w4mclassfilter) 
+R package is to provide the computational back-end of a 
+[Galaxy](https://galaxyproject.org/) 
+tool for inclusion in 
+[Workflow4Metabolomics (W4M)](http://workflow4metabolomics.org/).
+
+Galaxy tools are file-oriented; because of this, the 
+`w4mclassfilter::w4m_filter_by_sample_class` method reads from and writes to 
+files.  General-purpose R packages usually use data structures in memory for 
+their input and output, which may mean that this R package is not generally 
+useful outside of the context of Galaxy.
+
+The `w4mclassfilter::w4m_filter_imputation` function is the default imputation 
+method used by `w4m_filter_by_sample_class`; if other methods are to be used 
+in the Galaxy tool, they might best be incorporated into the `w4mclassfilter` 
+R package, although they could be implemented in another R package to be used 
+by the Galaxy tool.
+
+### How the `w4m_filter_by_sample_class` function is used
+
+A Galaxy tool wrapper invokes `w4m_filter_by_sample_class`.  For exploratory or
+debugging purposes, the package may be installed loaded into R and help may 
+then be obtained with the following command:
+
+```?w4mclassfilter::w4m_filter_by_sample_class```
+
+
+W4M uses the XCMS and CAMERA packages to preprocess GC-MS or LC-MS data, 
+producing three files (which are documented in detail on the 
+[Workflow4Metabolomics (W4M)](http://workflow4metabolomics.org/) web site).  
+In summary:
+
+1. `sampleMetadata.tsv`: a tab-separated file with metadata for the samples, 
+   one line per sample
+
+  + One column of this file indicates the *class* of the sample.
+  + It is the class that is used by this function to determine whether to 
+    include the sample in, or exclude the sample from, further analysis.
+
+2. `variableMetadata.tsv`: a tab-separated file with metadata for the features
+   detected, one line per feature
+
+  + A feature is a location in the two dimensional space defined by the GC-MS
+    or LC-MS data set, which corresponds to a compound or a group of compounds.
+  + One dimension is the mass-to-charge ratio, `m/z`.
+  + The other dimension is the `retention time`, i.e., how long until the
+    solvent gradient eluted the compound(s) from the column.
+
+3. `dataMatrix.tsv`: a tab separated file with the MS intensities for each
+   sample for each feature:
+
+  + There is one column per sample.
+  + There is one row per feature.
+  + If a feature is missing for a sample, the intensity value is `NA`.
+  + For numerical reasons, intenisities may be negative, but this has no
+    meaning in the real world.
+
+By default, the `w4m_filter_by_sample_class` function imputes negative and
+`NA` intensity values as zero using the `w4m_filter_imputation` function.
+
+When `w4m_filter_by_sample_class` is invoked, an array of class names is
+supplied in the `classes` argument.  If the `include` argument is true,
+then only samples whose *class* column in  `sampleMetadata.tsv` will be
+*included in* the output; by contrast, if the `include` argument is false,
+then only samples whose *class* column in `sampleMetadata.tsv` will 
+be *excluded from* the output.
+
+Even if no rows or columns of the `dataMatrix.tsv` input have zero variance,
+there is the possibility that eliminating samples may result in some rows or
+columns having zero variance, adversely impacting downstream statistical
+analysis.  Consequently, `w4m_filter_by_sample_class` eliminates these rows or
+columns and the corresponding rows from `sampleMetadata.tsv` and
+`variableMetadata.tsv`.
+
+When `w4m_filter_by_sample_class` completes running, it writes out updated
+`sampleMetadata.tsv`, `variableMetadata.tsv`, and `dataMatrix.tsv` files.
+The paths to the output files *must* be different from the paths to the 
+input files.

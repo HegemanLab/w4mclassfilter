@@ -1,0 +1,7 @@
+CHANGES IN VERSION 0.98.0
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o added: w4m_filter_by_sample_class w4m_filter_imputation
+
