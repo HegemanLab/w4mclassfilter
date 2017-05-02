@@ -14,9 +14,16 @@
 #' @seealso \url{http://workflow4metabolomics.org/}
 #'
 #' @examples
+#' # input contains negative and missing values
 #' my_input <- matrix(c(NA,1,-1,2), ncol = 2, nrow = 2)
+#'
+#' # expected output converts negative and missing values to zero
 #' my_expected <- matrix(c(0,1,0,2), ncol = 2, nrow = 2)
+#'
+#' # run the imputation method to generate actual output
 #' my_output <- w4m_filter_imputation(my_input)
+#'
+#' # validate actual output against expected output
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
@@ -60,28 +67,31 @@ w4m_filter_imputation <-
 #' @importFrom utils read.delim write.table str
 #'
 #' @examples
-#' print(' # set the paths to your input files                                  ')
-#' print(' dataMatrix_in <- "tests/testthat/input_dataMatrix.tsv"               ')
-#' print(' sampleMetadata_in <- "tests/testthat/input_sampleMetadata.tsv"       ')
-#' print(' variableMetadata_in <- "tests/testthat/input_variableMetadata.tsv"   ')
-#' print('                                                                      ')
-#' print(' # set the paths to your (nonexistent) output files                   ')
-#' print(' #    in a directory that DOES need to exist                          ')
-#' print(' dataMatrix_out <- "tests/testthat/output_dataMatrix.tsv"             ')
-#' print(' sampleMetadata_out <- "tests/testthat/output_sampleMetadata.tsv"     ')
-#' print(' variableMetadata_out <- "tests/testthat/output_variableMetadata.tsv" ')
-#' print('                                                                      ')
-#' print(' # Example: running the filter to exclude only unwanted samples       ')
-#' print(' #   include = FALSE means exclude samples with class blankpos        ')
-#' print(' w4m_filter_by_sample_class(                                          ')
-#' print('   dataMatrix_in = dataMatrix_in                                      ')
-#' print(' , dataMatrix_out = dataMatrix_out                                    ')
-#' print(' , variableMetadata_in = variableMetadata_in                          ')
-#' print(' , variableMetadata_out = variableMetadata_out                        ')
-#' print(' , sampleMetadata_out = sampleMetadata_out                            ')
-#' print(' , sampleMetadata_in = sampleMetadata_in                              ')
-#' print(' , classes = c("blankpos")                                            ')
-#' print(' , include = FALSE                                                    ')
+#' \dontrun{
+#'   # set the paths to your input files
+#'   dataMatrix_in <- "tests/testthat/input_dataMatrix.tsv"
+#'   sampleMetadata_in <- "tests/testthat/input_sampleMetadata.tsv"
+#'   variableMetadata_in <- "tests/testthat/input_variableMetadata.tsv"
+#'
+#'   # set the paths to your (nonexistent) output files
+#'   #    in a directory that DOES need to exist
+#'   dataMatrix_out <- "tests/testthat/output_dataMatrix.tsv"
+#'   sampleMetadata_out <- "tests/testthat/output_sampleMetadata.tsv"
+#'   variableMetadata_out <- "tests/testthat/output_variableMetadata.tsv"
+#'
+#'   # Example: running the filter to exclude only unwanted samples
+#'   #   include = FALSE means exclude samples with class blankpos
+#'   w4m_filter_by_sample_class(
+#'     dataMatrix_in = dataMatrix_in
+#'   , dataMatrix_out = dataMatrix_out
+#'   , variableMetadata_in = variableMetadata_in
+#'   , variableMetadata_out = variableMetadata_out
+#'   , sampleMetadata_out = sampleMetadata_out
+#'   , sampleMetadata_in = sampleMetadata_in
+#'   , classes = c("blankpos")
+#'   , include = FALSE
+#'   )
+#' }
 #'
 #' @export
 w4m_filter_by_sample_class <- function(

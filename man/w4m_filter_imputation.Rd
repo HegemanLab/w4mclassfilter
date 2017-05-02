@@ -16,9 +16,16 @@ matrix: input data matrix with zeros substituted for negative or NA values
 Impute missing or negative values in W4M files as zero
 }
 \examples{
+# input contains negative and missing values
 my_input <- matrix(c(NA,1,-1,2), ncol = 2, nrow = 2)
+
+# expected output converts negative and missing values to zero
 my_expected <- matrix(c(0,1,0,2), ncol = 2, nrow = 2)
+
+# run the imputation method to generate actual output
 my_output <- w4m_filter_imputation(my_input)
+
+# validate actual output against expected output
 all.equal(my_output, my_expected, check.attributes = FALSE)
 
 }
