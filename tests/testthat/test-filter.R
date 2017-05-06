@@ -39,8 +39,9 @@ test_that("filter test",{
   dataMatrix_in <- "input_dataMatrix.tsv"
   dataMatrix_out <- "output_dataMatrix.tsv"
   dataMatrix_exp <- "expected_dataMatrix.tsv"
-  classes_to_filter <- c("blankpos")
-  false_to_exclude_classes_in_filter <- FALSE
+  classes_to_filter <- c("M")
+  class_column <- "gender"
+  false_to_exclude_classes_in_filter <- TRUE
   # test input files
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   expect_true(data_matrix_input_env$success, info = "read data matrix input")
@@ -61,6 +62,7 @@ test_that("filter test",{
   , sampleMetadata_in = sampleMetadata_in
   , classes = classes_to_filter
   , include = false_to_exclude_classes_in_filter 
+  , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files

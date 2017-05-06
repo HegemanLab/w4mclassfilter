@@ -1,33 +1,10 @@
-sampleMetadata	class	polarity
-E1	frontpos12	unknown
-E2	frontpos12	unknown
-E3	frontpos12	unknown
-E4	frontpos12	unknown
-B10	frontpos3	unknown
-B7	frontpos3	unknown
-B8	frontpos3	unknown
-B9	frontpos3	unknown
-C5	frontpos6	unknown
-C6	frontpos6	unknown
-C7	frontpos6	unknown
-C8	frontpos6	unknown
-D3	frontpos9	unknown
-D4	frontpos9	unknown
-D5	frontpos9	unknown
-D6	frontpos9	unknown
-E5	marqpos12	unknown
-E6	marqpos12	unknown
-E7	marqpos12	unknown
-E8	marqpos12	unknown
-C1	marqpos3	unknown
-C2	marqpos3	unknown
-C3	marqpos3	unknown
-C4	marqpos3	unknown
-C10	marqpos6	unknown
-C9	marqpos6	unknown
-D1	marqpos6	unknown
-D2	marqpos6	unknown
-D10	marqpos9	unknown
-D7	marqpos9	unknown
-D8	marqpos9	unknown
-D9	marqpos9	unknown
+sampleMetadata	injectionOrder	mode	age	bmi	gender
+HU_017	2	pos	41	23.03	M
+HU_034	9	pos	52	23.37	M
+HU_078	34	pos	46	25.18	M
+HU_091	42	pos	61	26.12	M
+HU_093	43	pos	53	21.71	M
+HU_099	46	pos	23	21.3	M
+HU_130	63	pos	33	26.06	M
+HU_134	67	pos	48	22.89	M
+HU_138	68	pos	42	21.88	M

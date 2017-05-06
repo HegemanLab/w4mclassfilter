@@ -1,5 +1,3 @@
-#require(utils)
-
 #' Impute W4M Data Matrix Values
 #'
 #' Impute missing or negative values in W4M files as zero
@@ -32,12 +30,39 @@ w4m_filter_imputation <-
     # replace NA values with zero
     m[is.na(m)] <- 0
     # replace negative values with zero, if applicable (It should never be applicable!)
-    if (min(m) < 0) {
-      m <- matrix(sapply(X = m, FUN = function(z) {max(z,0)}), nrow = nrow(m) )
-    }
+    m[m<0] <- 0
     # return matrix as the result
     return (m)
   }
+
+# w4m__var_by_rank_or_file - Compute variance of rows or columns of a matrix
+# ref: http://stackoverflow.com/a/25100036
+# For row variance, dim == 1, for col variance, dim == 2
+w4m__var_by_rank_or_file <- function(x, dim = 1) {
+  if (dim == 1) {
+    dim.x.2 <- dim(x)[2]
+    if ( dim.x.2 == 0 )
+      stop("w4m__var_by_rank_or_file: there are zero columns")
+    if ( dim.x.2 == 1 ) {
+      stop("w4m__var_by_rank_or_file: a single column is insufficient to calculate a variance")
+    }
+  }
+  else if (dim == 2) {
+    dim.x.1 <- dim(x)[1]
+    if ( dim.x.1 == 0 ) {
+      stop("w4m__var_by_rank_or_file: there are zero rows")
+    }
+    if ( dim.x.1 == 1 ) {
+      stop("w4m__var_by_rank_or_file: a single row is insufficient to calculate a variance")
+    }
+    x <- t(x)
+  }
+  else {
+    stop("w4m__var_by_rank_or_file: dim is invalid; for rows, use dim = 1; for colums, use dim = 2")
+  }
+  return(rowSums((x - rowMeans(x))^2)/(dim(x)[2] - 1))
+}
+
 
 #' Filter W4M Samples by Class of Sample
 #'
@@ -135,34 +160,6 @@ w4m_filter_by_sample_class <- function(
     return (my.env)
   }
   
-  # MatVar - Compute variance of rows or columns of a matrix
-  # ref: http://stackoverflow.com/a/25100036
-  # For row variance, dim == 1, for col variance, dim == 2
-  MatVar <- function(x, dim = 1) {
-    if (dim == 1) {
-      dim.x.2 <- dim(x)[2]
-      if ( dim.x.2 == 0 )
-        stop("MatVar: there are zero columns")
-      if ( dim.x.2 == 1 ) {
-        stop("MatVar: a single column is insufficient to calculate a variance")
-        # return ( rep.int(x = 0, times = nrow(x)) )
-      } else {
-        return ( rowSums( (x    - rowMeans(x))^2 ) / ( dim(x)[2] - 1 ) )
-      }
-    } else if (dim == 2) {
-      dim.x.1 <- dim(x)[1]
-      if ( dim.x.1 == 0 ) {
-        stop("MatVar: there are zero rows")
-      }
-      if ( dim.x.1 == 1 ) {
-        stop("MatVar: a single row is insufficient to calculate a variance")
-        # return ( rep.int(x = 0, times = ncol(x)) )
-      } else {
-        return ( rowSums( (t(x) - colMeans(x))^2 ) / ( dim(x)[1] - 1 ) )
-      }
-    } else stop("Please enter valid dimension, for rows, dim = 1; for colums, dim = 2")
-  }
-
   # get names of columns that do not have only NA
   nonempty_column_names <-
     function(x) {
@@ -174,19 +171,19 @@ w4m_filter_by_sample_class <- function(
     }
 
   # produce matrix from matrix xpre where all rows and columns having zero variance have been removed 
-  nonzero_var <- function(xpre) {
+  w4m__nonzero_var <- function(xpre) {
     nonzero_var_internal <- function(x) {
       if (nrow(x) == 0) {
-          utils::str(x)
-          stop("matrix has no rows")
+        utils::str(x)
+        stop("matrix has no rows")
       }
       if (ncol(x) == 0) {
-          utils::str(x)
-          stop("matrix has no columns")
+        utils::str(x)
+        stop("matrix has no columns")
       }
       if ( is.numeric(x) ) {
         # exclude any rows with zero variance
-        row.vars <- MatVar(x, dim = 1)
+        row.vars <- w4m__var_by_rank_or_file(x, dim = 1)
         nonzero.row.vars <- row.vars > 0
         nonzero.rows <- row.vars[nonzero.row.vars]
         if ( length(rownames(x)) != length(rownames(nonzero.rows)) ) {
@@ -195,7 +192,7 @@ w4m_filter_by_sample_class <- function(
         }
 
         # exclude any columns with zero variance
-        column.vars <- MatVar(x, dim = 2)
+        column.vars <- w4m__var_by_rank_or_file(x, dim = 2)
         nonzero.column.vars <- column.vars > 0
         nonzero.columns <- column.vars[nonzero.column.vars]
         if ( length(colnames(x)) != length(colnames(nonzero.columns)) ) {
@@ -221,7 +218,6 @@ w4m_filter_by_sample_class <- function(
     }
     return (xpre)
   }
-  # ...
 
   # return FALSE if any paths are exact duplicates
   my.paths <- c(dataMatrix_in, dataMatrix_out, sampleMetadata_in, sampleMetadata_out, variableMetadata_in, variableMetadata_out)
@@ -234,7 +230,6 @@ w4m_filter_by_sample_class <- function(
     return (FALSE)
   }
 
-  # ---
   # read in the sample metadata
   smpl_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
   if (!smpl_metadata_input_env$success) {
@@ -247,12 +242,10 @@ w4m_filter_by_sample_class <- function(
   rownames(smpl_metadata) <- smpl_metadata[,samplename_column]
   
   # select the first column of the rows indicated by classes, include, & class_column, but don't drop dimension
-  selected_rows           <- smpl_metadata[ xor( !include, smpl_metadata[,class_column] %in% classes ), 1, drop = FALSE ]
+  selected_rows <- smpl_metadata[ xor( !include, smpl_metadata[,class_column] %in% classes ), 1, drop = FALSE ]
   # obtain the row names
-  sample_names            <- rownames( selected_rows )
-  # ...
+  sample_names <- rownames( selected_rows )
 
-  # ---
   # read in the variable metadata
   vrbl_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
   if (!vrbl_metadata_input_env$success) {
@@ -279,9 +272,7 @@ w4m_filter_by_sample_class <- function(
     failure_action(err.env$msg)
     return ( FALSE )
   }
-  # ...
 
-  # ---
   # read in the data matrix
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   if (!data_matrix_input_env$success) {
@@ -300,14 +291,13 @@ w4m_filter_by_sample_class <- function(
       err.env$success     <- TRUE
     }
   , error = function(e) {
-     err.env$ msg <- sprintf("failed to set rownames for data_matrix read because '%s'", e$message) 
+     err.env$msg <- sprintf("failed to set rownames for data_matrix read because '%s'", e$message) 
     }
   )
   if (!err.env$success) {
     failure_action(err.env$msg)
     return ( FALSE )
   }
-  # ...
 
   # remove rownames column
   data_matrix <- data_matrix[,2:ncol(data_matrix)]
@@ -318,14 +308,16 @@ w4m_filter_by_sample_class <- function(
   # impute missing values with supplied or default method
   data_matrix <- data_imputation(data_matrix)
 
+  # convert data_matrix to matrix from data.frame
+  data_matrix <- as.matrix(data_matrix)
+
   # purge data_matrix of rows and columns that have zero variance
-  data_matrix <- nonzero_var(data_matrix)
+  data_matrix <- w4m__nonzero_var(data_matrix)
 
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   sample_names <- intersect(sample_names,colnames(data_matrix))
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
 
-  # ---
   # write out the results
   err.env <- new.env()
   err.env$success <- FALSE
