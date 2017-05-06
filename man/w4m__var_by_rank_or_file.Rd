@@ -18,6 +18,7 @@ vector of numeric: variances for rows or columns
 (w4mclassfilter support function) Compute variances of rows or columns of a W4M data matrix
 }
 \examples{
+
 m <- base::matrix(
   c(
     1, 2, 3,
@@ -31,6 +32,10 @@ m <- base::matrix(
 rowvars <- w4m__var_by_rank_or_file(m = m, dim = 1)
 expecteds <- c(stats::var(c(1,2,3)),stats::var(c(5,7,11)),stats::var(c(13,17,19)))
 base::all.equal(rowvars, expecteds)
+colvars <- w4m__var_by_rank_or_file(m = m, dim = 2)
+expecteds <- c(var(c(1,5,13)),var(c(2,7,17)),var(c(3,11,19)))
+all.equal(colvars, expecteds)
+all.equal(colvars, rowvars)
 
 }
 \seealso{
