@@ -53,6 +53,21 @@ w4m_filter_imputation <-
 #' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
 #' @seealso \url{http://stackoverflow.com/a/25100036}
 #'
+#' @examples
+#' m <- base::matrix(
+#'   c(
+#'     1, 2, 3,
+#'     5, 7, 11,
+#'     13, 17, 19
+#'   )
+#' , nrow = 3
+#' , ncol = 3
+#' , byrow = TRUE
+#' )
+#' rowvars <- w4m__var_by_rank_or_file(m = m, dim = 1)
+#' expecteds <- c(stats::var(c(1,2,3)),stats::var(c(5,7,11)),stats::var(c(13,17,19)))
+#' base::all.equal(rowvars, expecteds)
+#'
 #' @export
 w4m__var_by_rank_or_file <- function(m, dim = 1) {
   if (dim == 1) {
