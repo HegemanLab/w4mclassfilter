@@ -41,7 +41,7 @@ w4m_filter_imputation <-
 
 #' Filter W4M Samples by Class of Sample
 #'
-#' Filter set of retention-corrected W4M files (dataMatrix, sampleMetadata) by feature
+#' Filter set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class
 #'
 #' @param dataMatrix_in        character: path to input file containing data matrix (tsv, rows are feature names, columns are sample names
 #' @param sampleMetadata_in    character: path to input file containing sample metadata (tsv, rows are sample names, one column's name matches class_column)
