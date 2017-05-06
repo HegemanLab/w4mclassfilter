@@ -2,6 +2,7 @@
 
 export(w4m__nonzero_var)
 export(w4m__var_by_rank_or_file)
+export(w4m_filter_by_sample_class)
 export(w4m_filter_imputation)
 importFrom(utils,read.delim)
 importFrom(utils,str)

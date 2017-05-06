@@ -63,6 +63,54 @@ w4m__var_by_rank_or_file <- function(x, dim = 1) {
   return(rowSums((x - rowMeans(x))^2)/(dim(x)[2] - 1))
 }
 
+# produce matrix from matrix xpre where all rows and columns having zero variance have been removed 
+w4m__nonzero_var <- function(xpre) {
+  nonzero_var_internal <- function(x) {
+    if (nrow(x) == 0) {
+      utils::str(x)
+      stop("matrix has no rows")
+    }
+    if (ncol(x) == 0) {
+      utils::str(x)
+      stop("matrix has no columns")
+    }
+    if ( is.numeric(x) ) {
+      # exclude any rows with zero variance
+      row.vars <- w4m__var_by_rank_or_file(x, dim = 1)
+      nonzero.row.vars <- row.vars > 0
+      nonzero.rows <- row.vars[nonzero.row.vars]
+      if ( length(rownames(x)) != length(rownames(nonzero.rows)) ) {
+        row.names <- attr(nonzero.rows,"names")
+        x <- x[ row.names, , drop = FALSE ]
+      }
+
+      # exclude any columns with zero variance
+      column.vars <- w4m__var_by_rank_or_file(x, dim = 2)
+      nonzero.column.vars <- column.vars > 0
+      nonzero.columns <- column.vars[nonzero.column.vars]
+      if ( length(colnames(x)) != length(colnames(nonzero.columns)) ) {
+        column.names <- attr(nonzero.columns,"names")
+        x <- x[ , column.names, drop = FALSE ]
+      }
+    }
+    return (x)
+  }
+
+  # purge rows and columns that have zero variance until there are nor more changes
+  #   rationale: nonzero_var_internal first purges rows with zero variance, then columns with zero variance,
+  #              so there exists the possibility that a row's variance might change to zero when a column is removed;
+  #              therefore, iterate till there are no more changes
+  if ( is.numeric(xpre) ) {
+    my.nrow <- 0
+    my.ncol <- 0
+    while ( nrow(xpre) != my.nrow || ncol(xpre) != my.ncol ) {
+      my.nrow <- nrow(xpre)
+      my.ncol <- ncol(xpre)
+      xpre <- nonzero_var_internal(xpre)
+    }
+  }
+  return (xpre)
+}
 
 #' Filter W4M Samples by Class of Sample
 #'
@@ -170,54 +218,6 @@ w4m_filter_by_sample_class <- function(
       return ( as.character( colnames(x)[column_sum > 0.0] ) )
     }
 
-  # produce matrix from matrix xpre where all rows and columns having zero variance have been removed 
-  w4m__nonzero_var <- function(xpre) {
-    nonzero_var_internal <- function(x) {
-      if (nrow(x) == 0) {
-        utils::str(x)
-        stop("matrix has no rows")
-      }
-      if (ncol(x) == 0) {
-        utils::str(x)
-        stop("matrix has no columns")
-      }
-      if ( is.numeric(x) ) {
-        # exclude any rows with zero variance
-        row.vars <- w4m__var_by_rank_or_file(x, dim = 1)
-        nonzero.row.vars <- row.vars > 0
-        nonzero.rows <- row.vars[nonzero.row.vars]
-        if ( length(rownames(x)) != length(rownames(nonzero.rows)) ) {
-          row.names <- attr(nonzero.rows,"names")
-          x <- x[ row.names, , drop = FALSE ]
-        }
-
-        # exclude any columns with zero variance
-        column.vars <- w4m__var_by_rank_or_file(x, dim = 2)
-        nonzero.column.vars <- column.vars > 0
-        nonzero.columns <- column.vars[nonzero.column.vars]
-        if ( length(colnames(x)) != length(colnames(nonzero.columns)) ) {
-          column.names <- attr(nonzero.columns,"names")
-          x <- x[ , column.names, drop = FALSE ]
-        }
-      }
-      return (x)
-    }
-
-    # purge rows and columns that have zero variance until there are nor more changes
-    #   rationale: nonzero_var_internal first purges rows with zero variance, then columns with zero variance,
-    #              so there exists the possibility that a row's variance might change to zero when a column is removed;
-    #              therefore, iterate till there are no more changes
-    if ( is.numeric(xpre) ) {
-      my.nrow <- 0
-      my.ncol <- 0
-      while ( nrow(xpre) != my.nrow || ncol(xpre) != my.ncol ) {
-        my.nrow <- nrow(xpre)
-        my.ncol <- ncol(xpre)
-        xpre <- nonzero_var_internal(xpre)
-      }
-    }
-    return (xpre)
-  }
 
   # return FALSE if any paths are exact duplicates
   my.paths <- c(dataMatrix_in, dataMatrix_out, sampleMetadata_in, sampleMetadata_out, variableMetadata_in, variableMetadata_out)
