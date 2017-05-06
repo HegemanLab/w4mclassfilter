@@ -1,6 +1,8 @@
-#' Impute W4M Data Matrix Values
+#' @title
+#' Impute values for W4M data matrix
 #'
-#' Impute missing or negative values in W4M files as zero
+#' @description
+#' Substitute zero for missing or negative values in W4M data matrix
 #'
 #' @param m  matrix: W4M data matrix potentially containing NA or negative values
 #'
@@ -35,12 +37,26 @@ w4m_filter_imputation <-
     return (m)
   }
 
-# w4m__var_by_rank_or_file - Compute variance of rows or columns of a matrix
-# ref: http://stackoverflow.com/a/25100036
-# For row variance, dim == 1, for col variance, dim == 2
-w4m__var_by_rank_or_file <- function(x, dim = 1) {
+#' @title
+#' Support function to compute variances of matrix rows or columns
+#'
+#' @description
+#' (w4mclassfilter support function) Compute variances of rows or columns of a W4M data matrix
+#'
+#' @param m  matrix: W4M data matrix for which variance must be computed for rows or columns
+#' @param dim  integer: For variances of rows, dim == 1, for variances of columns, dim == 2
+#'
+#' @return vector of numeric: variances for rows or columns
+#'
+#' @author Art Eschenlauer, \email{esch0041@@umn.edu}
+#' @concept w4m workflow4metabolomics
+#' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
+#' @seealso \url{http://stackoverflow.com/a/25100036}
+#'
+#' @export
+w4m__var_by_rank_or_file <- function(m, dim = 1) {
   if (dim == 1) {
-    dim.x.2 <- dim(x)[2]
+    dim.x.2 <- dim(m)[2]
     if ( dim.x.2 == 0 )
       stop("w4m__var_by_rank_or_file: there are zero columns")
     if ( dim.x.2 == 1 ) {
@@ -48,23 +64,34 @@ w4m__var_by_rank_or_file <- function(x, dim = 1) {
     }
   }
   else if (dim == 2) {
-    dim.x.1 <- dim(x)[1]
+    dim.x.1 <- dim(m)[1]
     if ( dim.x.1 == 0 ) {
       stop("w4m__var_by_rank_or_file: there are zero rows")
     }
     if ( dim.x.1 == 1 ) {
       stop("w4m__var_by_rank_or_file: a single row is insufficient to calculate a variance")
     }
-    x <- t(x)
+    m <- t(m)
   }
   else {
     stop("w4m__var_by_rank_or_file: dim is invalid; for rows, use dim = 1; for colums, use dim = 2")
   }
-  return(rowSums((x - rowMeans(x))^2)/(dim(x)[2] - 1))
+  return(rowSums((m - rowMeans(m))^2)/(dim(m)[2] - 1))
 }
 
 # produce matrix from matrix xpre where all rows and columns having zero variance have been removed 
-w4m__nonzero_var <- function(xpre) {
+#' @title
+#' Support function to eliminate rows or columns that have zero variance
+#'
+#' @description
+#' (w4mclassfilter support function) Produce matrix from matrix xpre where all rows and columns having zero variance have been removed
+#'
+#' @param m  matrix: W4M data matrix potentially having rows or columns having zero variance
+#'
+#' @return matrix: input data matrix after removal of rows or columns having zero variance
+#' 
+#' @export
+w4m__nonzero_var <- function(m) {
   nonzero_var_internal <- function(x) {
     if (nrow(x) == 0) {
       utils::str(x)
@@ -100,21 +127,23 @@ w4m__nonzero_var <- function(xpre) {
   #   rationale: nonzero_var_internal first purges rows with zero variance, then columns with zero variance,
   #              so there exists the possibility that a row's variance might change to zero when a column is removed;
   #              therefore, iterate till there are no more changes
-  if ( is.numeric(xpre) ) {
+  if ( is.numeric(m) ) {
     my.nrow <- 0
     my.ncol <- 0
-    while ( nrow(xpre) != my.nrow || ncol(xpre) != my.ncol ) {
-      my.nrow <- nrow(xpre)
-      my.ncol <- ncol(xpre)
-      xpre <- nonzero_var_internal(xpre)
+    while ( nrow(m) != my.nrow || ncol(m) != my.ncol ) {
+      my.nrow <- nrow(m)
+      my.ncol <- ncol(m)
+      m <- nonzero_var_internal(m)
     }
   }
-  return (xpre)
+  return (m)
 }
 
-#' Filter W4M Samples by Class of Sample
+#' @title
+#' Filter W4M data matrix by sample-class
 #'
-#' Filter set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class
+#' @description
+#' Filter a set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class
 #'
 #' @param dataMatrix_in        character: path to input file containing data matrix (tsv, rows are feature names, columns are sample names
 #' @param sampleMetadata_in    character: path to input file containing sample metadata (tsv, rows are sample names, one column's name matches class_column)
