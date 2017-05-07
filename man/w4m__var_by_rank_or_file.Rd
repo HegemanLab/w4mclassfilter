@@ -35,7 +35,6 @@ base::all.equal(rowvars, expecteds)
 colvars <- w4m__var_by_rank_or_file(m = m, dim = 2)
 expecteds <- c(var(c(1,5,13)),var(c(2,7,17)),var(c(3,11,19)))
 all.equal(colvars, expecteds)
-all.equal(colvars, rowvars)
 
 }
 \seealso{
