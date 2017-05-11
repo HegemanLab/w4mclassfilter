@@ -1,6 +1,11 @@
 # w4mclassfilter
 
-Filter W4M data matrix and metadata by sample-class
+This is a Galaxy-oriented R package that can be used to filter W4M data matrix and metadata by sample-class.
+For a brief introduction to this package, please see the vignette: (https://github.com/HegemanLab/w4mclassfilter/blob/master/vignettes/w4mclassfilter.Rmd).
+
+This package has been "wrapped" as a Galaxy tool
+  - the "wrapping project" is here: (https://github.com/HegemanLab/w4mclassfilter_galaxy_wrapper)
+  - the "w4mclassfilter" tool is in the toolshed at (https://toolshed.g2.bx.psu.edu/repository?repository_id=5f24951d82ab40fa)
 
 ## License
 
