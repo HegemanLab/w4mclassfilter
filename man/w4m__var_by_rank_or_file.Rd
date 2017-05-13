@@ -33,7 +33,7 @@ rowvars <- w4m__var_by_rank_or_file(m = m, dim = 1)
 expecteds <- c(stats::var(c(1,2,3)),stats::var(c(5,7,11)),stats::var(c(13,17,19)))
 base::all.equal(rowvars, expecteds)
 colvars <- w4m__var_by_rank_or_file(m = m, dim = 2)
-expecteds <- c(base::var(c(1,5,13)),base::var(c(2,7,17)),base::var(c(3,11,19)))
+expecteds <- c(stats::var(c(1,5,13)),stats::var(c(2,7,17)),stats::var(c(3,11,19)))
 base::all.equal(colvars, expecteds)
 
 }
