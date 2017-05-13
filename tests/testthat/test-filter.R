@@ -166,6 +166,12 @@ test_that("nofilter test 3f - empty classes_to_to_filter",{
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 2 - regex_include_all",{
+test_that("nofilter test 2.1 - regex_include_all",{
   run_nofilter_test(classes_to_filter = c("[MF]"), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+})
+
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 2.2 - regex_include_all",{
+  run_nofilter_test(classes_to_filter = c("[Mm]","[fF]"), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
 })
