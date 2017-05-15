@@ -44,6 +44,25 @@ SOFTWARE.
 
 * Support and tests for new features.
 
+#### BUILD NOTES
+
+* This package was built with R 3.3.1 under miniconda as follows:
+
+```
+  $ ~/miniconda2/bin/conda create -n r3.3.1 r-base=3.3.1
+  $ source ~/miniconda2/bin/activate r3.3.1
+  (r3.3.1) $ R
+  > library(devtools)
+  > document()
+  > test()
+  > check()
+  > build()
+  > install()
+
+```
+
+Result is at ~/src/w4mclassfilter_0.98.2.tar.gz
+
 ### CHANGES IN VERSION 0.98.1
 #### NEW FEATURES
 
