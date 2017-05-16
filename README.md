@@ -8,6 +8,32 @@ This package has been "wrapped" as a Galaxy tool
   - the "wrapping project" is here: (https://github.com/HegemanLab/w4mclassfilter_galaxy_wrapper)
   - the "w4mclassfilter" tool is in the toolshed at (https://toolshed.g2.bx.psu.edu/repository?repository_id=5f24951d82ab40fa)
 
+## Installing the w4mclassfilter R package
+
+To use this package in R, download the tar.gz file for the desired version from (https://github.com/HegemanLab/w4mclassfilter/releases), and install it into R one of the following ways:
+
+### From within RStudio, 
+
+```
+From the "Tools" menu, choose "Install packages..."
+Change "Install from:" to "Package Archive File (.tar.gz)", and a "file picker" dialog will pop up.
+Navigate to and select w4mclassfilter_blahblah.tar.gz
+Click the 'Install' button.
+```
+
+### From within R,
+
+```r
+install.packages("path/to/w4mclassfilter_blahblah.tar.gz", repos = NULL, type="source")
+```
+
+### From the command line,
+
+```bash
+cd directory_that_contains_w4mclassfilter_blahblah.tar.gz
+R CMD INSTALL w4mclassfilter_blahblah.tar.gz
+```
+
 ## License
 
 MIT License
