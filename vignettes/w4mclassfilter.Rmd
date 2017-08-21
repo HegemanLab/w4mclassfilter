@@ -88,3 +88,105 @@ When `w4m_filter_by_sample_class` completes running, it writes out updated
 `sampleMetadata.tsv`, `variableMetadata.tsv`, and `dataMatrix.tsv` files.
 The paths to the output files *must* be different from the paths to the 
 input files.
+
+### New in release v0.98.3 - more flexible input and output
+
+R package v0.98.3 - add support for env, list, data.frame, and matrix I/O
+
+#### Inputs:
+
+1. `dataMatrix_in`
+
+  - if a string, treat as a file path (i.e., same as in previous releases)
+  - else if an env or list, read `dataMatrix_in$dataMatrix`
+  - else if a data.frame, use `as.matrix(dataMatrix_in)`
+  - else if a matrix, use directly
+  - else error
+  
+2. `sampleMetadata_in`
+
+  - if a string, treat as a file path (i.e., same as in previous releases)
+  - else if an env or list, read `sampleMetadata_in$sampleMetadata`
+  - else if a data.frame, use directly
+  - else error
+
+3. `variableMetadata_in`
+
+  - if a string, treat as a file path (i.e., same as in previous releases)
+  - else if an env or list, read `sampleMetadata_in$sampleMetadata`
+  - else if a data.frame, use directly
+  - else error
+
+#### Outputs:
+
+1. `dataMatrix_out`
+
+  - if a string, treat as a file path (i.e., same as in previous releases)
+  - else if an env or list, write `dataMatrix_out$dataMatrix`
+  - else error
+
+2. `sampleMetadata_out`
+
+  - if a string, treat as a file path (i.e., same as in previous releases)
+  - else if an env or list, write `sampleMetadata_out$sampleMetadata`
+  - else error
+
+3. `variableMetadata_out`
+
+  - if a string, treat as a file path (i.e., same as in previous releases)
+  - else if an env or list, write `sampleMetadata_out$sampleMetadata`
+  - else error
+
+### New in release v0.98.2 - support regular expressions and wild cards
+
+**Wild card patterns to match class-names**
+
+Beginning with v0.98.2, w4mclassfilter supports use of R regular expression patterns to select class-names.
+
+* use `?` to match a single character
+* use `*` to match zero or more characters
+* the entire pattern must match the sample name
+
+For example
+
+* `??.samp*` matches `my.sample` but not `my.own.sample`
+* `*.sample` matches `my.sample` and `my.own.sample`
+* `*.sampl` matches neither `my.sample` nor `my.own.sample`
+
+**Regular expression patterns to match class-names**
+
+Beginning with v0.98.2, w4mclassfilter supports use of R regular expression patterns to select class-names.
+
+R uses POSIX 1003.2 standard regular expressions, which allow precise pattern-matching and are exhaustively defined at: [http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap09.html](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html)
+
+However, only a few basic building blocks of regular expressions need to be mastered for most cases:
+
+* `^` matches the beginning of a class-name
+* `$` matches the end of a class-name
+* `.` outside of square brackets matches a single character
+* `*` matches character specified immediately before zero or more times
+* square brackets specify a set of characters to be matched.
+
+Within square brackets
+
+* `^` as the first character specifies that the list of characters are those that should * not * be matched.
+* `-` is used to specify ranges of characters
+
+Caveat: The tool wrapper uses the comma (`,`) to split a list of sample-class names, so *commas may not be used within regular expressions for this tool*
+
+First Example: Consider a field of class-names consisting of 
+```marq3,marq6,marq9,marq12,front3,front6,front9,front12```
+
+* The regular expression `^front[0-9][0-9]*$` will match the same sample-classes as `front3,front6,front9,front12`
+* The regular expression `^[a-z][a-z]3$` will match the same sample-classes as `front3,marq3`
+* The regular expression `^[a-z][a-z]12$` will match the same sample-classes as `front12,marq12`
+* The regular expression `^[a-z][a-z][0-9]$` will match the same sample-classes as `front3,front6,front9,marq3,marq6,marq9`
+
+Second Example: Consider these regular expression patterns as possible matches to a sample-class name 'AB0123':
+
+* `^[A-Z][A-Z][0-9][0-9]*$` - MATCHES `**^AB0123$**`
+* `^\[A-Z][A-Z]*[0-9][0-9]*$` - MATCHES `**^AB0123$**`
+* `^[A-Z][0-9]*` - MATCHES `**^A** B0123$` (The first character is a letter, `*` can specify zero characters, and end of line did not need to be matched.)
+* `^[A-Z][A-Z][0-9]` - MATCHES `**^AB0** 123$` (The first two characters are letters aind the third is a digit.)
+* `^[A-Z][A-Z]*[0-9][0-9]$` - NO MATCH (The name does not end with the pattern `[A-Z][0-9][0-9]$`, i.e., it ends with four digits, not two.)
+* `^[A-Z][0-9]\*$` - NO MATCH (The pattern specifies that second character and all those that follow, if present, must be digits.)

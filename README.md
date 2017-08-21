@@ -64,7 +64,7 @@ SOFTWARE.
 #### NEW FEATURES
 
 * Added support for R-flavored regular expression pattern matching.
-* Empty classes argument or zero-length class_column result in no samples filtered out. 
+* Empty classes argument or zero-length class\_column result in no samples filtered out. 
 
 #### INTERNAL MODIFICATIONS
 
@@ -72,7 +72,7 @@ SOFTWARE.
 
 #### BUILD NOTES
 
-* This package was built with R 3.3.1 under miniconda as follows:
+* This package was built from ~/src/w4mclassfilter with R 3.3.1 under miniconda as follows:
 
 ```
   $ ~/miniconda2/bin/conda create -n r3.3.1 r-base=3.3.1
@@ -87,7 +87,7 @@ SOFTWARE.
 
 ```
 
-Result is at ~/src/w4mclassfilter_0.98.2.tar.gz
+Result is at ~/src/w4mclassfilter\_0.98.2.tar.gz
 
 ### CHANGES IN VERSION 0.98.1
 #### NEW FEATURES
