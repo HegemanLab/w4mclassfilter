@@ -60,7 +60,20 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.3
+
+#### NEW FEATURES
+
+* Galaxy-support unchanged.
+* Provide for more flexible input and output from env, list, or matrix/data.frame. 
+
+#### INTERNAL MODIFICATIONS
+
+* Support and tests for new features.
+
+
 ### CHANGES IN VERSION 0.98.2
+
 #### NEW FEATURES
 
 * Added support for R-flavored regular expression pattern matching.
@@ -72,7 +85,7 @@ SOFTWARE.
 
 #### BUILD NOTES
 
-* This package was built from ~/src/w4mclassfilter with R 3.3.1 under miniconda as follows:
+* This package was built from ~/src/w4mclassfilter with R 3.3.1 under bash and miniconda as follows:
 
 ```
   $ ~/miniconda2/bin/conda create -n r3.3.1 r-base=3.3.1
@@ -90,6 +103,7 @@ SOFTWARE.
 Result is at ~/src/w4mclassfilter\_0.98.2.tar.gz
 
 ### CHANGES IN VERSION 0.98.1
+
 #### NEW FEATURES
 
 * First release - Wrap the w4mclassfilter R package that implements filtering of W4M data matrix, variable metadata, and sample metadata by class of sample.
@@ -104,6 +118,5 @@ Result is at ~/src/w4mclassfilter\_0.98.2.tar.gz
 ## Citations
 
 Smith, Colin A. and Want, Elizabeth J. and O’Maille, Grace and Abagyan, Ruben and Siuzdak, Gary (2006). XCMS: Processing Mass Spectrometry Data for Metabolite Profiling Using Nonlinear Peak Alignment, Matching, and Identification. In Analytical Chemistry, 78 (3), pp. 779–787. [doi:10.1021/ac051437y](http://dx.doi.org/10.1021/ac051437y)
-
 
 Giacomoni, F. and Le Corguille, G. and Monsoor, M. and Landi, M. and Pericard, P. and Petera, M. and Duperier, C. and Tremblay-Franco, M. and Martin, J.-F. and Jacob, D. and et al. (2014). Workflow4Metabolomics: a collaborative research infrastructure for computational metabolomics. In Bioinformatics, 31 (9), pp. 1493–1495. [doi:10.1093/bioinformatics/btu813](http://dx.doi.org/10.1093/bioinformatics/btu813)

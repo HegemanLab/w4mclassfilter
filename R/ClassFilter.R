@@ -297,7 +297,9 @@ w4m_filter_by_sample_class <- function(
 
 
   # return FALSE if any paths are exact duplicates
-  my.paths <- c(dataMatrix_in, dataMatrix_out, sampleMetadata_in, sampleMetadata_out, variableMetadata_in, variableMetadata_out)
+  #   N.B. This does not check for different relative paths that resolve to the same file.
+  my_list <- list(dataMatrix_in, dataMatrix_out, sampleMetadata_in, sampleMetadata_out, variableMetadata_in, variableMetadata_out)
+  my.paths <- unlist(my_list[sapply(my_list, is.character)])
   if ( length(my.paths) != length(unique(my.paths)) ) {
     failure_action("some paths are duplicated")
     for ( my.path in my.paths ) {
@@ -308,12 +310,28 @@ w4m_filter_by_sample_class <- function(
   }
 
   # read in the sample metadata
-  smpl_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
-  if (!smpl_metadata_input_env$success) {
-    failure_action(smpl_metadata_input_env$msg)
-    return ( FALSE )
+  if ( is.character(sampleMetadata_in) ){
+    smpl_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
+    if (!smpl_metadata_input_env$success) {
+      failure_action(smpl_metadata_input_env$msg)
+      return ( FALSE )
+    }
+    smpl_metadata <- smpl_metadata_input_env$data
+  } else if ( is.environment(smpl_metadata) ||  is.list(smpl_metadata) ) {
+    if ( Reduce(`|`,names(sampleMetadata_in) == "sampleMetadata") ) {
+      smpl_metadata <- as.list(sampleMetadata_in)$sampleMetadata
+    }
+    else {
+      stop("sampleMetadata_in has no member 'sampleMetadata'")
+      return (FALSE)
+    }
+  } else if ( is.data.frame(sampleMetadata_in) ) {
+    smpl_metadata <- sampleMetadata_in
+  } else {
+    stop(sprintf("sampleMetadata_in has unexpected type %s"), typeof(sampleMetadata_in))
+    return (FALSE)
   }
-  smpl_metadata <- smpl_metadata_input_env$data
+  
 
   # extract rownames
   rownames(smpl_metadata) <- smpl_metadata[,samplename_column]
@@ -346,12 +364,28 @@ w4m_filter_by_sample_class <- function(
   }
 
   # read in the variable metadata
-  vrbl_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
-  if (!vrbl_metadata_input_env$success) {
-    failure_action(vrbl_metadata_input_env$msg)
-    return ( FALSE )
+  if ( is.character(variableMetadata_in) ){
+    vrbl_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
+    if (!vrbl_metadata_input_env$success) {
+      failure_action(vrbl_metadata_input_env$msg)
+      return ( FALSE )
+    }
+    vrbl_metadata <- vrbl_metadata_input_env$data
+  } else if ( is.environment(vrbl_metadata) ||  is.list(vrbl_metadata) ) {
+    if ( Reduce(`|`,names(variableMetadata_in) == "variableMetadata") ) {
+      vrbl_metadata <- as.list(variableMetadata_in)$variableMetadata
+    }
+    else {
+      stop("variableMetadata_in has no member 'variableMetadata'")
+      return (FALSE)
+    }
+  } else if ( is.data.frame(variableMetadata_in) ) {
+    vrbl_metadata <- variableMetadata_in
+  } else {
+    stop(sprintf("variableMetadata_in has unexpected type %s"), typeof(variableMetadata_in))
+    return (FALSE)
   }
-  vrbl_metadata <- vrbl_metadata_input_env$data
+  
 
   # extract rownames (using make.names to handle degenerate feature names)
   err.env <- new.env()
@@ -373,12 +407,27 @@ w4m_filter_by_sample_class <- function(
   }
 
   # read in the data matrix
-  data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
-  if (!data_matrix_input_env$success) {
-    failure_action(data_matrix_input_env$msg)
-    return ( FALSE )
+  if ( is.character(dataMatrix_in) ){
+    data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
+    if (!data_matrix_input_env$success) {
+      failure_action(data_matrix_input_env$msg)
+      return ( FALSE )
+    }
+    data_matrix <- data_matrix_input_env$data
+  } else if ( is.environment(data_matrix) ||  is.list(data_matrix) ) {
+    if ( Reduce(`|`,names(dataMatrix_in) == "dataMatrix") ) {
+      data_matrix <- as.list(dataMatrix_in)$dataMatrix
+    }
+    else {
+      stop("dataMatrix_in has no member 'dataMatrix'")
+      return (FALSE)
+    }
+  } else if ( is.data.frame(dataMatrix_in) || is.matrix(dataMatrix_in) ) {
+    data_matrix <- as.matrix(dataMatrix_in)
+  } else {
+    stop(sprintf("dataMatrix_in has unexpected type %s"), typeof(dataMatrix_in))
+    return (FALSE)
   }
-  data_matrix <- data_matrix_input_env$data
 
   # extract rownames (using make.names to handle degenerate feature names)
   err.env <- new.env()
@@ -423,37 +472,64 @@ w4m_filter_by_sample_class <- function(
   err.env$msg <- "no message writing output files"
   tryCatch(
     expr = {
-      utils::write.table( x = data_matrix  
-                           [ rownames(data_matrix) %in% variable_names    # row selector
-                           , colnames(data_matrix) %in% sample_names      # column selector
-                           , drop = FALSE                                 # keep two dimensions
-                           ]
-                         , file = dataMatrix_out
-                         , sep = "\t"
-                         , quote = FALSE
-                         , row.names = TRUE
-                         , col.names = NA
-                         )
-      utils::write.table( x = smpl_metadata
-                           [ sample_names                                 # row selector
-                           ,                                              # column selector (select all)
-                           , drop = FALSE                                 # keep two dimensions
-                           ]
-                         , file = sampleMetadata_out
-                         , sep = "\t"
-                         , quote = FALSE
-                         , row.names = FALSE
-                         )
-      utils::write.table( x = vrbl_metadata
-                           [ rownames(vrbl_metadata) %in% variable_names  # row selector
-                           ,                                              # column selector (select all)
-                           , drop = FALSE                                 # keep two dimensions
-                           ]
-                         , file = variableMetadata_out
-                         , sep = "\t"
-                         , quote = FALSE
-                         , row.names = FALSE
-                         )
+      # write the data matrix
+      if ( is.character(dataMatrix_out) ){
+        utils::write.table( x = data_matrix  
+                             [ rownames(data_matrix) %in% variable_names    # row selector
+                             , colnames(data_matrix) %in% sample_names      # column selector
+                             , drop = FALSE                                 # keep two dimensions
+                             ]
+                           , file = dataMatrix_out
+                           , sep = "\t"
+                           , quote = FALSE
+                           , row.names = TRUE
+                           , col.names = NA
+                           )
+      } else if ( is.environment(dataMatrix_out) ||  is.list(dataMatrix_out) ) {
+        dataMatrix_out$dataMatrix <- data_matrix
+      } else {
+        stop(sprintf("dataMatrix_out has unexpected type %s"), typeof(dataMatrix_out))
+        return (FALSE)
+      }
+
+      # write the sample metadata
+      if ( is.character(sampleMetadata_out) ){
+        utils::write.table( x = smpl_metadata
+                             [ sample_names                                 # row selector
+                             ,                                              # column selector (select all)
+                             , drop = FALSE                                 # keep two dimensions
+                             ]
+                           , file = sampleMetadata_out
+                           , sep = "\t"
+                           , quote = FALSE
+                           , row.names = FALSE
+                           )
+      } else if ( is.environment(sampleMetadata_out) ||  is.list(sampleMetadata_out) ) {
+        sampleMetadata_out$sampleMetadata <- smpl_metadata
+      } else {
+        stop(sprintf("sampleMetadata_out has unexpected type %s"), typeof(sampleMetadata_out))
+        return (FALSE)
+      }
+
+      # write the variable metadata
+      if ( is.character(variableMetadata_out) ){
+        utils::write.table( x = vrbl_metadata
+                             [ rownames(vrbl_metadata) %in% variable_names  # row selector
+                             ,                                              # column selector (select all)
+                             , drop = FALSE                                 # keep two dimensions
+                             ]
+                           , file = variableMetadata_out
+                           , sep = "\t"
+                           , quote = FALSE
+                           , row.names = FALSE
+                           )
+      } else if ( is.environment(variableMetadata_out) ||  is.list(variableMetadata_out) ) {
+        variableMetadata_out$variableMetadata <- vrbl_metadata
+      } else {
+        stop(sprintf("variableMetadata_out has unexpected type %s"), typeof(variableMetadata_out))
+        return (FALSE)
+      }
+
       err.env$success     <- TRUE
     }
   , error = function(e) {
