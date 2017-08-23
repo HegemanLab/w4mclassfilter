@@ -320,11 +320,10 @@ w4m_filter_by_sample_class <- function(
     format_error <- function(e) {
       paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
     }
-    my_expr <- function() { expr }
     retval <- NULL
     tryCatch(
       expr = {
-        retval <- ( list( success = TRUE, value = my_expr(), msg = "" ) )
+        retval <- ( list( success = TRUE, value = eval(expr = expr), msg = "" ) )
       }
       , error = function(e) {
         retval <<- list( success = FALSE, value = NA, msg = format_error(e) )
@@ -336,45 +335,71 @@ w4m_filter_by_sample_class <- function(
   # read one of three XCMS data elements: dataMatrix, sampleMetadata, variableMetadata
   # returns respectively: matrix, data.frame, data.frame, or FALSE if there is a failure
   read_xcms_data_element <- function(xcms_data_in, xcms_data_type, failure_action = stop) {
+    my_failure_action <- function(...) { failure_action("w4mclassfilter::read_xcms_data_element: ", ...) }
     # xcms_data_type must be in c("sampleMetadata", "variableMetadata", "dataMatrix")
     if ( ! is.character(xcms_data_type) ) {
-      failure_action(sprintf("read_xcms_data_element: bad parameter xcms_data_type '%s'", deparse(xcms_data_type)))
+      my_failure_action(sprintf("bad parameter xcms_data_type '%s'", deparse(xcms_data_type)))
       return ( FALSE )
     }
     if ( 1 != length(xcms_data_type)
          || ! ( xcms_data_type %in% c("sampleMetadata", "variableMetadata", "dataMatrix") ) 
     ) {
-      failure_action( sprintf("read_xcms_data_element: bad parameter xcms_data_type '%s'", xcms_data_type) )
+      my_failure_action( sprintf("bad parameter xcms_data_type '%s'", xcms_data_type) )
       return ( FALSE )
     }
     if ( is.character(xcms_data_in) ){
+      # warning(sprintf("%s is character",xcms_data_type))
       # case: xcms_data_in is a path to a file
       xcms_data_input_env <- read_data_frame( xcms_data_in, sprintf("%s input", xcms_data_type) )
       if (!xcms_data_input_env$success) {
-        failure_action(xcms_data_input_env$msg)
+        my_failure_action(xcms_data_input_env$msg)
         return ( FALSE )
       }
-      xcms_data <- xcms_data_input_env$data
-    } else if ( is.environment(xcms_data) || is.list(xcms_data) ) {
-      # case: xcms_data_in is an environment or list
-      if ( is.na(
-             prospect <-ifelse(
-                exists(xcms_data_type, where = xcms_data)
-              , get(xcms_data_type, xcms_data)
-              , NA
-              )
-           )
-      ) {
-        failure_action(sprintf("environment xcms_data is missing member '%s'"), xcms_data_type)
+      return (xcms_data_input_env$data)
+    } else if ( is.environment(xcms_data_in) ) {
+      # warning(sprintf("%s is %s (env)",xcms_data_type, typeof(xcms_data_in)))
+      # warning(sprintf("ls(xcms_data_in) is %s",ls(xcms_data_in)))
+      # case: xcms_data_in is an environment
+      if ( ! exists(xcms_data_type, where = xcms_data_in) ) {
+        my_failure_action(sprintf("environment xcms_data_in is missing member '%s'"), xcms_data_type)
         return (FALSE)
+      } 
+      prospect <- getElement(name = xcms_data_type, object = xcms_data_in)
+      if ( ! is.data.frame(prospect) ) {
+        utils::str("environment - str(prospect)")
+        utils::str(prospect)
+        my_failure_action(sprintf("xcms_data_in$%s is not a data.frame but is a %s", xcms_data_type, typeof(prospect)))
+        return (prospect)
       }
       return(prospect) 
     } else if ( is.data.frame(xcms_data_in) || is.matrix(xcms_data_in) ) {
+      # warning(sprintf("%s is %s (data.frame or matrix)",xcms_data_type, typeof(xcms_data_in)))
       # case: xcms_data_in is a data.frame or matrix
       return(xcms_data_in)
+    } else if ( is.list(xcms_data_in) ) {
+      # NOTE WELL: is.list succeeds for data.frame, so the is.data.frame test must appear before the is.list test
+      # warning(sprintf("%s is %s (list)",xcms_data_type, typeof(xcms_data_in)))
+      # warning(sprintf("xcms_data_in is %s", str(xcms_data_in)))
+      # case: xcms_data_in is a list
+      if ( is.null(inner_prospect <- xcms_data_in[xcms_data_type]) ) {
+        my_failure_action(sprintf("list xcms_data_in is missing member '%s'"), xcms_data_type)
+        return (FALSE)
+      }
+      prospect <- xcms_data_in[xcms_data_type]
+      prospect <- prospect[[1]]
+      if ( ! is.data.frame(prospect) ) {
+        utils::str("environment - str(prospect)")
+        utils::str(prospect)
+        my_failure_action(sprintf("the first member of xcms_data_in['%s'] is not a data.frame but is a %s", xcms_data_type, typeof(prospect)))
+        return (prospect)
+      }
+      # warning(sprintf("typeof(prospect) is %s", typeof(prospect)))
+      # warning(sprintf("is.data.frame(prospect) is %s", is.data.frame(prospect)))
+      # stop("stopping here for a snapshot")
+      return (prospect) 
     } else {
       # case: xcms_data_in is invalid
-      failure_action( sprintf("xcms_data_in has unexpected type %s", typeof(xcms_data_in)) )
+      my_failure_action( sprintf("xcms_data_in has unexpected type %s", typeof(xcms_data_in)) )
       return (FALSE)
     }
   }
