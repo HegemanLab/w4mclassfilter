@@ -55,14 +55,14 @@ test_that("filter test",{
   # filter, impute, and write output
   filter_result <- w4m_filter_by_sample_class(
     dataMatrix_in = dataMatrix_in
-  , dataMatrix_out = dataMatrix_out
-  , variableMetadata_in = variableMetadata_in
-  , variableMetadata_out = variableMetadata_out
-  , sampleMetadata_out = sampleMetadata_out
-  , sampleMetadata_in = sampleMetadata_in
-  , classes = classes_to_filter
-  , include = false_to_exclude_classes_in_filter 
-  , class_column = class_column
+    , dataMatrix_out = dataMatrix_out
+    , variableMetadata_in = variableMetadata_in
+    , variableMetadata_out = variableMetadata_out
+    , sampleMetadata_out = sampleMetadata_out
+    , sampleMetadata_in = sampleMetadata_in
+    , classes = classes_to_filter
+    , include = false_to_exclude_classes_in_filter 
+    , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files
@@ -84,6 +84,73 @@ test_that("filter test",{
   expect_equivalent(sample_metadata_output_env$data, sample_metadata_expected_env$data, info = "validate sample metadata")
   expect_equivalent(variable_metadata_output_env$data, variable_metadata_expected_env$data, info = "validate variable metadata")
 })
+
+# test alternative inputs and outputs
+# #' @import testthat w4mclassfilter
+# #' @export
+# test_that("io test",{
+#   # set up variables
+#   variableMetadata_in  <- "input_variableMetadata.tsv"
+#   variableMetadata_out <- "output_variableMetadata.tsv"
+#   variableMetadata_exp <- "expected_variableMetadata.tsv"
+#   sampleMetadata_in <- "input_sampleMetadata.tsv"
+#   sampleMetadata_out <- "output_sampleMetadata.tsv"
+#   sampleMetadata_exp <- "expected_sampleMetadata.tsv"
+#   dataMatrix_in <- "input_dataMatrix.tsv"
+#   dataMatrix_out <- "output_dataMatrix.tsv"
+#   dataMatrix_exp <- "expected_dataMatrix.tsv"
+#   classes_to_filter <- c("M")
+#   class_column <- "gender"
+#   false_to_exclude_classes_in_filter <- TRUE
+#   # NB
+#   #   - "foo" == get("sampleMetadata",list2env(list(sampleMetadata = "foo")))
+#   #   - "foo" == list(sampleMetadata = "foo")[["sampleMetadata"]]
+#   #   - "foo" == list(sampleMetadata = "foo")["sampleMetadata"]
+#   # test input ...
+#   #   dataMatrix_in as matrix:  
+#   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
+#   expect_true(data_matrix_input_env$success, info = "read data matrix input")
+#   dataMatrix_in <- list2env(list(sampleMetadata = data_matrix_input_env$data))
+#   #   sampleMetadata_in as list:  
+#   sample_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
+#   expect_true(sample_metadata_input_env$success, info = "read sample metadata input")
+#   rm(sample_metadata_input_env)
+#   #   variableMetadata_in as environment:  
+#   variable_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
+#   expect_true(variable_metadata_input_env$success, info = "read variable metadata input")
+#   rm(variable_metadata_input_env)
+#   # filter, impute, and write output
+#   filter_result <- w4m_filter_by_sample_class(
+#     dataMatrix_in = dataMatrix_in
+#   , dataMatrix_out = dataMatrix_out
+#   , variableMetadata_in = variableMetadata_in
+#   , variableMetadata_out = variableMetadata_out
+#   , sampleMetadata_out = sampleMetadata_out
+#   , sampleMetadata_in = sampleMetadata_in
+#   , classes = classes_to_filter
+#   , include = false_to_exclude_classes_in_filter 
+#   , class_column = class_column
+#   )
+#   expect_true(filter_result, info = "filter_result should be true")
+#   # read actual output files
+#   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
+#   expect_true(data_matrix_output_env$success, info = "read data matrix output")
+#   sample_metadata_output_env <- read_data_frame(sampleMetadata_out, "sample metadata output")
+#   expect_true(sample_metadata_output_env$success, info = "read sample metadata output")
+#   variable_metadata_output_env <- read_data_frame(variableMetadata_out, "variable metadata output")
+#   expect_true(variable_metadata_output_env$success, info = "read variable metadata output")
+#   # read expected output files
+#   data_matrix_expected_env <- read_data_frame(dataMatrix_exp, "data matrix expected")
+#   expect_true(data_matrix_expected_env$success, info = "read data matrix expected")
+#   sample_metadata_expected_env <- read_data_frame(sampleMetadata_exp, "sample metadata expected")
+#   expect_true(sample_metadata_expected_env$success, info = "read sample metadata expected")
+#   variable_metadata_expected_env <- read_data_frame(variableMetadata_exp, "variable metadata expected")
+#   expect_true(variable_metadata_expected_env$success, info = "read variable metadata expected")
+#   # compare actuals with expecteds
+#   expect_equivalent(data_matrix_output_env$data, data_matrix_expected_env$data, info = "validate data matrix")
+#   expect_equivalent(sample_metadata_output_env$data, sample_metadata_expected_env$data, info = "validate sample metadata")
+#   expect_equivalent(variable_metadata_output_env$data, variable_metadata_expected_env$data, info = "validate variable metadata")
+# })
 
 run_nofilter_test <- function(classes_to_filter, class_column, samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter) {
   # set up variables

@@ -309,29 +309,89 @@ w4m_filter_by_sample_class <- function(
     return (FALSE)
   }
 
-  # read in the sample metadata
-  if ( is.character(sampleMetadata_in) ){
-    smpl_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
-    if (!smpl_metadata_input_env$success) {
-      failure_action(smpl_metadata_input_env$msg)
-      return ( FALSE )
+  # tryCatchFunc wraps an expression that produces a value if it does not stop:
+  #   tryCatchFunc produces a list
+  #   On success of expr(), tryCatchFunc produces
+  #     list(success TRUE, value = expr(), msg = "")
+  #   On failure of expr(), tryCatchFunc produces
+  #     list(success = FALSE, value = NA, msg = "the error message")
+  tryCatchFunc <- function(expr) {
+    # format error for logging
+    format_error <- function(e) {
+      paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
     }
-    smpl_metadata <- smpl_metadata_input_env$data
-  } else if ( is.environment(smpl_metadata) ||  is.list(smpl_metadata) ) {
-    if ( Reduce(`|`,names(sampleMetadata_in) == "sampleMetadata") ) {
-      smpl_metadata <- as.list(sampleMetadata_in)$sampleMetadata
-    }
-    else {
-      stop("sampleMetadata_in has no member 'sampleMetadata'")
-      return (FALSE)
-    }
-  } else if ( is.data.frame(sampleMetadata_in) ) {
-    smpl_metadata <- sampleMetadata_in
-  } else {
-    stop(sprintf("sampleMetadata_in has unexpected type %s"), typeof(sampleMetadata_in))
-    return (FALSE)
+    my_expr <- function() { expr }
+    retval <- NULL
+    tryCatch(
+      expr = {
+        retval <- ( list( success = TRUE, value = my_expr(), msg = "" ) )
+      }
+      , error = function(e) {
+        retval <<- list( success = FALSE, value = NA, msg = format_error(e) )
+      }
+    )
+    return (retval)
   }
   
+  # read one of three XCMS data elements: dataMatrix, sampleMetadata, variableMetadata
+  # returns respectively: matrix, data.frame, data.frame, or FALSE if there is a failure
+  read_xcms_data_element <- function(xcms_data_in, xcms_data_type, failure_action = stop) {
+    # xcms_data_type must be in c("sampleMetadata", "variableMetadata", "dataMatrix")
+    if ( ! is.character(xcms_data_type) ) {
+      failure_action(sprintf("read_xcms_data_element: bad parameter xcms_data_type '%s'", deparse(xcms_data_type)))
+      return ( FALSE )
+    }
+    if ( 1 != length(xcms_data_type)
+         || ! ( xcms_data_type %in% c("sampleMetadata", "variableMetadata", "dataMatrix") ) 
+    ) {
+      failure_action( sprintf("read_xcms_data_element: bad parameter xcms_data_type '%s'", xcms_data_type) )
+      return ( FALSE )
+    }
+    if ( is.character(xcms_data_in) ){
+      # case: xcms_data_in is a path to a file
+      xcms_data_input_env <- read_data_frame( xcms_data_in, sprintf("%s input", xcms_data_type) )
+      if (!xcms_data_input_env$success) {
+        failure_action(xcms_data_input_env$msg)
+        return ( FALSE )
+      }
+      xcms_data <- xcms_data_input_env$data
+    } else if ( is.environment(xcms_data) || is.list(xcms_data) ) {
+      # case: xcms_data_in is an environment or list
+      if ( is.na(
+             prospect <-ifelse(
+                exists(xcms_data_type, where = xcms_data)
+              , get(xcms_data_type, xcms_data)
+              , NA
+              )
+           )
+      ) {
+        failure_action(sprintf("environment xcms_data is missing member '%s'"), xcms_data_type)
+        return (FALSE)
+      }
+      return(prospect) 
+    } else if ( is.data.frame(xcms_data_in) || is.matrix(xcms_data_in) ) {
+      # case: xcms_data_in is a data.frame or matrix
+      return(xcms_data_in)
+    } else {
+      # case: xcms_data_in is invalid
+      failure_action( sprintf("xcms_data_in has unexpected type %s", typeof(xcms_data_in)) )
+      return (FALSE)
+    }
+  }
+  
+
+  # read in the sample metadata
+  read_data_result <- tryCatchFunc(
+    expr = {
+      read_xcms_data_element(xcms_data_in = sampleMetadata_in, xcms_data_type = "sampleMetadata")
+    }
+  )
+  if ( read_data_result$success ) {
+    smpl_metadata <- read_data_result$value
+  } else {
+    failure_action(read_data_result$msg)
+    return (FALSE)
+  }
 
   # extract rownames
   rownames(smpl_metadata) <- smpl_metadata[,samplename_column]
@@ -364,25 +424,15 @@ w4m_filter_by_sample_class <- function(
   }
 
   # read in the variable metadata
-  if ( is.character(variableMetadata_in) ){
-    vrbl_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
-    if (!vrbl_metadata_input_env$success) {
-      failure_action(vrbl_metadata_input_env$msg)
-      return ( FALSE )
+  read_data_result <- tryCatchFunc(
+    expr = {
+      read_xcms_data_element(xcms_data_in = variableMetadata_in, xcms_data_type = "variableMetadata")
     }
-    vrbl_metadata <- vrbl_metadata_input_env$data
-  } else if ( is.environment(vrbl_metadata) ||  is.list(vrbl_metadata) ) {
-    if ( Reduce(`|`,names(variableMetadata_in) == "variableMetadata") ) {
-      vrbl_metadata <- as.list(variableMetadata_in)$variableMetadata
-    }
-    else {
-      stop("variableMetadata_in has no member 'variableMetadata'")
-      return (FALSE)
-    }
-  } else if ( is.data.frame(variableMetadata_in) ) {
-    vrbl_metadata <- variableMetadata_in
+  )
+  if ( read_data_result$success ) {
+    vrbl_metadata <- read_data_result$value
   } else {
-    stop(sprintf("variableMetadata_in has unexpected type %s"), typeof(variableMetadata_in))
+    failure_action(read_data_result$msg)
     return (FALSE)
   }
   
@@ -407,57 +457,49 @@ w4m_filter_by_sample_class <- function(
   }
 
   # read in the data matrix
-  if ( is.character(dataMatrix_in) ){
-    data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
-    if (!data_matrix_input_env$success) {
-      failure_action(data_matrix_input_env$msg)
-      return ( FALSE )
+  read_data_result <- tryCatchFunc(
+    expr = {
+      read_xcms_data_element(xcms_data_in = dataMatrix_in, xcms_data_type = "dataMatrix")
     }
-    data_matrix <- data_matrix_input_env$data
-  } else if ( is.environment(data_matrix) ||  is.list(data_matrix) ) {
-    if ( Reduce(`|`,names(dataMatrix_in) == "dataMatrix") ) {
-      data_matrix <- as.list(dataMatrix_in)$dataMatrix
-    }
-    else {
-      stop("dataMatrix_in has no member 'dataMatrix'")
-      return (FALSE)
-    }
-  } else if ( is.data.frame(dataMatrix_in) || is.matrix(dataMatrix_in) ) {
-    data_matrix <- as.matrix(dataMatrix_in)
+  )
+  if ( read_data_result$success ) {
+    data_matrix <- read_data_result$value
   } else {
-    stop(sprintf("dataMatrix_in has unexpected type %s"), typeof(dataMatrix_in))
+    failure_action(read_data_result$msg)
     return (FALSE)
   }
 
-  # extract rownames (using make.names to handle degenerate feature names)
-  err.env <- new.env()
-  err.env$success <- FALSE
-  err.env$msg <- "no message setting data_matrix rownames"
-  tryCatch(
-    expr = {
-      rownames(data_matrix) <- make.names( data_matrix[,1], unique = TRUE )
-      err.env$success     <- TRUE
+  if ( ! is.matrix(data_matrix) ) {
+    # extract rownames (using make.names to handle degenerate feature names)
+    err.env <- new.env()
+    err.env$success <- FALSE
+    err.env$msg <- "no message setting data_matrix rownames"
+    tryCatch(
+      expr = {
+        rownames(data_matrix) <- make.names( data_matrix[,1], unique = TRUE )
+        err.env$success     <- TRUE
+      }
+    , error = function(e) {
+       err.env$msg <- sprintf("failed to set rownames for data_matrix read because '%s'", e$message) 
+      }
+    )
+    if (!err.env$success) {
+      failure_action(err.env$msg)
+      return ( FALSE )
     }
-  , error = function(e) {
-     err.env$msg <- sprintf("failed to set rownames for data_matrix read because '%s'", e$message) 
-    }
-  )
-  if (!err.env$success) {
-    failure_action(err.env$msg)
-    return ( FALSE )
+
+    # remove rownames column
+    data_matrix <- data_matrix[,2:ncol(data_matrix)]
+
+    # select the subset of samples indicated by classes, include, & class_column
+    data_matrix <- data_matrix[,intersect(sample_names,colnames(data_matrix)), drop = FALSE]
+
+    # impute missing values with supplied or default method
+    data_matrix <- data_imputation(data_matrix)
+
+    # convert data_matrix to matrix from data.frame
+    data_matrix <- as.matrix(data_matrix)
   }
-
-  # remove rownames column
-  data_matrix <- data_matrix[,2:ncol(data_matrix)]
-
-  # select the subset of samples indicated by classes, include, & class_column
-  data_matrix <- data_matrix[,intersect(sample_names,colnames(data_matrix)), drop = FALSE]
-
-  # impute missing values with supplied or default method
-  data_matrix <- data_imputation(data_matrix)
-
-  # convert data_matrix to matrix from data.frame
-  data_matrix <- as.matrix(data_matrix)
 
   # purge data_matrix of rows and columns that have zero variance
   data_matrix <- w4m__nonzero_var(data_matrix)
