@@ -552,8 +552,12 @@ w4m_filter_by_sample_class <- function(
                            , row.names = TRUE
                            , col.names = NA
                            )
-      } else if ( is.environment(dataMatrix_out) ||  is.list(dataMatrix_out) ) {
-        dataMatrix_out$dataMatrix <- data_matrix
+      } else if ( is.environment(dataMatrix_out) || (is.list(dataMatrix_out) && ! is.matrix(dataMatrix_out)) ) {
+        dataMatrix_out$dataMatrix <-
+          data_matrix[ rownames(data_matrix) %in% variable_names    # row selector
+                     , colnames(data_matrix) %in% sample_names      # column selector
+                     , drop = FALSE                                 # keep two dimensions
+                     ]
       } else {
         stop(sprintf("dataMatrix_out has unexpected type %s"), typeof(dataMatrix_out))
         return (FALSE)
@@ -571,8 +575,15 @@ w4m_filter_by_sample_class <- function(
                            , quote = FALSE
                            , row.names = FALSE
                            )
-      } else if ( is.environment(sampleMetadata_out) ||  is.list(sampleMetadata_out) ) {
-        sampleMetadata_out$sampleMetadata <- smpl_metadata
+      } else if ( is.environment(sampleMetadata_out) || (is.list(sampleMetadata_out) && ! is.matrix(sampleMetadata_out)) ) {
+        sampleMetadata_out$sampleMetadata <-
+          smpl_metadata [ sample_names                                 # row selector
+                        ,                                              # column selector (select all)
+                        , drop = FALSE                                 # keep two dimensions
+                        ]
+        rownames(sampleMetadata_out$sampleMetadata) <- 1:nrow(sampleMetadata_out$sampleMetadata)
+        sampleMetadata_out$sampleMetadata$sampleMetadata <- as.factor(sampleMetadata_out$sampleMetadata$sampleMetadata)
+        sampleMetadata_out$sampleMetadata <- droplevels(sampleMetadata_out$sampleMetadata)
       } else {
         stop(sprintf("sampleMetadata_out has unexpected type %s"), typeof(sampleMetadata_out))
         return (FALSE)
@@ -590,8 +601,15 @@ w4m_filter_by_sample_class <- function(
                            , quote = FALSE
                            , row.names = FALSE
                            )
-      } else if ( is.environment(variableMetadata_out) ||  is.list(variableMetadata_out) ) {
-        variableMetadata_out$variableMetadata <- vrbl_metadata
+      } else if ( is.environment(variableMetadata_out) || (is.list(variableMetadata_out) && ! is.matrix(variableMetadata_out)) ) {
+        variableMetadata_out$variableMetadata <-
+          vrbl_metadata[ rownames(vrbl_metadata) %in% variable_names  # row selector
+                       ,                                              # column selector (select all)
+                       , drop = FALSE                                 # keep two dimensions
+                       ]
+        rownames(variableMetadata_out$variableMetadata) <- 1:nrow(variableMetadata_out$variableMetadata)
+        variableMetadata_out$variableMetadata$variableMetadata <- as.factor(variableMetadata_out$variableMetadata$variableMetadata)
+        variableMetadata_out$variableMetadata <- droplevels(variableMetadata_out$variableMetadata)
       } else {
         stop(sprintf("variableMetadata_out has unexpected type %s"), typeof(variableMetadata_out))
         return (FALSE)
@@ -611,6 +629,3 @@ w4m_filter_by_sample_class <- function(
   # ...
 }
 
-
-
-  
