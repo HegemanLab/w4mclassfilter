@@ -10,6 +10,5 @@ RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/HegemanLab/w4mclassfilter
 Imports: utils
-Suggests: testthat
-Suggests: knitr, rmarkdown
+Suggests: testthat, knitr, rmarkdown
 VignetteBuilder: knitr
