@@ -1,6 +1,12 @@
 ---
 title: "Filter W4M data by sample class"
-output: rmarkdown::html_vignette
+output:
+  pdf_document:
+    highlight: null
+    number_sections: no
+  knitr:::html_vignette:
+    toc: true
+    fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Filter W4M data by sample class}
   %\VignetteEngine{knitr::rmarkdown}
