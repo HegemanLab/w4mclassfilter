@@ -11,17 +11,17 @@ w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
   data_imputation = w4m_filter_imputation, failure_action = print)
 }
 \arguments{
-\item{dataMatrix_in}{character: path to input file containing data matrix (tsv, rows are feature names, columns are sample names}
+\item{dataMatrix_in}{see details: data matrix (rows are feature names, columns are sample names}
 
-\item{sampleMetadata_in}{character: path to input file containing sample metadata (tsv, rows are sample names, one column's name matches class_column)}
+\item{sampleMetadata_in}{see details: sample metadata (rows are sample names, one column's name matches class_column)}
 
-\item{variableMetadata_in}{character: path to input file containing variable metadata (tsv, rows are variable names)}
+\item{variableMetadata_in}{see details: variable metadata (rows are variable names)}
 
-\item{dataMatrix_out}{character: path to output file containing data matrix (tsv, rows are feature names, columns are sample names}
+\item{dataMatrix_out}{see details: output data matrix (rows are feature names, columns are sample names}
 
-\item{sampleMetadata_out}{character: path to output file containing sample metadata (tsv, rows are sample names, one column's name matches class_column)}
+\item{sampleMetadata_out}{see details: output sample metadata (rows are sample names, one column's name matches class_column)}
 
-\item{variableMetadata_out}{character: path to input file containing variable metadata (tsv, rows are variable names)}
+\item{variableMetadata_out}{see details: output variable metadata (rows are variable names)}
 
 \item{classes}{character array: names of sample classes to include or exclude; default is an empty array}
 
@@ -40,6 +40,35 @@ logical: TRUE only if filtration succeeded
 }
 \description{
 Filter a set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class
+}
+\details{
+The W4M files dataMatrix, sampleMetadata, and variableMetadata must be a consistent set, i.e.,
+there must be metadata in the latter two files for all (and only for) the samples and variables named in the columns and rows of dataMatrix.
+
+For multivariate statistics functions, samples and variables with zero variance must be eliminated, and missing values are problematic.
+
+Furthermore, frequently, it is desirable to analyze a subset of samples (or features) in the dataMatrix.
+
+This function manipulates produces a set of files with imputed missing values, omitting features and samples that are not consistently present within the set or have zero variance.
+It also provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
+
+Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:
+\itemize{
+\item character: path to input tab-separated-values-file (TSV)
+\item data.frame
+\item matrix: allowed for dataMatrix_in only
+\item list: must have a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_in, sampleMetadata_in, or variableMetadata_in, respectively.
+\item environment: must have a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_in, sampleMetadata_in, or variableMetadata_in, respectively.
+}
+
+Outputs (dataMatrix_out, sampleMetadata_out, variableMetadata_out) may be:
+\itemize{
+\item character: path to write a tab-separated-values-file (TSV)
+\item list: will add a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_out, sampleMetadata_out, or variableMetadata_out, respectively.
+\item environment: will add a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_out, sampleMetadata_out, or variableMetadata_out, respectively.
+}
+
+Please see the package vignette for further details.
 }
 \examples{
 \dontrun{

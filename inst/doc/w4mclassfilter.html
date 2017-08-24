@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -72,6 +72,104 @@ In summary:</p>
 <p>When <code>w4m_filter_by_sample_class</code> is invoked, an array of class names is supplied in the <code>classes</code> argument. If the <code>include</code> argument is true, then only samples whose <em>class</em> column in <code>sampleMetadata.tsv</code> will be <em>included in</em> the output; by contrast, if the <code>include</code> argument is false, then only samples whose <em>class</em> column in <code>sampleMetadata.tsv</code> will be <em>excluded from</em> the output.</p>
 <p>Even if no rows or columns of the <code>dataMatrix.tsv</code> input have zero variance, there is the possibility that eliminating samples may result in some rows or columns having zero variance, adversely impacting downstream statistical analysis. Consequently, <code>w4m_filter_by_sample_class</code> eliminates these rows or columns and the corresponding rows from <code>sampleMetadata.tsv</code> and <code>variableMetadata.tsv</code>.</p>
 <p>When <code>w4m_filter_by_sample_class</code> completes running, it writes out updated <code>sampleMetadata.tsv</code>, <code>variableMetadata.tsv</code>, and <code>dataMatrix.tsv</code> files. The paths to the output files <em>must</em> be different from the paths to the input files.</p>
+<p>As of v0.98.3, <code>w4m_filter_by_sample_class</code> can interface not only with files but also with data structures; see release note below.</p>
+</div>
+<div id="new-in-release-v0.98.2---support-regular-expressions" class="section level3">
+<h3>New in release v0.98.2 - support regular expressions</h3>
+<p>Beginning with v0.98.2, w4mclassfilter supports use of R regular expression patterns to select class-names.</p>
+<p>The R <code>base::grepl</code> function (at the core of this functionality) uses POSIX 1003.2 standard regular expressions, which allow precise pattern-matching and are exhaustively defined at: <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html" class="uri">http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html</a></p>
+<p>However, only a few basic building blocks of regular expressions need to be mastered for most cases:</p>
+<ul>
+<li><code>^</code> matches the beginning of a class-name</li>
+<li><code>$</code> matches the end of a class-name</li>
+<li><code>.</code> outside of square brackets matches a single character</li>
+<li><code>*</code> matches character specified immediately before zero or more times</li>
+<li>square brackets specify a set of characters to be matched.</li>
+</ul>
+<p>Within square brackets</p>
+<ul>
+<li><code>^</code> as the first character specifies that the list of characters are those that should * not * be matched.</li>
+<li><code>-</code> is used to specify ranges of characters</li>
+</ul>
+<p>Caveat: The tool wrapper uses the comma (<code>,</code>) to split a list of sample-class names, so <em>commas may not be used within regular expressions for this tool</em></p>
+<p>First Example: Consider a field of class-names consisting of <code>marq3,marq6,marq9,marq12,front3,front6,front9,front12</code></p>
+<ul>
+<li>The regular expression <code>^front[0-9][0-9]*$</code> will match the same sample-classes as <code>front3,front6,front9,front12</code></li>
+<li>The regular expression <code>^[a-z][a-z]3$</code> will match the same sample-classes as <code>front3,marq3</code></li>
+<li>The regular expression <code>^[a-z][a-z]12$</code> will match the same sample-classes as <code>front12,marq12</code></li>
+<li>The regular expression <code>^[a-z][a-z][0-9]$</code> will match the same sample-classes as <code>front3,front6,front9,marq3,marq6,marq9</code></li>
+</ul>
+<p>Second Example: Consider these regular expression patterns as possible matches to a sample-class name ‘AB0123’:</p>
+<ul>
+<li><code>^[A-Z][A-Z][0-9][0-9]*$</code> - MATCHES <code>**^AB0123$**</code></li>
+<li><code>^[A-Z][A-Z]*[0-9][0-9]*$</code> - MATCHES <code>**^AB0123$**</code></li>
+<li><code>^[A-Z][0-9]*</code> - MATCHES <code>**^A** B0123$</code> (The first character is a letter, <code>*</code> can specify zero characters, and end of line did not need to be matched.)</li>
+<li><code>^[A-Z][A-Z][0-9]</code> - MATCHES <code>**^AB0** 123$</code> (The first two characters are letters aind the third is a digit.)</li>
+<li><code>^[A-Z][A-Z]*[0-9][0-9]$</code> - NO MATCH (The name does not end with the pattern <code>[A-Z][0-9][0-9]$</code>, i.e., it ends with four digits, not two.)</li>
+<li><code>^[A-Z][0-9]*$</code> - NO MATCH (The pattern specifies that second character and all those that follow, if present, must be digits.)</li>
+</ul>
+</div>
+<div id="new-in-release-v0.98.3---more-flexible-input-and-output" class="section level3">
+<h3>New in release v0.98.3 - more flexible input and output</h3>
+<p>R package v0.98.3 - add support for env, list, data.frame, and matrix I/O * To support XCMS outside the context of Galaxy, <code>w4m_filter_by_sample_class</code> now supports input from and output to data structures as follows:</p>
+<div id="inputs" class="section level4">
+<h4>Inputs:</h4>
+<ol style="list-style-type: decimal">
+<li><code>dataMatrix_in</code></li>
+</ol>
+<ul>
+<li>if a string, treat as a file path (i.e., same as in previous releases)</li>
+<li>else if an env or list, read <code>dataMatrix_in$dataMatrix</code></li>
+<li>else if a data.frame, use <code>as.matrix(dataMatrix_in)</code></li>
+<li>else if a matrix, use directly</li>
+<li>else error</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li><code>sampleMetadata_in</code></li>
+</ol>
+<ul>
+<li>if a string, treat as a file path (i.e., same as in previous releases)</li>
+<li>else if an env or list, read <code>sampleMetadata_in$sampleMetadata</code></li>
+<li>else if a data.frame, use directly</li>
+<li>else error</li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li><code>variableMetadata_in</code></li>
+</ol>
+<ul>
+<li>if a string, treat as a file path (i.e., same as in previous releases)</li>
+<li>else if an env or list, read <code>sampleMetadata_in$sampleMetadata</code></li>
+<li>else if a data.frame, use directly</li>
+<li>else error</li>
+</ul>
+</div>
+<div id="outputs" class="section level4">
+<h4>Outputs:</h4>
+<ol style="list-style-type: decimal">
+<li><code>dataMatrix_out</code></li>
+</ol>
+<ul>
+<li>if a string, treat as a file path (i.e., same as in previous releases)</li>
+<li>else if an env or list, write <code>dataMatrix_out$dataMatrix</code></li>
+<li>else error</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li><code>sampleMetadata_out</code></li>
+</ol>
+<ul>
+<li>if a string, treat as a file path (i.e., same as in previous releases)</li>
+<li>else if an env or list, write <code>sampleMetadata_out$sampleMetadata</code></li>
+<li>else error</li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li><code>variableMetadata_out</code></li>
+</ol>
+<ul>
+<li>if a string, treat as a file path (i.e., same as in previous releases)</li>
+<li>else if an env or list, write <code>sampleMetadata_out$sampleMetadata</code></li>
+<li>else error</li>
+</ul>
+</div>
 </div>
 
 
@@ -81,7 +179,7 @@ In summary:</p>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

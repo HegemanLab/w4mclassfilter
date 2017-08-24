@@ -89,6 +89,8 @@ When `w4m_filter_by_sample_class` completes running, it writes out updated
 The paths to the output files *must* be different from the paths to the 
 input files.
 
+As of v0.98.3, `w4m_filter_by_sample_class` can interface not only with files but also with data structures; see release note below.
+
 ### New in release v0.98.2 - support regular expressions
 
 Beginning with v0.98.2, w4mclassfilter supports use of R regular expression patterns to select class-names.
@@ -130,6 +132,7 @@ Second Example: Consider these regular expression patterns as possible matches t
 ### New in release v0.98.3 - more flexible input and output
 
 R package v0.98.3 - add support for env, list, data.frame, and matrix I/O
+* To support XCMS outside the context of Galaxy, `w4m_filter_by_sample_class` now supports input from and output to data structures as follows:
 
 #### Inputs:
 
