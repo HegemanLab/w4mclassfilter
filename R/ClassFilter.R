@@ -366,10 +366,10 @@ w4m_filter_by_sample_class <- function(
         return (FALSE)
       } 
       prospect <- getElement(name = xcms_data_type, object = xcms_data_in)
-      if ( ! is.data.frame(prospect) ) {
+      if ( ! is.data.frame(prospect) && ! is.matrix(prospect) ) {
         utils::str("environment - str(prospect)")
         utils::str(prospect)
-        my_failure_action(sprintf("xcms_data_in$%s is not a data.frame but is a %s", xcms_data_type, typeof(prospect)))
+        my_failure_action(sprintf("xcms_data_in$%s is neither a data.frame nor a matrix but is a %s", xcms_data_type, typeof(prospect)))
         return (prospect)
       }
       return(prospect) 
