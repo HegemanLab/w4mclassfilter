@@ -1,3 +1,28 @@
+CHANGES IN VERSION 0.98.3
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Provide for more flexible input and output from env, list, or matrix/data.frame, to facilitate non-Galaxy use.
+
+OTHER
+
+    o Support and tests for new features.
+
+
+CHANGES IN VERSION 0.98.2
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Added support for R-flavored regular expression pattern matching.
+    o Empty classes argument or zero-length class_column result in no samples filtered out.
+
+OTHER
+
+    o Support and tests for new features.
+
+
 CHANGES IN VERSION 0.98.1
 ------------------------------
 
@@ -5,6 +30,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
 
     o fixed defects in: w4m_filter_by_sample_class w4m_filter_imputation
     o added: test data that exercises changes
+
 
 CHANGES IN VERSION 0.98.0
 ------------------------------
