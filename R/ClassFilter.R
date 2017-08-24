@@ -260,6 +260,7 @@ w4m_filter_by_sample_class <- function(
 ) {
   # ---
   # define internal functions
+  # ...
 
   # read_data_frame - read a w4m data frame, with error handling
   #   e.g., data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
@@ -404,7 +405,11 @@ w4m_filter_by_sample_class <- function(
     }
   }
   
+  # ---
+  # entrypoint
+  # ...
 
+  # ---
   # read in the sample metadata
   read_data_result <- tryCatchFunc(
     expr = {
@@ -423,7 +428,6 @@ w4m_filter_by_sample_class <- function(
   
   if (nchar(class_column) > 0 && length(classes) > 0) {
     # select the first column of the rows indicated by classes, include, & class_column, but don't drop dimension
-    #selected_rows <- smpl_metadata[ xor( !include, smpl_metadata[,class_column] %in% classes ), 1, drop = FALSE ]
     #   > Reduce(`|`,list(c(TRUE,FALSE,FALSE),c(FALSE,TRUE,FALSE),c(FALSE,FALSE,FALSE)))
     #   [1]  TRUE  TRUE FALSE
     #   > Reduce(`|`,lapply(X=c("[aC]", "[Ab]"), FUN = function(pattern) {grepl(pattern = pattern, x = c("b", "ba", "c", "ab", "bcb")) }))
@@ -447,7 +451,9 @@ w4m_filter_by_sample_class <- function(
   } else {
     sample_names <- rownames( smpl_metadata )
   }
+  # ...
 
+  # ---
   # read in the variable metadata
   read_data_result <- tryCatchFunc(
     expr = {
@@ -480,7 +486,9 @@ w4m_filter_by_sample_class <- function(
     failure_action(err.env$msg)
     return ( FALSE )
   }
+  # ...
 
+  # ---
   # read in the data matrix
   read_data_result <- tryCatchFunc(
     expr = {
@@ -525,14 +533,18 @@ w4m_filter_by_sample_class <- function(
     # convert data_matrix to matrix from data.frame
     data_matrix <- as.matrix(data_matrix)
   }
+  # ...
 
+  # ---
+  # purge unwanted data
   # purge data_matrix of rows and columns that have zero variance
   data_matrix <- w4m__nonzero_var(data_matrix)
-
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   sample_names <- intersect(sample_names,colnames(data_matrix))
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
+  # ...
 
+  # ---
   # write out the results
   err.env <- new.env()
   err.env$success <- FALSE
@@ -621,11 +633,16 @@ w4m_filter_by_sample_class <- function(
      err.env$ msg <- sprintf("failed to set write output files because '%s'", e$message) 
     }
   )
+  # ...
+
+  # ---
+  # report results
   if (!err.env$success) {
     failure_action(err.env$msg)
     return ( FALSE )
+  } else {
+    return (TRUE)
   }
-  return (TRUE)
   # ...
 }
 

@@ -147,7 +147,6 @@ test_that("io test",{
 
   sample_metadata_expected_env <- read_data_frame(sampleMetadata_exp, "sample metadata expected")
   expect_true(sample_metadata_expected_env$success, info = "read sample metadata expected")
-  
   expect_true(all.equal(out_env$sampleMetadata, sample_metadata_expected_env$data), info = { 
     x <- all.equal(sample_metadata_expected_env$data, out_env$sampleMetadata)
     sprintf("all.equal(sample_metadata_expected_env$data, out_env$sampleMetadata) = %s", x)
