@@ -40,8 +40,9 @@ A Galaxy tool wrapper invokes `w4m_filter_by_sample_class`.  For exploratory or
 debugging purposes, the package may be installed loaded into R and help may 
 then be obtained with the following command:
 
-```?w4mclassfilter::w4m_filter_by_sample_class```
-
+```r
+?w4mclassfilter::w4m_filter_by_sample_class
+```
 
 W4M uses the XCMS and CAMERA packages to preprocess GC-MS or LC-MS data, 
 producing three files (which are documented in detail on the 
@@ -119,21 +120,33 @@ Within square brackets
 Caveat: The tool wrapper uses the comma (`,`) to split a list of sample-class names, so *commas may not be used within regular expressions for this tool*
 
 First Example: Consider a field of class-names consisting of 
-```marq3,marq6,marq9,marq12,front3,front6,front9,front12```
+```
+marq3,marq6,marq9,marq12,front3,front6,front9,front12
+```
 
-* The regular expression `^front[0-9][0-9]*$` will match the same sample-classes as `front3,front6,front9,front12`
-* The regular expression `^[a-z][a-z]3$` will match the same sample-classes as `front3,marq3`
-* The regular expression `^[a-z][a-z]12$` will match the same sample-classes as `front12,marq12`
-* The regular expression `^[a-z][a-z][0-9]$` will match the same sample-classes as `front3,front6,front9,marq3,marq6,marq9`
+| this regular expression | matches this set of sample-class names |
+| :--- | :--- |
+| `^front[0-9][0-9]*$` | "front3,front6,front9,front12" |
+| `^[a-z][a-z]3$`      | "front3,marq3" |
+| `^[a-z][a-z]12$`     | "front12,marq12" |
+| `^[a-z][a-z][0-9]$`  | "front3,front6,front9,marq3,marq6,marq9" |
 
 Second Example: Consider these regular expression patterns as possible matches to a sample-class name 'AB0123':
 
-* `^[A-Z][A-Z][0-9][0-9]*$` - MATCHES `**^AB0123$**`
-* `^[A-Z][A-Z]*[0-9][0-9]*$` - MATCHES `**^AB0123$**`
-* `^[A-Z][0-9]*` - MATCHES `**^A** B0123$` (The first character is a letter, `*` can specify zero characters, and end of line did not need to be matched.)
-* `^[A-Z][A-Z][0-9]` - MATCHES `**^AB0** 123$` (The first two characters are letters aind the third is a digit.)
-* `^[A-Z][A-Z]*[0-9][0-9]$` - NO MATCH (The name does not end with the pattern `[A-Z][0-9][0-9]$`, i.e., it ends with four digits, not two.)
-* `^[A-Z][0-9]*$` - NO MATCH (The pattern specifies that second character and all those that follow, if present, must be digits.)
+| this regular expression | matches this set of sample-class names |
+| :--- | :--- | 
+| `^[A-Z][A-Z][0-9][0-9]*$` | `AB0123`  |
+| `^[A-Z][A-Z]*[0-9][0-9]*$` | `AB0123`  |
+| `^[A-Z][0-9]*` | `AB0123`, see note 1. |
+| `^[A-Z][A-Z][0-9]` | `AB0123`, see note 2. |
+| `^[A-Z][A-Z]*[0-9][0-9]$` | NO MATCH, see note 3. |
+| `^[A-Z][0-9]*$` | NO MATCH, see note 4. |
+
+
+1. The first character is a letter, `*` can specify zero characters, and end of line did not need to be matched. 
+2. The first two characters are letters aind the third is a digit. 
+3. The name does not end with the pattern `[A-Z][0-9][0-9]$`, i.e., it ends with four digits, not two.
+4. The pattern specifies that second character and all those that follow, if present, must be digits.
 
 ### New in release v0.98.3 - more flexible input and output
 
