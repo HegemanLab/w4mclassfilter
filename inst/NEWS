@@ -3,7 +3,8 @@ CHANGES IN VERSION 0.98.3
 
 SIGNIFICANT USER-VISIBLE CHANGES
 
-    o Provide for more flexible input and output from env, list, or matrix/data.frame, to facilitate non-Galaxy use.
+    o Provide for more flexible input and output from env, list, or matrix/data.frame, 
+      to facilitate use with XCMS outside of the context of Galaxy Workflow4Metabolomics.
 
 OTHER
 
