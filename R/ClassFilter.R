@@ -218,18 +218,20 @@ w4m__nonzero_var <- function(m) {
 #'
 #' Please see the package vignette for further details.
 #'
-#' @param dataMatrix_in        see details: data matrix (rows are feature names, columns are sample names
-#' @param sampleMetadata_in    see details: sample metadata (rows are sample names, one column's name matches class_column)
-#' @param variableMetadata_in  see details: variable metadata (rows are variable names)
-#' @param dataMatrix_out       see details: output data matrix (rows are feature names, columns are sample names
-#' @param sampleMetadata_out   see details: output sample metadata (rows are sample names, one column's name matches class_column)
-#' @param variableMetadata_out see details: output variable metadata (rows are variable names)
-#' @param classes              character array: names of sample classes to include or exclude; default is an empty array
-#' @param include              logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
-#' @param class_column         character: name of "class" column, defaults to "class"
-#' @param samplename_column    character: name of column with sample name, defaults to "sampleMetadata"
-#' @param data_imputation      function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
-#' @param failure_action       function(x, ...): action to take upon failure - defaults to 'print(x,...)'
+#' @param dataMatrix_in         see details: data matrix (rows are feature names, columns are sample names
+#' @param sampleMetadata_in     see details: sample metadata (rows are sample names, one column's name matches class_column)
+#' @param variableMetadata_in   see details: variable metadata (rows are variable names)
+#' @param dataMatrix_out        see details: output data matrix (rows are feature names, columns are sample names
+#' @param sampleMetadata_out    see details: output sample metadata (rows are sample names, one column's name matches class_column)
+#' @param variableMetadata_out  see details: output variable metadata (rows are variable names)
+#' @param classes               character array: names of sample classes to include or exclude; default is an empty array
+#' @param include               logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
+#' @param class_column          character: name of "class" column, defaults to "class"
+#' @param samplename_column     character: name of column with sample name, defaults to "sampleMetadata"
+#' @param name_varmetadata_col1 logical: TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
+#' @param variable_range_filter character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
+#' @param data_imputation       function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
+#' @param failure_action        function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
 #' 
@@ -270,18 +272,20 @@ w4m__nonzero_var <- function(m) {
 #'
 #' @export
 w4m_filter_by_sample_class <- function(
-  dataMatrix_in                           # character: path to input file containing data matrix (tsv, rows are feature names, columns are sample names)
-, sampleMetadata_in                       # character: path to input file containing sample metadata (tsv, rows are sample names, one column is "class")
-, variableMetadata_in                     # character: path to input file containing variable metadata (tsv, rows are variable names)
-, dataMatrix_out                          # character: path to output file containing data matrix (tsv, rows are feature names, columns are sample names)
-, sampleMetadata_out                      # character: path to output file containing sample metadata (tsv, rows are sample names, one column is "class")
-, variableMetadata_out                    # character: path to output file containing variable metadata (tsv, rows are variable names)
-, classes = c()                           # array of character: names of sample classes to include or exclude; default is an empty array
-, include = FALSE                         # logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
-, class_column = "class"                  # character: name of "class" column, defaults to "class"
-, samplename_column = "sampleMetadata"    # character: name of column with sample name, defaults to "sampleMetadata"
-, data_imputation = w4m_filter_imputation # function(m): default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA
-, failure_action = print                  # function(x, ...): action to take upon failure - defaults to 'print(x,...)'
+  dataMatrix_in                           # character:          path to input file containing data matrix (tsv, rows are feature names, columns are sample names)
+, sampleMetadata_in                       # character:          path to input file containing sample metadata (tsv, rows are sample names, one column is "class")
+, variableMetadata_in                     # character:          path to input file containing variable metadata (tsv, rows are variable names)
+, dataMatrix_out                          # character:          path to output file containing data matrix (tsv, rows are feature names, columns are sample names)
+, sampleMetadata_out                      # character:          path to output file containing sample metadata (tsv, rows are sample names, one column is "class")
+, variableMetadata_out                    # character:          path to output file containing variable metadata (tsv, rows are variable names)
+, classes = c()                           # character array:    names of sample classes to include or exclude; default is an empty array
+, include = FALSE                         # logical:            TRUE, include named sample classes; FALSE (the default), exclude named sample classes
+, class_column = "class"                  # character:          name of "class" column, defaults to "class"
+, samplename_column = "sampleMetadata"    # character:          name of column with sample name, defaults to "sampleMetadata"
+, name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
+, variable_range_filter = c() #c("mz:125:850")             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
+, data_imputation = w4m_filter_imputation # function(m):        default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA
+, failure_action = print                  # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
   # ---
   # define internal functions
@@ -482,6 +486,9 @@ w4m_filter_by_sample_class <- function(
     expr = {
       rownames(vrbl_metadata) <- make.names( vrbl_metadata[,1], unique = TRUE )
       vrbl_metadata[,1] <- rownames(vrbl_metadata)
+      if (name_varmetadata_col1) {
+        colnames(vrbl_metadata)[1] <- "variableMetadata"
+      }
       err.env$success     <- TRUE
     }
   , error = function(e) {
@@ -543,6 +550,26 @@ w4m_filter_by_sample_class <- function(
 
   # ---
   # purge unwanted data
+  if (length(variable_range_filter) > 0) {
+    # filter out-of-range variables 
+    for (variable_range_filter_string in variable_range_filter) { 
+      split_list <- strsplit(x = variable_range_filter_string, split = ":", fixed = TRUE)
+      if ( length(split_list) == 1 ) {
+        split_strings <- split_list[[1]]
+        if ( length(split_strings) == 3 ) {
+          filter_col <- split_strings[1]
+          filter_min <- split_strings[2]
+          filter_max <- split_strings[3]
+          vrbl_colnames <- colnames(vrbl_metadata)
+          if ( filter_col %in% vrbl_colnames ) {
+            row_value <- vrbl_metadata[filter_col]
+            keep_row <- row_value >= filter_min & row_value <= filter_max
+            vrbl_metadata <- vrbl_metadata[keep_row,]
+          }
+        }
+      }
+    }
+  }
   # purge data_matrix of rows and columns that have zero variance
   data_matrix <- w4m__nonzero_var(data_matrix)
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
@@ -557,13 +584,17 @@ w4m_filter_by_sample_class <- function(
   err.env$msg <- "no message writing output files"
   tryCatch(
     expr = {
+      sub_matrix <- data_matrix[ rownames(data_matrix) %in% variable_names    # row selector
+                    , colnames(data_matrix) %in% sample_names      # column selector
+                    , drop = FALSE                                 # keep two dimensions
+                    ]
+      # sort matrix to match order of variable_names and sample_names
+      sorted_matrix <- sub_matrix
       # write the data matrix
       if ( is.character(dataMatrix_out) ){
-        utils::write.table( x = data_matrix  
-                             [ rownames(data_matrix) %in% variable_names    # row selector
-                             , colnames(data_matrix) %in% sample_names      # column selector
-                             , drop = FALSE                                 # keep two dimensions
-                             ]
+
+        # write the results
+        utils::write.table(  x = sorted_matrix  
                            , file = dataMatrix_out
                            , sep = "\t"
                            , quote = FALSE
@@ -571,11 +602,7 @@ w4m_filter_by_sample_class <- function(
                            , col.names = NA
                            )
       } else if ( is.environment(dataMatrix_out) || (is.list(dataMatrix_out) && ! is.matrix(dataMatrix_out)) ) {
-        dataMatrix_out$dataMatrix <-
-          data_matrix[ rownames(data_matrix) %in% variable_names    # row selector
-                     , colnames(data_matrix) %in% sample_names      # column selector
-                     , drop = FALSE                                 # keep two dimensions
-                     ]
+        dataMatrix_out$dataMatrix <- sorted_matrix
       } else {
         stop(sprintf("dataMatrix_out has unexpected type %s"), typeof(dataMatrix_out))
         return (FALSE)

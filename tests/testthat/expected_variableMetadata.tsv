@@ -1,16 +1,16 @@
-variableMetadata	name
-HMDB03193	Testosterone_glucuronide
-HMDB01101	p-Anisic_acid
-HMDB01101.1	p-Anisic_acid_2
-HMDB10348	Dehydroepiandrosterone_3-glucuronide
-HMDB59717	Glu-Val
-HMDB13189	3-Indole_carboxylic_acid_glucuronide
-HMDB00299	Xanthosine
-HMDB00191	L-Aspartic_acid
-HMDB00518	Chenodeoxycholic_acid
-HMDB00715	Kynurenic_acid
-HMDB01032	Dehydroepiandrosterone_sulfate
-HMDB00208	Oxoglutaric_acid
-HMDB04824	N2,N2-Dimethylguanosine
-HMDB00512	N-Acetyl-L-phenylalanine
-HMDB00251	Taurine
+variableMetadata	name	mz	rt
+HMDB03193	foo	100	200
+HMDB01101	bar	150	300
+HMDB01101.1	baz	200	225
+HMDB10348	batur	300	275
+HMDB59717	bamur	125	400
+HMDB13189	baris	800	325
+HMDB00299	bantur	700	500
+HMDB00191	loquor	650	600
+HMDB00518	loquoris	870	250
+HMDB00715	loquitur	725	900
+HMDB01032	loquimur	550	425
+HMDB00208	loquimini	873	476
+HMDB04824	loquantur	950	522
+HMDB00512	pantur	900	543
+HMDB00251	pasamur	500	423

@@ -60,6 +60,19 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.6
+
+#### NEW FEATURES
+
+* Add field filters for variableMetadata as csv; default empty.
+  - E.g. for mz &gt; 200 and mz &lt; 800 and rt &gt; 150 and rt &lt; 1100,
+    `mz:200:800,rt:150:1100`
+
+#### INTERNAL MODIFICATIONS
+
+* Sort dataMatrix to match order of sampleMetadata and variableMetadata
+
+
 ### CHANGES IN VERSION 0.98.3
 
 #### NEW FEATURES
