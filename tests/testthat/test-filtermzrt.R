@@ -34,20 +34,21 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
   return (my.env)
 }
 
+
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter test",{
-  #expect_true(FALSE, info = "abort filter test")
+test_that("filter mz rt",{
+  #expect_true(FALSE, info = "abort filter mz rt")
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
-  variableMetadata_out <- "output_variableMetadata.tsv"
-  variableMetadata_exp <- "expected_variableMetadata.tsv"
+  variableMetadata_out <- "output_mzrt_variableMetadata.tsv"
+  variableMetadata_exp <- "expected_mzrt_variableMetadata.tsv"
   sampleMetadata_in <- "input_sampleMetadata.tsv"
-  sampleMetadata_out <- "output_sampleMetadata.tsv"
-  sampleMetadata_exp <- "expected_sampleMetadata.tsv"
+  sampleMetadata_out <- "output_mzrt_sampleMetadata.tsv"
+  sampleMetadata_exp <- "expected_mzrt_sampleMetadata.tsv"
   dataMatrix_in <- "input_dataMatrix.tsv"
-  dataMatrix_out <- "output_filter_dataMatrix.tsv"
-  dataMatrix_exp <- "expected_filterio_dataMatrix.tsv"
+  dataMatrix_out <- "output_mzrt_dataMatrix.tsv"
+  dataMatrix_exp <- "expected_mzrt_dataMatrix.tsv"
   classes_to_filter <- c("M")
   class_column <- "gender"
   false_to_exclude_classes_in_filter <- TRUE
@@ -72,9 +73,10 @@ test_that("filter test",{
     , classes = classes_to_filter
     , include = false_to_exclude_classes_in_filter 
     , class_column = class_column
+    , variable_range_filter = c("mz:125:850","rt:250:850")
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter test")
+  #expect_true(FALSE, info = "first checkpoint - filter mz rt")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")

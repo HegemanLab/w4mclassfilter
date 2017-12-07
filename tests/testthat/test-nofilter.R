@@ -34,23 +34,18 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
   return (my.env)
 }
 
-#' @import testthat w4mclassfilter
-#' @export
-test_that("filter test",{
-  #expect_true(FALSE, info = "abort filter test")
+run_nofilter_test <- function(classes_to_filter, class_column, samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter) {
+  # expect_true(FALSE, info = "abort run_nofilter_test")
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_variableMetadata.tsv"
-  variableMetadata_exp <- "expected_variableMetadata.tsv"
+  variableMetadata_exp <- "expected_nofilter_variableMetadata.tsv"
   sampleMetadata_in <- "input_sampleMetadata.tsv"
   sampleMetadata_out <- "output_sampleMetadata.tsv"
-  sampleMetadata_exp <- "expected_sampleMetadata.tsv"
+  sampleMetadata_exp <- "expected_nofilter_sampleMetadata.tsv"
   dataMatrix_in <- "input_dataMatrix.tsv"
-  dataMatrix_out <- "output_filter_dataMatrix.tsv"
-  dataMatrix_exp <- "expected_filterio_dataMatrix.tsv"
-  classes_to_filter <- c("M")
-  class_column <- "gender"
-  false_to_exclude_classes_in_filter <- TRUE
+  dataMatrix_out <- "output_nofilter_dataMatrix.tsv"
+  dataMatrix_exp <- "expected_nofilter_dataMatrix.tsv"
   # test input files
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   expect_true(data_matrix_input_env$success, info = "read data matrix input")
@@ -64,17 +59,18 @@ test_that("filter test",{
   # filter, impute, and write output
   filter_result <- w4m_filter_by_sample_class(
     dataMatrix_in = dataMatrix_in
-    , dataMatrix_out = dataMatrix_out
-    , variableMetadata_in = variableMetadata_in
-    , variableMetadata_out = variableMetadata_out
-    , sampleMetadata_out = sampleMetadata_out
-    , sampleMetadata_in = sampleMetadata_in
-    , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
-    , class_column = class_column
+  , dataMatrix_out = dataMatrix_out
+  , variableMetadata_in = variableMetadata_in
+  , variableMetadata_out = variableMetadata_out
+  , sampleMetadata_out = sampleMetadata_out
+  , sampleMetadata_in = sampleMetadata_in
+  , samplename_column = samplename_column
+  , classes = classes_to_filter
+  , include = false_to_exclude_classes_in_filter 
+  , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter test")
+  # expect_true(FALSE, info = "first checkpoint - run_nofilter_test")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -96,5 +92,40 @@ test_that("filter test",{
   expect_equivalent(data_matrix_output_env$data, data_matrix_expected_env$data, info = "validate data matrix")
   expect_equivalent(sample_metadata_output_env$data, sample_metadata_expected_env$data, info = "validate sample metadata")
   expect_equivalent(variable_metadata_output_env$data, variable_metadata_expected_env$data, info = "validate variable metadata")
+}
+
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 1t - empty class_column",{
+  run_nofilter_test(classes_to_filter = c("M"), class_column = "", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
 })
 
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 3t - empty classes_to_to_filter",{
+  run_nofilter_test(classes_to_filter = c(), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+})
+
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 1f - empty class_column",{
+  run_nofilter_test(classes_to_filter = c("M"), class_column = "", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = FALSE)
+})
+
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 3f - empty classes_to_to_filter",{
+  run_nofilter_test(classes_to_filter = c(), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = FALSE)
+})
+
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 2.1 - regex_include_all",{
+  run_nofilter_test(classes_to_filter = c("[MF]"), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+})
+
+#' @import testthat w4mclassfilter
+#' @export
+test_that("nofilter test 2.2 - regex_include_all",{
+  run_nofilter_test(classes_to_filter = c("[Mm]","[fF]"), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+})

@@ -283,7 +283,7 @@ w4m_filter_by_sample_class <- function(
 , class_column = "class"                  # character:          name of "class" column, defaults to "class"
 , samplename_column = "sampleMetadata"    # character:          name of column with sample name, defaults to "sampleMetadata"
 , name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
-, variable_range_filter = c() #c("mz:125:850")             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
+, variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
 , data_imputation = w4m_filter_imputation # function(m):        default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA
 , failure_action = print                  # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
@@ -392,7 +392,7 @@ w4m_filter_by_sample_class <- function(
       # NOTE WELL: is.list succeeds for data.frame, so the is.data.frame test must appear before the is.list test
       # case: xcms_data_in is a list
       if ( ! exists(xcms_data_type, where = xcms_data_in) ) {
-        my_failure_action(sprintf("%s xcms_data_in is missing member '%s'"), ifelse(is.environment(xcms_data_in),"environment","list"), xcms_data_type)
+        my_failure_action(sprintf("%s xcms_data_in is missing member '%s'", ifelse(is.environment(xcms_data_in),"environment","list"), xcms_data_type))
         return (FALSE)
       }
       prospect <- getElement(name = xcms_data_type, object = xcms_data_in)
@@ -574,7 +574,9 @@ w4m_filter_by_sample_class <- function(
   data_matrix <- w4m__nonzero_var(data_matrix)
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   sample_names <- intersect(sample_names,colnames(data_matrix))
+  sample_names <- sample_names[order(sample_names)]
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
+  variable_names <- variable_names[order(variable_names)]
   # ...
 
   # ---
@@ -582,14 +584,18 @@ w4m_filter_by_sample_class <- function(
   err.env <- new.env()
   err.env$success <- FALSE
   err.env$msg <- "no message writing output files"
+  err.env$trace <- "trace string:"
   tryCatch(
     expr = {
+      err.env$trace <- paste(err.env$trace, "A")
       sub_matrix <- data_matrix[ rownames(data_matrix) %in% variable_names    # row selector
                     , colnames(data_matrix) %in% sample_names      # column selector
                     , drop = FALSE                                 # keep two dimensions
                     ]
+      err.env$trace <- paste(err.env$trace, "B")
       # sort matrix to match order of variable_names and sample_names
-      sorted_matrix <- sub_matrix
+      sorted_matrix <- sub_matrix[variable_names, sample_names]
+      err.env$trace <- paste(err.env$trace, "C")
       # write the data matrix
       if ( is.character(dataMatrix_out) ){
 
@@ -611,9 +617,9 @@ w4m_filter_by_sample_class <- function(
       # write the sample metadata
       if ( is.character(sampleMetadata_out) ){
         utils::write.table( x = smpl_metadata
-                             [ sample_names                                 # row selector
-                             ,                                              # column selector (select all)
-                             , drop = FALSE                                 # keep two dimensions
+                             [ sample_names # row selector
+                             ,              # column selector (select all)
+                             , drop = FALSE # keep two dimensions
                              ]
                            , file = sampleMetadata_out
                            , sep = "\t"
@@ -622,9 +628,9 @@ w4m_filter_by_sample_class <- function(
                            )
       } else if ( is.environment(sampleMetadata_out) || (is.list(sampleMetadata_out) && ! is.matrix(sampleMetadata_out)) ) {
         sampleMetadata_out$sampleMetadata <-
-          smpl_metadata [ sample_names                                 # row selector
-                        ,                                              # column selector (select all)
-                        , drop = FALSE                                 # keep two dimensions
+          smpl_metadata [ sample_names # row selector
+                        ,              # column selector (select all)
+                        , drop = FALSE # keep two dimensions
                         ]
         rownames(sampleMetadata_out$sampleMetadata) <- 1:nrow(sampleMetadata_out$sampleMetadata)
         sampleMetadata_out$sampleMetadata$sampleMetadata <- as.factor(sampleMetadata_out$sampleMetadata$sampleMetadata)
@@ -637,9 +643,9 @@ w4m_filter_by_sample_class <- function(
       # write the variable metadata
       if ( is.character(variableMetadata_out) ){
         utils::write.table( x = vrbl_metadata
-                             [ rownames(vrbl_metadata) %in% variable_names  # row selector
-                             ,                                              # column selector (select all)
-                             , drop = FALSE                                 # keep two dimensions
+                             [ variable_names # row selector
+                             ,                # column selector (select all)
+                             , drop = FALSE   # keep two dimensions
                              ]
                            , file = variableMetadata_out
                            , sep = "\t"
@@ -648,9 +654,9 @@ w4m_filter_by_sample_class <- function(
                            )
       } else if ( is.environment(variableMetadata_out) || (is.list(variableMetadata_out) && ! is.matrix(variableMetadata_out)) ) {
         variableMetadata_out$variableMetadata <-
-          vrbl_metadata[ rownames(vrbl_metadata) %in% variable_names  # row selector
-                       ,                                              # column selector (select all)
-                       , drop = FALSE                                 # keep two dimensions
+          vrbl_metadata[ variable_names # row selector
+                       ,                # column selector (select all)
+                       , drop = FALSE   # keep two dimensions
                        ]
         rownames(variableMetadata_out$variableMetadata) <- 1:nrow(variableMetadata_out$variableMetadata)
         variableMetadata_out$variableMetadata$variableMetadata <- as.factor(variableMetadata_out$variableMetadata$variableMetadata)
@@ -663,7 +669,7 @@ w4m_filter_by_sample_class <- function(
       err.env$success     <- TRUE
     }
   , error = function(e) {
-     err.env$ msg <- sprintf("failed to set write output files because '%s'", e$message) 
+     err.env$ msg <- sprintf("failed to write output files because '%s'; trace %s", e$message, err.env$trace) 
     }
   )
   # ...
