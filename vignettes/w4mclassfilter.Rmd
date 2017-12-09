@@ -28,7 +28,7 @@ data issues that may impede or thwart downstream statistical analysis:
 * Samples that are missing from either `sampleMetadata` or `dataMatrix` are eliminated.
 * Samples may also be eliminated by a "sample class" column in `sampleMetadata`.
 * Features that are missing from either `variableMetadata` or `dataMatrix` are eliminated.
-* Features may also be eliminated by specifying ranges of allowable values in columns of `variableMetadata`.
+* Features may also be eliminated by specifying ranges of values allowable in columns of `variableMetadata`.
 * Missing values in `dataMatrix` are imputed to zero (by default) or with a user-supplied imputation function.
 * Features and samples that have zero variance are eliminated.
 
@@ -85,7 +85,7 @@ Galaxy presents datasets to tools as files; because of this, ordinary usage of t
 tab-delimited flat files (TSVs).  However, because general-purpose R packages 
 usually use data structures in memory for their input and output, 
 `w4m_filter_by_sample_class` can interface not only with TSVs but also with data
-structures (data.frame and matrix); see 'New in release v0.98.3' below.
+structures (data.frame, matrix, list, env); see 'New in release v0.98.3' below.
 
 #### Feature- and Sample-Elimination
 
@@ -99,11 +99,11 @@ When `w4m_filter_by_sample_class` is invoked:
   * an array of range specifications may be supplied in the `variable_range_filter`
     argument.  If supplied, only features having values in the specified column
     of `variableMetadata` that fall within the specified ranges will be retained
-    in the output.  Each range is a string of three colon-separated values in the
+    in the output.  Each range is a string of three colon-separated values (e.g., "mz:200:800") in the
     following order:
-      - the name of a column of `variableMetadata` which must have numerical data;
-      - the minimum allowed value in that column for the feature to be retained;
-      - the maximum allowed value.
+      - the name of a column of `variableMetadata` which must have numerical data (e.g., "mz");
+      - the minimum allowed value in that column for the feature to be retained (e.g., "200");
+      - the maximum allowed value (e.g., "800").
 
 Even if no rows or columns of the input `dataMatrix` input have zero variance,
 there is the possibility that eliminating samples or features may result in some 
@@ -237,4 +237,4 @@ R package v0.98.3 - add support for env, list, data.frame, and matrix I/O
 ### New in release v0.98.6 - feature-attribute range filtering
 
 R package v0.98.6 - add support for eliminating features whose attributes fall outside specified ranges.
-
+For more detail, see "Feature- and Sample-Elimination" above.
