@@ -22,17 +22,15 @@ R package is to provide the computational back-end of a
 tool for inclusion in 
 [Workflow4Metabolomics (W4M)](http://workflow4metabolomics.org/).
 
-Galaxy tools are file-oriented; because of this, the 
-`w4mclassfilter::w4m_filter_by_sample_class` method reads from and writes to 
-files.  General-purpose R packages usually use data structures in memory for 
-their input and output, which may mean that this R package is not generally 
-useful outside of the context of Galaxy.
+This package (and the Galaxy tool) perform several steps to address several
+data issues that may impede or thwart downstream statistical analysis:
 
-The `w4mclassfilter::w4m_filter_imputation` function is the default imputation 
-method used by `w4m_filter_by_sample_class`; if other methods are to be used 
-in the Galaxy tool, they might best be incorporated into the `w4mclassfilter` 
-R package, although they could be implemented in another R package to be used 
-by the Galaxy tool.
+* Samples that are missing from either `sampleMetadata` or `dataMatrix` are eliminated.
+* Samples may also be eliminated by a "sample class" column in `sampleMetadata`.
+* Features that are missing from either `variableMetadata` or `dataMatrix` are eliminated.
+* Features may also be eliminated by specifying ranges of allowable values in columns of `variableMetadata`.
+* Missing values in `dataMatrix` are imputed to zero (by default) or with a user-supplied imputation function.
+* Features and samples that have zero variance are eliminated.
 
 ### How the `w4m_filter_by_sample_class` function is used
 
@@ -74,29 +72,68 @@ In summary:
   + For numerical reasons, intenisities may be negative, but this has no
     meaning in the real world.
 
-By default, the `w4m_filter_by_sample_class` function imputes negative and
-`NA` intensity values as zero using the `w4m_filter_imputation` function.
-
-When `w4m_filter_by_sample_class` is invoked, an array of class names is
-supplied in the `classes` argument.  If the `include` argument is true,
-then only samples whose *class* column in  `sampleMetadata.tsv` will be
-*included in* the output; by contrast, if the `include` argument is false,
-then only samples whose *class* column in `sampleMetadata.tsv` will 
-be *excluded from* the output.
-
-Even if no rows or columns of the `dataMatrix.tsv` input have zero variance,
-there is the possibility that eliminating samples may result in some rows or
-columns having zero variance, adversely impacting downstream statistical
-analysis.  Consequently, `w4m_filter_by_sample_class` eliminates these rows or
-columns and the corresponding rows from `sampleMetadata.tsv` and
-`variableMetadata.tsv`.
 
 When `w4m_filter_by_sample_class` completes running, it writes out updated
 `sampleMetadata.tsv`, `variableMetadata.tsv`, and `dataMatrix.tsv` files.
 The paths to the output files *must* be different from the paths to the 
 input files.
 
-As of v0.98.3, `w4m_filter_by_sample_class` can interface not only with files but also with data structures; see release note below.
+#### Input- and Output-Format
+
+Galaxy presents datasets to tools as files; because of this, ordinary usage of the
+`w4mclassfilter::w4m_filter_by_sample_class` method is to read from and write to 
+tab-delimited flat files (TSVs).  However, because general-purpose R packages 
+usually use data structures in memory for their input and output, 
+`w4m_filter_by_sample_class` can interface not only with TSVs but also with data
+structures (data.frame and matrix); see 'New in release v0.98.3' below.
+
+#### Feature- and Sample-Elimination
+
+When `w4m_filter_by_sample_class` is invoked:
+  * an array of class names may be supplied in the `classes` argument.
+    If the `include` argument is true, then only samples whose *class* column in 
+    `sampleMetadata` (as named in the `class_column` argument) will 
+    be *included in* the output; by contrast, if the `include` argument is false,
+    then only samples whose *class* column in `sampleMetadata`
+    will be *excluded from* the output.
+  * an array of range specifications may be supplied in the `variable_range_filter`
+    argument.  If supplied, only features having values in the specified column
+    of `variableMetadata` that fall within the specified ranges will be retained
+    in the output.  Each range is a string of three colon-separated values in the
+    following order:
+      - the name of a column of `variableMetadata` which must have numerical data;
+      - the minimum allowed value in that column for the feature to be retained;
+      - the maximum allowed value.
+
+Even if no rows or columns of the input `dataMatrix` input have zero variance,
+there is the possibility that eliminating samples or features may result in some 
+rows or columns having zero variance, adversely impacting downstream statistical
+analysis.  Consequently, `w4m_filter_by_sample_class` eliminates these rows or
+columns and the corresponding rows from `sampleMetadata`,
+`variableMetadata`, and `dataMatrix`.
+
+#### Imputation of Missing Values
+
+The `w4mclassfilter::w4m_filter_imputation` function is the default imputation 
+method used by `w4m_filter_by_sample_class`; if other methods are to be used 
+in the Galaxy tool, they might best be incorporated into the `w4mclassfilter` 
+R package, although they could be implemented in another R package to be used 
+by the Galaxy tool. 
+
+By default, the `w4m_filter_by_sample_class` function imputes negative and
+`NA` intensity values as zero using the following `w4m_filter_imputation` function.
+
+```r
+w4m_filter_imputation <- 
+  function(m) {
+    # replace NA values with zero
+    m[is.na(m)] <- 0
+    # replace negative values with zero, if applicable (It should never be applicable!)
+    m[m<0] <- 0
+    # return matrix as the result
+    return (m)
+  }
+```
 
 ### New in release v0.98.2 - support regular expressions
 
@@ -196,4 +233,8 @@ R package v0.98.3 - add support for env, list, data.frame, and matrix I/O
   - if a string, treat as a file path (i.e., same as in previous releases)
   - else if an env or list, write `sampleMetadata_out$sampleMetadata`
   - else error
+
+### New in release v0.98.6 - feature-attribute range filtering
+
+R package v0.98.6 - add support for eliminating features whose attributes fall outside specified ranges.
 

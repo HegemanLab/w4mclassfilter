@@ -218,12 +218,12 @@ w4m__nonzero_var <- function(m) {
 #'
 #' Please see the package vignette for further details.
 #'
-#' @param dataMatrix_in         see details: data matrix (rows are feature names, columns are sample names
-#' @param sampleMetadata_in     see details: sample metadata (rows are sample names, one column's name matches class_column)
-#' @param variableMetadata_in   see details: variable metadata (rows are variable names)
-#' @param dataMatrix_out        see details: output data matrix (rows are feature names, columns are sample names
-#' @param sampleMetadata_out    see details: output sample metadata (rows are sample names, one column's name matches class_column)
-#' @param variableMetadata_out  see details: output variable metadata (rows are variable names)
+#' @param dataMatrix_in         input  data matrix (rows are feature names, columns are sample names
+#' @param sampleMetadata_in     input  sample metadata (rows are sample names, one column's name matches class_column)
+#' @param variableMetadata_in   input  variable metadata (rows are variable names)
+#' @param dataMatrix_out        output data matrix (rows are feature names, columns are sample names
+#' @param sampleMetadata_out    output sample metadata (rows are sample names, one column's name matches class_column)
+#' @param variableMetadata_out  output variable metadata (rows are variable names)
 #' @param classes               character array: names of sample classes to include or exclude; default is an empty array
 #' @param include               logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
 #' @param class_column          character: name of "class" column, defaults to "class"
