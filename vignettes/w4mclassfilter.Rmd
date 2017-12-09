@@ -102,8 +102,8 @@ When `w4m_filter_by_sample_class` is invoked:
     in the output.  Each range is a string of three colon-separated values (e.g., "mz:200:800") in the
     following order:
       - the name of a column of `variableMetadata` which must have numerical data (e.g., "mz");
-      - the minimum allowed value in that column for the feature to be retained (e.g., "200");
-      - the maximum allowed value (e.g., "800").
+      - the minimum allowed value in that column for the feature to be retained (e.g., 200);
+      - the maximum allowed value (e.g., 800).
 
 Even if no rows or columns of the input `dataMatrix` input have zero variance,
 there is the possibility that eliminating samples or features may result in some 
