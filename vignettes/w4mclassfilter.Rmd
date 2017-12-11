@@ -1,5 +1,5 @@
 ---
-title: "Filter W4M data by sample class"
+title: "Filter W4M data by sample class or feature attributes"
 output:
   pdf_document:
     highlight: null
@@ -22,19 +22,21 @@ R package is to provide the computational back-end of a
 tool for inclusion in 
 [Workflow4Metabolomics (W4M)](http://workflow4metabolomics.org/).
 
-This package (and the Galaxy tool) perform several steps to address several
-data issues that may impede or thwart downstream statistical analysis:
+This package (and the Galaxy tool) perform several steps, 
+either to reduce the number samples or features to be analyzed, 
+or to address several data issues that may impede downstream statistical analysis:
 
 * Samples that are missing from either `sampleMetadata` or `dataMatrix` are eliminated.
 * Samples may also be eliminated by a "sample class" column in `sampleMetadata`.
 * Features that are missing from either `variableMetadata` or `dataMatrix` are eliminated.
 * Features may also be eliminated by specifying ranges of values allowable in columns of `variableMetadata`.
-* Missing values in `dataMatrix` are imputed to zero (by default) or with a user-supplied imputation function.
+* Missing values in `dataMatrix` are imputed either to zero (by default) or to the result of a user-supplied imputation function.
 * Features and samples that have zero variance are eliminated.
 
 ### How the `w4m_filter_by_sample_class` function is used
 
-A Galaxy tool wrapper invokes `w4m_filter_by_sample_class`.  For exploratory or
+Ordinarily, a Galaxy tool wrapper invokes `w4m_filter_by_sample_class`.  
+For exploratory or
 debugging purposes, the package may be installed loaded into R and help may 
 then be obtained with the following command:
 
@@ -43,8 +45,8 @@ then be obtained with the following command:
 ```
 
 W4M uses the XCMS and CAMERA packages to preprocess GC-MS or LC-MS data, 
-producing three files (which are documented in detail on the 
-[Workflow4Metabolomics (W4M)](http://workflow4metabolomics.org/) web site).  
+producing three files that are documented in detail on the 
+[Workflow4Metabolomics (W4M)](http://workflow4metabolomics.org/) web site.  
 In summary:
 
 1. `sampleMetadata.tsv`: a tab-separated file with metadata for the samples, 
@@ -73,39 +75,44 @@ In summary:
     meaning in the real world.
 
 
-When `w4m_filter_by_sample_class` completes running, it writes out updated
-`sampleMetadata.tsv`, `variableMetadata.tsv`, and `dataMatrix.tsv` files.
-The paths to the output files *must* be different from the paths to the 
-input files.
-
 #### Input- and Output-Format
 
-Galaxy presents datasets to tools as files; because of this, ordinary usage of the
-`w4mclassfilter::w4m_filter_by_sample_class` method is to read from and write to 
-tab-delimited flat files (TSVs).  However, because general-purpose R packages 
+Ordinary usage of the
+`w4mclassfilter::w4m_filter_by_sample_class` 
+method is to read from and write to 
+tab-delimited flat files (TSVs) because Galaxy presents datasets to tools as files.
+However, because general-purpose R packages 
 usually use data structures in memory for their input and output, 
-`w4m_filter_by_sample_class` can interface not only with TSVs but also with data
-structures (data.frame, matrix, list, env); see 'New in release v0.98.3' below.
+this function can accept not only with TSVs but also with data
+structures (data.frame, matrix, list, env); see 'New in release v0.98.3' below for details.
+
+For all inputs and outputs that are file paths, those paths must be unique.
 
 #### Feature- and Sample-Elimination
 
 When `w4m_filter_by_sample_class` is invoked:
+
   * an array of class names may be supplied in the `classes` argument.
     If the `include` argument is true, then only samples whose *class* column in 
     `sampleMetadata` (as named in the `class_column` argument) will 
     be *included in* the output; by contrast, if the `include` argument is false,
     then only samples whose *class* column in `sampleMetadata`
     will be *excluded from* the output.
-  * an array of range specifications may be supplied in the `variable_range_filter`
-    argument.  If supplied, only features having values in the specified column
+
+      - Class names may be explicit, or regular expressions may be used.
+      - See "New in release v0.98.2" below for details on using regular expressions.
+
+  * an array of range specification strings may be supplied in the `variable_range_filter`
+    argument.  If supplied, only features having numerical values in the specified column
     of `variableMetadata` that fall within the specified ranges will be retained
     in the output.  Each range is a string of three colon-separated values (e.g., "mz:200:800") in the
     following order:
+
       - the name of a column of `variableMetadata` which must have numerical data (e.g., "mz");
       - the minimum allowed value in that column for the feature to be retained (e.g., 200);
       - the maximum allowed value (e.g., 800).
 
-Even if no rows or columns of the input `dataMatrix` input have zero variance,
+Note that even when no rows or columns of the input `dataMatrix` input have zero variance,
 there is the possibility that eliminating samples or features may result in some 
 rows or columns having zero variance, adversely impacting downstream statistical
 analysis.  Consequently, `w4m_filter_by_sample_class` eliminates these rows or
@@ -128,7 +135,7 @@ w4m_filter_imputation <-
   function(m) {
     # replace NA values with zero
     m[is.na(m)] <- 0
-    # replace negative values with zero, if applicable (It should never be applicable!)
+    # replace negative values with zero, if applicable
     m[m<0] <- 0
     # return matrix as the result
     return (m)
@@ -139,7 +146,9 @@ w4m_filter_imputation <-
 
 Beginning with v0.98.2, w4mclassfilter supports use of R regular expression patterns to select class-names.
 
-The R `base::grepl` function (at the core of this functionality) uses POSIX 1003.2 standard regular expressions, which allow precise pattern-matching and are exhaustively defined at: [http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap09.html](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html)
+The R `base::grepl` function (at the core of this functionality) uses POSIX 1003.2 standard regular expressions, which allow precise pattern-matching and are exhaustively defined at: 
+
+[http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap09.html](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html)
 
 However, only a few basic building blocks of regular expressions need to be mastered for most cases:
 
@@ -154,7 +163,7 @@ Within square brackets
 * `^` as the first character specifies that the list of characters are those that should * not * be matched.
 * `-` is used to specify ranges of characters
 
-Caveat: The tool wrapper uses the comma (`,`) to split a list of sample-class names, so *commas may not be used within regular expressions for this tool*
+*Caveat*: The tool wrapper uses the comma (`,`) to split a list of sample-class names, so *commas may not be used within regular expressions for this tool*
 
 First Example: Consider a field of class-names consisting of 
 ```

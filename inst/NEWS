@@ -1,3 +1,15 @@
+CHANGES IN VERSION 0.98.6
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Add support for eliminating features whose attributes fall outside specified ranges.
+
+OTHER
+
+    o Support and tests for new features.
+
+
 CHANGES IN VERSION 0.98.3
 ------------------------------
 

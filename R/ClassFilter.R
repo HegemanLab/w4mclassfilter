@@ -191,7 +191,7 @@ w4m__nonzero_var <- function(m) {
 #' Filter W4M data matrix by sample-class
 #'
 #' @description
-#' Filter a set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class
+#' Filter a set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class or feature-attributes
 #'
 #' @details
 #' The W4M files dataMatrix, sampleMetadata, and variableMetadata must be a consistent set, i.e., 
@@ -202,7 +202,8 @@ w4m__nonzero_var <- function(m) {
 #' Furthermore, frequently, it is desirable to analyze a subset of samples (or features) in the dataMatrix.
 #'
 #' This function manipulates produces a set of files with imputed missing values, omitting features and samples that are not consistently present within the set or have zero variance.
-#' It also provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
+#' Secondly, it provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
+#' Thirdly, it provides a selection-capability for features based on whether their metadata lie within the ranges specified by 'variable_range_filter'.
 #'
 #' Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:
 #' * character: path to input tab-separated-values-file (TSV)
