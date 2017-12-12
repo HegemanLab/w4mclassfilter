@@ -32,6 +32,7 @@ or to address several data issues that may impede downstream statistical analysi
 * Features may also be eliminated by specifying ranges of values allowable in columns of `variableMetadata`.
 * Missing values in `dataMatrix` are imputed either to zero (by default) or to the result of a user-supplied imputation function.
 * Features and samples that have zero variance are eliminated.
+* Samples and features are sorted alphabetically in rows and columns of `variableMetadata`, `sampleMetadata`, and `dataMatrix`  
 
 ### How the `w4m_filter_by_sample_class` function is used
 
