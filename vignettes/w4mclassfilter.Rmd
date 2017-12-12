@@ -153,22 +153,23 @@ The R `base::grepl` function (at the core of this functionality) uses POSIX 1003
 
 However, only a few basic building blocks of regular expressions need to be mastered for most cases:
 
-* `^` matches the beginning of a class-name
-* `$` matches the end of a class-name
-* `.` outside of square brackets matches a single character
-* `*` matches character specified immediately before zero or more times
-* square brackets specify a set of characters to be matched.
+Within square brackets:
 
-Within square brackets
+  - "`^`" as the first character after the left bracket specifies that none listed characters should be matched
+  - "`-`" separates a range of characters, e.g., "4-7" or "b-f".
 
-* `^` as the first character specifies that the list of characters are those that should * not * be matched.
-* `-` is used to specify ranges of characters
+Outside of square brackets:
 
-*Caveat*: The tool wrapper uses the comma (`,`) to split a list of sample-class names, so *commas may not be used within regular expressions for this tool*
+  - "`^`" matches the beginning of a class-name
+  - "`$`" matches the end of a class-name
+  - "`.`" matches a single character
+  - "`*`" matches the character specified immediately before zero or more times
+
+*Caveat*: The tool wrapper uses the comma ("`,`") to split a list of sample-class names, so *commas may not be used within regular expressions for this tool*
 
 First Example: Consider a field of class-names consisting of 
 ```
-marq3,marq6,marq9,marq12,front3,front6,front9,front12
+                  marq3,marq6,marq9,marq12,front3,front6,front9,front12
 ```
 
 | this regular expression | matches this set of sample-class names |
@@ -178,22 +179,25 @@ marq3,marq6,marq9,marq12,front3,front6,front9,front12
 | `^[a-z][a-z]12$`     | "front12,marq12" |
 | `^[a-z][a-z][0-9]$`  | "front3,front6,front9,marq3,marq6,marq9" |
 
-Second Example: Consider these regular expression patterns as possible matches to a sample-class name 'AB0123':
+Second Example: Consider these regular expression patterns as possible matches to a sample-class name 
+```
+                  AB0123
+```
 
 | this regular expression | matches this set of sample-class names |
 | :--- | :--- | 
 | `^[A-Z][A-Z][0-9][0-9]*$` | `AB0123`  |
 | `^[A-Z][A-Z]*[0-9][0-9]*$` | `AB0123`  |
-| `^[A-Z][0-9]*` | `AB0123`, see note 1. |
-| `^[A-Z][A-Z][0-9]` | `AB0123`, see note 2. |
-| `^[A-Z][A-Z]*[0-9][0-9]$` | NO MATCH, see note 3. |
-| `^[A-Z][0-9]*$` | NO MATCH, see note 4. |
+| `^[A-Z][0-9]*` | `AB0123`, see Note 1. |
+| `^[A-Z][A-Z][0-9]` | `AB0123`, see Note 2. |
+| `^[A-Z][A-Z]*[0-9][0-9]$` | NO MATCH, see Note 3. |
+| `^[A-Z][0-9]*$` | NO MATCH, see Note 4. |
 
 
-1. The first character is a letter, `*` can specify zero characters, and end of line did not need to be matched. 
-2. The first two characters are letters aind the third is a digit. 
-3. The name does not end with the pattern `[A-Z][0-9][0-9]$`, i.e., it ends with four digits, not two.
-4. The pattern specifies that second character and all those that follow, if present, must be digits.
+  - Note 1. The first character is a letter, "`*`" can specify zero characters, and end of line did not need to be matched. 
+  - Note 2. The first two characters are letters aind the third is a digit. 
+  - Note 3. The name does not end with the pattern "`[A-Z][0-9][0-9]$`", i.e., it ends with four digits, not two.
+  - Note 4. The pattern specifies that second character and all those that follow, if present, must be digits.
 
 ### New in release v0.98.3 - more flexible input and output
 
