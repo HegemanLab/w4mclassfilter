@@ -248,6 +248,6 @@ R package v0.98.3 - add support for env, list, data.frame, and matrix I/O
 
 R package v0.98.6
 
- - Added support for eliminating features whose attributes fall outside specified ranges.
+ - Support eliminating features whose attributes fall outside specified ranges.
    For more detail, see "Feature- and Sample-Elimination" above.
  - Sort sample names and feature names because some statistical tools expect the same order in `dataMatrix` row and column names as in the corresponding metadata files.

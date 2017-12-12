@@ -3,7 +3,7 @@ CHANGES IN VERSION 0.98.6
 
 SIGNIFICANT USER-VISIBLE CHANGES
 
-    o Add support for eliminating features whose attributes fall outside specified ranges.
+    o Support eliminating features whose attributes fall outside specified ranges.
     o Sort sample names and feature names because some statistical tools expect the same order in dataMatrix row and column names as in the corresponding metadata files.
 
 OTHER
