@@ -246,5 +246,8 @@ R package v0.98.3 - add support for env, list, data.frame, and matrix I/O
 
 ### New in release v0.98.6 - feature-attribute range filtering
 
-R package v0.98.6 - add support for eliminating features whose attributes fall outside specified ranges.
-For more detail, see "Feature- and Sample-Elimination" above.
+R package v0.98.6
+
+ - Added support for eliminating features whose attributes fall outside specified ranges.
+   For more detail, see "Feature- and Sample-Elimination" above.
+ - Sort sample names and feature names because some statistical tools expect the same order in `dataMatrix` row and column names as in the corresponding metadata files.
