@@ -554,19 +554,26 @@ w4m_filter_by_sample_class <- function(
   if (length(variable_range_filter) > 0) {
     # filter out-of-range variables 
     for (variable_range_filter_string in variable_range_filter) { 
+      variable_range_filter_string <- sub(":$", ":NA",  variable_range_filter_string)
+      variable_range_filter_string <- sub("::", ":NA:", variable_range_filter_string)
       split_list <- strsplit(x = variable_range_filter_string, split = ":", fixed = TRUE)
       if ( length(split_list) == 1 ) {
+        # stop("deliberate failure")
         split_strings <- split_list[[1]]
         if ( length(split_strings) == 3 ) {
           filter_col <- split_strings[1]
-          filter_min <- split_strings[2]
-          filter_max <- split_strings[3]
+          # TODO test infininte filter_max and -infinite filter_min
+          # sub(":$",":NA","foo:5:")
+          filter_min <- tryCatch({ as.numeric(split_strings[2]) }, warning = function(w){ -Inf })
+          filter_max <- tryCatch({ as.numeric(split_strings[3]) }, warning = function(w){ Inf })
           vrbl_colnames <- colnames(vrbl_metadata)
           if ( filter_col %in% vrbl_colnames ) {
             row_value <- vrbl_metadata[filter_col]
             keep_row <- row_value >= filter_min & row_value <= filter_max
             vrbl_metadata <- vrbl_metadata[keep_row,]
           }
+        } else {
+          warning("split_list is not of the expected length")
         }
       }
     }
