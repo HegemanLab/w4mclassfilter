@@ -569,7 +569,13 @@ w4m_filter_by_sample_class <- function(
           vrbl_colnames <- colnames(vrbl_metadata)
           if ( filter_col %in% vrbl_colnames ) {
             row_value <- vrbl_metadata[filter_col]
-            keep_row <- row_value >= filter_min & row_value <= filter_max
+            if (filter_min <= filter_max) {
+              # filter specifies an inclusion range
+              keep_row <- row_value >= filter_min & row_value <= filter_max
+            } else {
+              # filter specifies an exclusion range
+              keep_row <- row_value > filter_min | row_value < filter_max
+            }
             vrbl_metadata <- vrbl_metadata[keep_row,]
           }
         } else {
