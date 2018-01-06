@@ -29,7 +29,8 @@ or to address several data issues that may impede downstream statistical analysi
 * Samples that are missing from either `sampleMetadata` or `dataMatrix` are eliminated.
 * Samples may also be eliminated by a "sample class" column in `sampleMetadata`.
 * Features that are missing from either `variableMetadata` or `dataMatrix` are eliminated.
-* Features may also be eliminated by specifying ranges of values allowable in columns of `variableMetadata`.
+* Features may be eliminated by specifying minimum or maximum value (or both) allowable in columns of `variableMetadata`.
+* Features may be eliminated by specifying minimum or maximum intensity (or both) allowable in columns of `dataMatrix` for at least one sample for each feature ("range of row-maximum for each feature").
 * Missing values in `dataMatrix` are imputed either to zero (by default) or to the result of a user-supplied imputation function.
 * Features and samples that have zero variance are eliminated.
 * Samples and features are sorted alphabetically in rows and columns of `variableMetadata`, `sampleMetadata`, and `dataMatrix`  
@@ -37,9 +38,8 @@ or to address several data issues that may impede downstream statistical analysi
 ### How the `w4m_filter_by_sample_class` function is used
 
 Ordinarily, a Galaxy tool wrapper invokes `w4m_filter_by_sample_class`.  
-For exploratory or
-debugging purposes, the package may be installed loaded into R and help may 
-then be obtained with the following command:
+For exploratory or debugging purposes, the package may be installed loaded 
+into R and help may then be obtained with the following command:
 
 ```r
 ?w4mclassfilter::w4m_filter_by_sample_class
@@ -112,6 +112,15 @@ When `w4m_filter_by_sample_class` is invoked:
       - the name of a column of `variableMetadata` which must have numerical data (e.g., "mz");
       - the minimum allowed value in that column for the feature to be retained (e.g., 200);
       - the maximum allowed value (e.g., 800).
+      - if the "maximum" is less than the "minimum", then the range is exclusive 
+        (e.g., "mz:800:200" means retain only features whose mz is NOT in the range 200-800)
+
+  * note for the range specification strings: if the name supplied in the first field is 'FEATMAX', 
+    then the string is defining the minimum (and possibly, though less useful, maximum)
+    intensity for each feature in the dataMatrix.  For example, "FEATMAX:1e6:" would specify 
+    that any feature would be excluded if no sample had an intensity for that feature greater than 1000000.
+   
+      - note that if the "maximum" is greater than the "minimum" then the FEATMAX range specification is ignored.
 
 Note that even when no rows or columns of the input `dataMatrix` input have zero variance,
 there is the possibility that eliminating samples or features may result in some 
@@ -124,9 +133,9 @@ columns and the corresponding rows from `sampleMetadata`,
 
 The `w4mclassfilter::w4m_filter_imputation` function is the default imputation 
 method used by `w4m_filter_by_sample_class`; if other methods are to be used 
-in the Galaxy tool, they might best be incorporated into the `w4mclassfilter` 
-R package, although they could be implemented in another R package to be used 
-by the Galaxy tool. 
+in the Galaxy tool, they might best eventually be incorporated into the `w4mclassfilter` 
+R package, although they could be implemented in any R code to be used 
+by the Galaxy tool wrapper. 
 
 By default, the `w4m_filter_by_sample_class` function imputes negative and
 `NA` intensity values as zero using the following `w4m_filter_imputation` function.

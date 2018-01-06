@@ -541,51 +541,101 @@ w4m_filter_by_sample_class <- function(
     # select the subset of samples indicated by classes, include, & class_column
     data_matrix <- data_matrix[,intersect(sample_names,colnames(data_matrix)), drop = FALSE]
 
-    # impute missing values with supplied or default method
-    data_matrix <- data_imputation(data_matrix)
-
     # convert data_matrix to matrix from data.frame
     data_matrix <- as.matrix(data_matrix)
   }
   # ...
 
+  # impute missing values with supplied or default method
+  data_matrix <- data_imputation(data_matrix)
+
   # ---
-  # purge unwanted data
-  if (length(variable_range_filter) > 0) {
-    # filter out-of-range variables 
-    for (variable_range_filter_string in variable_range_filter) { 
-      variable_range_filter_string <- sub(":$", ":NA",  variable_range_filter_string)
-      variable_range_filter_string <- sub("::", ":NA:", variable_range_filter_string)
-      split_list <- strsplit(x = variable_range_filter_string, split = ":", fixed = TRUE)
-      if ( length(split_list) == 1 ) {
-        # stop("deliberate failure")
-        split_strings <- split_list[[1]]
-        if ( length(split_strings) == 3 ) {
-          filter_col <- split_strings[1]
-          # TODO test infininte filter_max and -infinite filter_min
-          # sub(":$",":NA","foo:5:")
-          filter_min <- tryCatch({ as.numeric(split_strings[2]) }, warning = function(w){ -Inf })
-          filter_max <- tryCatch({ as.numeric(split_strings[3]) }, warning = function(w){ Inf })
-          vrbl_colnames <- colnames(vrbl_metadata)
-          if ( filter_col %in% vrbl_colnames ) {
-            row_value <- vrbl_metadata[filter_col]
-            if (filter_min <= filter_max) {
-              # filter specifies an inclusion range
-              keep_row <- row_value >= filter_min & row_value <= filter_max
-            } else {
-              # filter specifies an exclusion range
-              keep_row <- row_value > filter_min | row_value < filter_max
+  # purge unwanted data from data_matrix
+  some_data_were_eliminated <- TRUE
+  while (some_data_were_eliminated) {
+    # count rows and columns before elimination
+    nrow_before <- nrow(data_matrix)
+    ncol_before <- ncol(data_matrix)
+
+    # run filters for variable metadata and maximum intensity for each feature
+    if (length(variable_range_filter) > 0) {
+      # filter variables having out-of-range metadata or intensity maximum
+      for (variable_range_filter_string in variable_range_filter) { 
+        variable_range_filter_string <- sub(":$", ":NA",  variable_range_filter_string)
+        variable_range_filter_string <- sub("::", ":NA:", variable_range_filter_string)
+        split_list <- strsplit(x = variable_range_filter_string, split = ":", fixed = TRUE)
+        if ( length(split_list) == 1 ) {
+          # stop("deliberate failure")
+          split_strings <- split_list[[1]]
+          if ( length(split_strings) == 3 ) {
+            filter_col <- split_strings[1]
+            # TODO test infininte filter_max and -infinite filter_min
+            # sub(":$",":NA","foo:5:")
+            filter_min <- tryCatch({ as.numeric(split_strings[2]) }, warning = function(w){ -Inf })
+            filter_max <- tryCatch({ as.numeric(split_strings[3]) }, warning = function(w){ Inf })
+            vrbl_colnames <- colnames(vrbl_metadata)
+            if ( filter_col %in% vrbl_colnames ) {
+              row_value <- vrbl_metadata[filter_col]
+              if (filter_min <= filter_max) {
+                # filter specifies an inclusion range
+                keep_row <- row_value >= filter_min & row_value <= filter_max
+              } else {
+                # filter specifies an exclusion range
+                keep_row <- row_value > filter_min | row_value < filter_max
+              }
+              vrbl_metadata <- vrbl_metadata[keep_row,]
+            } else if (filter_col == "FEATMAX") {
+              # warning("FEATMAX section entry")
+              # apply the function 'max' to rows (1, columns would be 2) of data_matrix
+              row_maxima <- apply(data_matrix, 1, max)
+              if (filter_min <= filter_max) {
+                # warning("FEATMAX filter being applied now")
+                # warning(
+                #   Reduce(
+                #     f = function(l,r){paste(l,r,sep=",")}
+                #   , x = as.character(rownames(data_matrix))
+                #   )
+                # )
+                # warning(
+                #   Reduce(
+                #     f = function(l,r){paste(l,r,sep=",")}
+                #   , x = as.character(row_maxima)
+                #   )
+                # )
+                # filter specifies an inclusion range
+                keep_row <- row_maxima >= filter_min & row_maxima <= filter_max
+                # warning(
+                #   Reduce(
+                #     f = function(l,r){paste(l,r,sep=",")}
+                #   , x = as.character(keep_row)
+                #   )
+                # )
+                data_matrix <- data_matrix[keep_row,]
+                # warning(
+                #   Reduce(
+                #     f = function(l,r){paste(l,r,sep=",")}
+                #   , x = as.character(rownames(data_matrix))
+                #   )
+                # )
+              } else {
+                warning("w4m_filter_by_sample_class: FEATMAX filter specified but not applied")
+              }
             }
-            vrbl_metadata <- vrbl_metadata[keep_row,]
+          } else {
+            warning("w4m_filter_by_sample_class: split_list is not of the expected length")
           }
-        } else {
-          warning("split_list is not of the expected length")
         }
       }
     }
+
+    # purge data_matrix of rows and columns that have zero variance
+    data_matrix <- w4m__nonzero_var(data_matrix)
+    
+    # count rows and columns after elimination
+    nrow_after <- nrow(data_matrix)
+    ncol_after <- ncol(data_matrix)
+    some_data_were_eliminated <- nrow_before != nrow_after | ncol_before != ncol_after
   }
-  # purge data_matrix of rows and columns that have zero variance
-  data_matrix <- w4m__nonzero_var(data_matrix)
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   sample_names <- intersect(sample_names,colnames(data_matrix))
   sample_names <- sample_names[order(sample_names)]
