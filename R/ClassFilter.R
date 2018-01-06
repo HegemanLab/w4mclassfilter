@@ -585,38 +585,12 @@ w4m_filter_by_sample_class <- function(
               }
               vrbl_metadata <- vrbl_metadata[keep_row,]
             } else if (filter_col == "FEATMAX") {
-              # warning("FEATMAX section entry")
               # apply the function 'max' to rows (1, columns would be 2) of data_matrix
               row_maxima <- apply(data_matrix, 1, max)
               if (filter_min <= filter_max) {
-                # warning("FEATMAX filter being applied now")
-                # warning(
-                #   Reduce(
-                #     f = function(l,r){paste(l,r,sep=",")}
-                #   , x = as.character(rownames(data_matrix))
-                #   )
-                # )
-                # warning(
-                #   Reduce(
-                #     f = function(l,r){paste(l,r,sep=",")}
-                #   , x = as.character(row_maxima)
-                #   )
-                # )
                 # filter specifies an inclusion range
                 keep_row <- row_maxima >= filter_min & row_maxima <= filter_max
-                # warning(
-                #   Reduce(
-                #     f = function(l,r){paste(l,r,sep=",")}
-                #   , x = as.character(keep_row)
-                #   )
-                # )
                 data_matrix <- data_matrix[keep_row,]
-                # warning(
-                #   Reduce(
-                #     f = function(l,r){paste(l,r,sep=",")}
-                #   , x = as.character(rownames(data_matrix))
-                #   )
-                # )
               } else {
                 warning("w4m_filter_by_sample_class: FEATMAX filter specified but not applied")
               }
