@@ -565,7 +565,6 @@ w4m_filter_by_sample_class <- function(
         variable_range_filter_string <- sub("::", ":NA:", variable_range_filter_string)
         split_list <- strsplit(x = variable_range_filter_string, split = ":", fixed = TRUE)
         if ( length(split_list) == 1 ) {
-          # stop("deliberate failure")
           split_strings <- split_list[[1]]
           if ( length(split_strings) == 3 ) {
             filter_col <- split_strings[1]
@@ -648,7 +647,7 @@ w4m_filter_by_sample_class <- function(
       } else if ( is.environment(dataMatrix_out) || (is.list(dataMatrix_out) && ! is.matrix(dataMatrix_out)) ) {
         dataMatrix_out$dataMatrix <- sorted_matrix
       } else {
-        stop(sprintf("dataMatrix_out has unexpected type %s"), typeof(dataMatrix_out))
+        stop(sprintf("w4m_filter_by_sample_class: dataMatrix_out has unexpected type %s"), typeof(dataMatrix_out))
         return (FALSE)
       }
 
@@ -674,7 +673,7 @@ w4m_filter_by_sample_class <- function(
         sampleMetadata_out$sampleMetadata$sampleMetadata <- as.factor(sampleMetadata_out$sampleMetadata$sampleMetadata)
         sampleMetadata_out$sampleMetadata <- droplevels(sampleMetadata_out$sampleMetadata)
       } else {
-        stop(sprintf("sampleMetadata_out has unexpected type %s"), typeof(sampleMetadata_out))
+        stop(sprintf("w4m_filter_by_sample_class: sampleMetadata_out has unexpected type %s"), typeof(sampleMetadata_out))
         return (FALSE)
       }
 
@@ -700,7 +699,7 @@ w4m_filter_by_sample_class <- function(
         variableMetadata_out$variableMetadata$variableMetadata <- as.factor(variableMetadata_out$variableMetadata$variableMetadata)
         variableMetadata_out$variableMetadata <- droplevels(variableMetadata_out$variableMetadata)
       } else {
-        stop(sprintf("variableMetadata_out has unexpected type %s"), typeof(variableMetadata_out))
+        stop(sprintf("w4m_filter_by_sample_class: variableMetadata_out has unexpected type %s"), typeof(variableMetadata_out))
         return (FALSE)
       }
 
