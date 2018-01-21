@@ -149,11 +149,11 @@ w4m__nonzero_var <- function(m) {
       utils::str(x)
       stop("matrix has no columns")
     }
-    if ( is.numeric(x) ) {
       # exclude any rows with zero variance
       row.vars <- w4m__var_by_rank_or_file(x, dim = 1)
       nonzero.row.vars <- row.vars > 0
       nonzero.rows <- row.vars[nonzero.row.vars]
+    if ( is.numeric(x) ) {
       if ( length(rownames(x)) != length(rownames(nonzero.rows)) ) {
         row.names <- attr(nonzero.rows,"names")
         x <- x[ row.names, , drop = FALSE ]
@@ -219,20 +219,21 @@ w4m__nonzero_var <- function(m) {
 #'
 #' Please see the package vignette for further details.
 #'
-#' @param dataMatrix_in         input  data matrix (rows are feature names, columns are sample names
-#' @param sampleMetadata_in     input  sample metadata (rows are sample names, one column's name matches class_column)
-#' @param variableMetadata_in   input  variable metadata (rows are variable names)
-#' @param dataMatrix_out        output data matrix (rows are feature names, columns are sample names
-#' @param sampleMetadata_out    output sample metadata (rows are sample names, one column's name matches class_column)
-#' @param variableMetadata_out  output variable metadata (rows are variable names)
-#' @param classes               character array: names of sample classes to include or exclude; default is an empty array
-#' @param include               logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
-#' @param class_column          character: name of "class" column, defaults to "class"
-#' @param samplename_column     character: name of column with sample name, defaults to "sampleMetadata"
-#' @param name_varmetadata_col1 logical: TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
-#' @param variable_range_filter character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
-#' @param data_imputation       function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
-#' @param failure_action        function(x, ...): action to take upon failure - defaults to 'print(x,...)'
+#' @param dataMatrix_in          input  data matrix (rows are feature names, columns are sample names
+#' @param sampleMetadata_in      input  sample metadata (rows are sample names, one column's name matches class_column)
+#' @param variableMetadata_in    input  variable metadata (rows are variable names)
+#' @param dataMatrix_out         output data matrix (rows are feature names, columns are sample names
+#' @param sampleMetadata_out     output sample metadata (rows are sample names, one column's name matches class_column)
+#' @param variableMetadata_out   output variable metadata (rows are variable names)
+#' @param classes                character array: names of sample classes to include or exclude; default is an empty array
+#' @param include                logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
+#' @param class_column           character: name of "class" column, defaults to "class"
+#' @param samplename_column      character: name of column with sample name, defaults to "sampleMetadata"
+#' @param name_varmetadata_col1  logical: TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
+#' @param name_smplmetadata_col1 logical: TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE
+#' @param variable_range_filter  character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
+#' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
+#' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
 #' 
@@ -284,6 +285,7 @@ w4m_filter_by_sample_class <- function(
 , class_column = "class"                  # character:          name of "class" column, defaults to "class"
 , samplename_column = "sampleMetadata"    # character:          name of column with sample name, defaults to "sampleMetadata"
 , name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
+, name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
 , data_imputation = w4m_filter_imputation # function(m):        default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA
 , failure_action = print                  # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
@@ -435,7 +437,10 @@ w4m_filter_by_sample_class <- function(
   }
 
   # extract rownames
-  rownames(smpl_metadata) <- smpl_metadata[,samplename_column]
+  if (name_smplmetadata_col1) {
+    colnames(smpl_metadata)[1] <- "sampleMetadata"
+  }
+  rownames(smpl_metadata) <- smpl_metadata[ , samplename_column]
   
   if (nchar(class_column) > 0 && length(classes) > 0) {
     # select the first column of the rows indicated by classes, include, & class_column, but don't drop dimension
@@ -449,7 +454,7 @@ w4m_filter_by_sample_class <- function(
       , Reduce(
           `|`
         , lapply(X = classes, FUN = function(pattern) {
-            grepl(pattern = pattern, x = smpl_metadata[,class_column])
+            grepl(pattern = pattern, x = smpl_metadata[ , class_column])
           })
         )
       )
@@ -485,8 +490,8 @@ w4m_filter_by_sample_class <- function(
   err.env$msg <- "no message setting vrbl_metadata rownames"
   tryCatch(
     expr = {
-      rownames(vrbl_metadata) <- make.names( vrbl_metadata[,1], unique = TRUE )
-      vrbl_metadata[,1] <- rownames(vrbl_metadata)
+      rownames(vrbl_metadata) <- make.names( vrbl_metadata[ , 1 ], unique = TRUE )
+      vrbl_metadata[ , 1 ] <- rownames(vrbl_metadata)
       if (name_varmetadata_col1) {
         colnames(vrbl_metadata)[1] <- "variableMetadata"
       }

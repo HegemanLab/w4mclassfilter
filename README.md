@@ -60,6 +60,17 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.7
+
+#### NEW FEATURES
+
+* First column of sample metadata is by default renamed to "sampleMetadata" unless 
+  argument 'name_smplmetadata_col1' is supplied and set to FALSE.
+
+#### INTERNAL MODIFICATIONS
+
+* none
+
 ### CHANGES IN VERSION 0.98.6
 
 #### NEW FEATURES

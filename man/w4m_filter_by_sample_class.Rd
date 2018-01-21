@@ -8,8 +8,8 @@ w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
   variableMetadata_in, dataMatrix_out, sampleMetadata_out, variableMetadata_out,
   classes = c(), include = FALSE, class_column = "class",
   samplename_column = "sampleMetadata", name_varmetadata_col1 = TRUE,
-  variable_range_filter = c(), data_imputation = w4m_filter_imputation,
-  failure_action = print)
+  name_smplmetadata_col1 = TRUE, variable_range_filter = c(),
+  data_imputation = w4m_filter_imputation, failure_action = print)
 }
 \arguments{
 \item{dataMatrix_in}{input  data matrix (rows are feature names, columns are sample names}
@@ -33,6 +33,8 @@ w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
 \item{samplename_column}{character: name of column with sample name, defaults to "sampleMetadata"}
 
 \item{name_varmetadata_col1}{logical: TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE}
+
+\item{name_smplmetadata_col1}{logical: TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE}
 
 \item{variable_range_filter}{character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array}
 

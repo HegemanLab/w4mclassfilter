@@ -33,7 +33,8 @@ or to address several data issues that may impede downstream statistical analysi
 * Features may be eliminated by specifying minimum or maximum intensity (or both) allowable in columns of `dataMatrix` for at least one sample for each feature ("range of row-maximum for each feature").
 * Missing values in `dataMatrix` are imputed either to zero (by default) or to the result of a user-supplied imputation function.
 * Features and samples that have zero variance are eliminated.
-* Samples and features are sorted alphabetically in rows and columns of `variableMetadata`, `sampleMetadata`, and `dataMatrix`  
+* Samples and features are sorted alphabetically in rows and columns of `variableMetadata`, `sampleMetadata`, and `dataMatrix`
+* By default, the names of the first columns of `variableMetadata` and `sampleMetadata` are set respectively to `"variableMetadata"` and `"sampleMetadata"`
 
 ### How the `w4m_filter_by_sample_class` function is used
 
@@ -264,3 +265,10 @@ R package v0.98.6
  - Support eliminating features whose attributes fall outside specified ranges.
    For more detail, see "Feature- and Sample-Elimination" above.
  - Sort sample names and feature names because some statistical tools expect the same order in `dataMatrix` row and column names as in the corresponding metadata files.
+
+### New in release v0.98.7 - rename first column of sample metadata
+
+R package v0.98.7
+
+ -  First column of sample metadata is by default renamed to "sampleMetadata" unless 
+    argument 'name_smplmetadata_col1' is supplied and set to FALSE.
