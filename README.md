@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/89879581.svg)](https://zenodo.org/badge/latestdoi/89879581)
+
 # w4mclassfilter
 
 This is a Galaxy-oriented R package that can be used to filter Workflow4Metabolomics ("W4M", Giacomoni *et al.*, 2014) data matrix and metadata by sample-class.
