@@ -187,8 +187,8 @@ test_that("io test",{
   , variableMetadata_out = variableMetadata_out
   , sampleMetadata_out = sampleMetadata_out
   , sampleMetadata_in = sampleMetadata_in
-  , classes = classes_to_filter
-  , include = false_to_exclude_classes_in_filter 
+  , classes = classes_to_filter                  # filter out this list of class names
+  , include = false_to_exclude_classes_in_filter # TRUE - exclude 'classes_to_filter' in previous line
   , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
