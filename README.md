@@ -62,6 +62,19 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.8
+
+#### NEW FEATURES
+
+* none
+
+#### INTERNAL MODIFICATIONS
+
+* Fix https://github.com/HegemanLab/w4mclassfilter/issues/1 -
+  "bad error handling when input file cannot be found"
+* Add tests for missing and invalid input files
+* Built with R version 3.4.1 (2017-06-30) "Single Candle"
+
 ### CHANGES IN VERSION 0.98.7
 
 #### NEW FEATURES
