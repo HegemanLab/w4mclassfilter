@@ -1,9 +1,5 @@
 # test w4mclassfilter::w4m_filter_by_sample_class
 
-#require(base)
-#require(testthat)
-#require(w4mclassfilter)
-
 expect_equivalent_length <- function(target, current, info) {
   expect_equivalent(length(target), length(current), info = info)
 }
@@ -35,7 +31,6 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
 }
 
 run_nofilter_test <- function(classes_to_filter, class_column, samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter) {
-  # expect_true(FALSE, info = "abort run_nofilter_test")
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_variableMetadata.tsv"
@@ -66,11 +61,10 @@ run_nofilter_test <- function(classes_to_filter, class_column, samplename_column
   , sampleMetadata_in = sampleMetadata_in
   , samplename_column = samplename_column
   , classes = classes_to_filter
-  , include = false_to_exclude_classes_in_filter 
+  , include = false_to_exclude_classes_in_filter
   , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
-  # expect_true(FALSE, info = "first checkpoint - run_nofilter_test")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -96,36 +90,65 @@ run_nofilter_test <- function(classes_to_filter, class_column, samplename_column
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 1t - empty class_column",{
-  run_nofilter_test(classes_to_filter = c("M"), class_column = "", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+test_that("nofilter test 1t - empty class_column", {
+  run_nofilter_test(
+    classes_to_filter = c("M")
+  , class_column = ""
+  , samplename_column = "sampleMetadata"
+  , false_to_exclude_classes_in_filter = TRUE
+  )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 3t - empty classes_to_to_filter",{
-  run_nofilter_test(classes_to_filter = c(), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+test_that("nofilter test 3t - empty classes_to_to_filter", {
+  run_nofilter_test(
+    classes_to_filter = c()
+  , class_column = "gender"
+  , samplename_column = "sampleMetadata"
+  , false_to_exclude_classes_in_filter = TRUE
+  )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 1f - empty class_column",{
-  run_nofilter_test(classes_to_filter = c("M"), class_column = "", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = FALSE)
+test_that("nofilter test 1f - empty class_column", {
+  run_nofilter_test(
+    classes_to_filter = c("M")
+  , class_column = ""
+  , samplename_column = "sampleMetadata"
+  , false_to_exclude_classes_in_filter = FALSE
+  )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 3f - empty classes_to_to_filter",{
-  run_nofilter_test(classes_to_filter = c(), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = FALSE)
+test_that("nofilter test 3f - empty classes_to_to_filter", {
+  run_nofilter_test(
+    classes_to_filter = c()
+  , class_column = "gender"
+  , samplename_column = "sampleMetadata"
+  , false_to_exclude_classes_in_filter = FALSE
+  )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 2.1 - regex_include_all",{
-  run_nofilter_test(classes_to_filter = c("[MF]"), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+test_that("nofilter test 2.1 - regex_include_all", {
+  run_nofilter_test(
+    classes_to_filter = c("[MF]")
+  , class_column = "gender"
+  , samplename_column = "sampleMetadata"
+  , false_to_exclude_classes_in_filter = TRUE
+  )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("nofilter test 2.2 - regex_include_all",{
-  run_nofilter_test(classes_to_filter = c("[Mm]","[fF]"), class_column = "gender", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
+test_that("nofilter test 2.2 - regex_include_all", {
+  run_nofilter_test(
+    classes_to_filter = c("[Mm]", "[fF]")
+  , class_column = "gender"
+  , samplename_column = "sampleMetadata"
+  , false_to_exclude_classes_in_filter = TRUE)
 })

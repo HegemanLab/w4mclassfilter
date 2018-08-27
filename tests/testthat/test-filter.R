@@ -1,9 +1,5 @@
 # test w4mclassfilter::w4m_filter_by_sample_class
 
-#require(base)
-#require(testthat)
-#require(w4mclassfilter)
-
 expect_equivalent_length <- function(target, current, info) {
   expect_equivalent(length(target), length(current), info = info)
 }
@@ -36,8 +32,7 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter test",{
-  #expect_true(FALSE, info = "abort filter test")
+test_that("filter test", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_variableMetadata.tsv"
@@ -70,11 +65,10 @@ test_that("filter test",{
     , sampleMetadata_out = sampleMetadata_out
     , sampleMetadata_in = sampleMetadata_in
     , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
+    , include = false_to_exclude_classes_in_filter
     , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter test")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -97,4 +91,3 @@ test_that("filter test",{
   expect_equivalent(sample_metadata_output_env$data, sample_metadata_expected_env$data, info = "validate sample metadata")
   expect_equivalent(variable_metadata_output_env$data, variable_metadata_expected_env$data, info = "validate variable metadata")
 })
-

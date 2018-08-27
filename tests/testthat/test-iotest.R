@@ -1,9 +1,5 @@
 # test w4mclassfilter::w4m_filter_by_sample_class
 
-#require(base)
-#require(testthat)
-#require(w4mclassfilter)
-
 expect_equivalent_length <- function(target, current, info) {
   expect_equivalent(length(target), length(current), info = info)
 }
@@ -37,8 +33,7 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
 # test matrix outputs and inputs
 #' @import testthat w4mclassfilter
 #' @export
-test_that("io test - matrix",{
-  #expect_true(FALSE, info = "abort io test - matrix")
+test_that("io test - matrix", {
   # set up variables
   out_env <- new.env()
   variableMetadata_in  <- "input_variableMetadata.tsv"
@@ -58,26 +53,26 @@ test_that("io test - matrix",{
 
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   expect_true(data_matrix_input_env$success, info = "read data matrix input")
-  #   dataMatrix_in as data.frame:  
+  #   dataMatrix_in as data.frame:
   dataMatrix_in <- data_matrix_input_env$data
   data_matrix_nrow <- nrow(dataMatrix_in)
   data_matrix_ncol <- ncol(dataMatrix_in) - 1
   rm(data_matrix_input_env)
-  
+
   sample_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
   expect_true(sample_metadata_input_env$success, info = "read sample metadata input")
-  #   sampleMetadata_in as list:  
+  #   sampleMetadata_in as list:
   sampleMetadata_in <- list(sampleMetadata = sample_metadata_input_env$data)
   rm(sample_metadata_input_env)
-  
+
   variable_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
   expect_true(variable_metadata_input_env$success, info = "read variable metadata input")
-  #   variableMetadata_in as environment:  
+  #   variableMetadata_in as environment:
   variableMetadata_in <- list2env(list(variableMetadata = variable_metadata_input_env$data))
   rm(variable_metadata_input_env)
 
   # first of two passes: create an unfiltered matrix as output
-  
+
   data_matrix_env <- new.env()
 
   # filter, impute, and write output
@@ -93,14 +88,13 @@ test_that("io test - matrix",{
   , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
-  # expect_true(FALSE, info = "first checkpoint - io test - matrix")
   expect_equivalent(ls_env <- ls(data_matrix_env), "dataMatrix", info = sprintf("expected ls(data_matrix_env) == 'dataMatrix' but instead was '%s'", ls_env))
   expect_true(is.matrix(data_matrix_env$dataMatrix), info = "is.matrix(data_matrix_env$dataMatrix) should be true")
-  expect_equivalent(nrow(data_matrix_env$dataMatrix),15, info = "nrow(data_matrix_env$dataMatrix) is not 15 as expected")
-  expect_equivalent(ncol(data_matrix_env$dataMatrix),19, info = "ncol(data_matrix_env$dataMatrix) is not 19 as expected")
+  expect_equivalent(nrow(data_matrix_env$dataMatrix), 15, info = "nrow(data_matrix_env$dataMatrix) is not 15 as expected")
+  expect_equivalent(ncol(data_matrix_env$dataMatrix), 19, info = "ncol(data_matrix_env$dataMatrix) is not 19 as expected")
 
   # first of two passes: read an unfiltered matrix producing a filtered data file for dataMatrix
-  
+
   # filter, impute, and write output
   filter_result <- w4m_filter_by_sample_class(
     dataMatrix_in = data_matrix_env
@@ -110,12 +104,11 @@ test_that("io test - matrix",{
   , sampleMetadata_out = sampleMetadata_out
   , sampleMetadata_in = sampleMetadata_in
   , classes = classes_to_filter
-  , include = false_to_exclude_classes_in_filter 
+  , include = false_to_exclude_classes_in_filter
   , class_column = class_column
   )
   expect_true(filter_result, info = "filter_result should be true")
 
-  # expect_true(FALSE, info = "second checkpoint - io test - matrix")
   # read actual outputs and compare to expecteds
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -126,14 +119,14 @@ test_that("io test - matrix",{
 
   sample_metadata_expected_env <- read_data_frame(sampleMetadata_exp, "sample metadata expected")
   expect_true(sample_metadata_expected_env$success, info = "read sample metadata expected")
-  expect_true(all.equal(out_env$sampleMetadata, sample_metadata_expected_env$data), info = { 
+  expect_true(all.equal(out_env$sampleMetadata, sample_metadata_expected_env$data), info = {
     x <- all.equal(sample_metadata_expected_env$data, out_env$sampleMetadata)
     sprintf("all.equal(sample_metadata_expected_env$data, out_env$sampleMetadata) = %s", x)
   })
-  
+
   variable_metadata_expected_env <- read_data_frame(variableMetadata_exp, "variable metadata expected")
   expect_true(variable_metadata_expected_env$success, info = "read variable metadata expected")
-  expect_true(all.equal(out_env$variableMetadata, variable_metadata_expected_env$data), info = { 
+  expect_true(all.equal(out_env$variableMetadata, variable_metadata_expected_env$data), info = {
     x <- all.equal(variable_metadata_expected_env$data, out_env$variableMetadata)
     sprintf("all.equal(variable_metadata_expected_env$data, out_env$variableMetadata) = %s", x)
   })
@@ -142,8 +135,7 @@ test_that("io test - matrix",{
 # test alternative inputs and outputs
 #' @import testthat w4mclassfilter
 #' @export
-test_that("io test",{
-  # expect_true(FALSE, info = "abort io test")
+test_that("io test", {
   # set up variables
   out_env <- new.env()
   variableMetadata_in  <- "input_variableMetadata.tsv"
@@ -163,22 +155,22 @@ test_that("io test",{
 
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   expect_true(data_matrix_input_env$success, info = "read data matrix input")
-  #   dataMatrix_in as data.frame:  
+  #   dataMatrix_in as data.frame:
   dataMatrix_in <- data_matrix_input_env$data
   rm(data_matrix_input_env)
-  
+
   sample_metadata_input_env <- read_data_frame(sampleMetadata_in, "sample metadata input")
   expect_true(sample_metadata_input_env$success, info = "read sample metadata input")
-  #   sampleMetadata_in as list:  
+  #   sampleMetadata_in as list:
   sampleMetadata_in <- list(sampleMetadata = sample_metadata_input_env$data)
   rm(sample_metadata_input_env)
-  
+
   variable_metadata_input_env <- read_data_frame(variableMetadata_in, "variable metadata input")
   expect_true(variable_metadata_input_env$success, info = "read variable metadata input")
-  #   variableMetadata_in as environment:  
+  #   variableMetadata_in as environment:
   variableMetadata_in <- list2env(list(variableMetadata = variable_metadata_input_env$data))
   rm(variable_metadata_input_env)
-  
+
   # filter, impute, and write output
   filter_result <- w4m_filter_by_sample_class(
     dataMatrix_in = dataMatrix_in
@@ -193,7 +185,6 @@ test_that("io test",{
   )
   expect_true(filter_result, info = "filter_result should be true")
 
-  # expect_true(FALSE, info = "first checkpoint - io test")
   # read actual outputs and compare to expecteds
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -204,16 +195,15 @@ test_that("io test",{
 
   sample_metadata_expected_env <- read_data_frame(sampleMetadata_exp, "sample metadata expected")
   expect_true(sample_metadata_expected_env$success, info = "read sample metadata expected")
-  expect_true(all.equal(out_env$sampleMetadata, sample_metadata_expected_env$data), info = { 
+  expect_true(all.equal(out_env$sampleMetadata, sample_metadata_expected_env$data), info = {
     x <- all.equal(sample_metadata_expected_env$data, out_env$sampleMetadata)
     sprintf("all.equal(sample_metadata_expected_env$data, out_env$sampleMetadata) = %s", x)
   })
-  
+
   variable_metadata_expected_env <- read_data_frame(variableMetadata_exp, "variable metadata expected")
   expect_true(variable_metadata_expected_env$success, info = "read variable metadata expected")
-  expect_true(all.equal(out_env$variableMetadata, variable_metadata_expected_env$data), info = { 
+  expect_true(all.equal(out_env$variableMetadata, variable_metadata_expected_env$data), info = {
     x <- all.equal(variable_metadata_expected_env$data, out_env$variableMetadata)
     sprintf("all.equal(variable_metadata_expected_env$data, out_env$variableMetadata) = %s", x)
   })
 })
-

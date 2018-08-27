@@ -1,9 +1,5 @@
 # test w4mclassfilter::w4m_filter_by_sample_class
 
-#require(base)
-#require(testthat)
-#require(w4mclassfilter)
-
 expect_equivalent_length <- function(target, current, info) {
   expect_equivalent(length(target), length(current), info = info)
 }
@@ -37,8 +33,7 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter mz rt max",{
-  #expect_true(FALSE, info = "abort filter mz rt")
+test_that("filter mz rt max", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_mzrtmax_variableMetadata.tsv"
@@ -71,12 +66,11 @@ test_that("filter mz rt max",{
     , sampleMetadata_out = sampleMetadata_out
     , sampleMetadata_in = sampleMetadata_in
     , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
+    , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("mz:125:850","rt::850")
+    , variable_range_filter = c("mz:125:850", "rt::850")
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter mz rt")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -103,8 +97,7 @@ test_that("filter mz rt max",{
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter mz rt min",{
-  #expect_true(FALSE, info = "abort filter mz rt")
+test_that("filter mz rt min", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_mzrtmin_variableMetadata.tsv"
@@ -137,12 +130,11 @@ test_that("filter mz rt min",{
     , sampleMetadata_out = sampleMetadata_out
     , sampleMetadata_in = sampleMetadata_in
     , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
+    , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("mz:125:850","rt:250:")
+    , variable_range_filter = c("mz:125:850", "rt:250:")
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter mz rt")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -169,8 +161,7 @@ test_that("filter mz rt min",{
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter mz rt excl",{
-  #expect_true(FALSE, info = "abort filter mz rt")
+test_that("filter mz rt excl", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_mzrtexcl_variableMetadata.tsv"
@@ -203,12 +194,11 @@ test_that("filter mz rt excl",{
     , sampleMetadata_out = sampleMetadata_out
     , sampleMetadata_in = sampleMetadata_in
     , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
+    , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("mz:125:850","rt:850:250")
+    , variable_range_filter = c("mz:125:850", "rt:850:250")
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter mz rt")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -235,8 +225,7 @@ test_that("filter mz rt excl",{
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter mz rt featmax",{
-  #expect_true(FALSE, info = "abort filter mz rt")
+test_that("filter mz rt featmax", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_mzrtfeatmax_variableMetadata.tsv"
@@ -269,12 +258,11 @@ test_that("filter mz rt featmax",{
     , sampleMetadata_out = sampleMetadata_out
     , sampleMetadata_in = sampleMetadata_in
     , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
+    , include = false_to_exclude_classes_in_filter
     , class_column = class_column
     , variable_range_filter = c("FEATMAX:9e5:")
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter mz rt")
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -301,8 +289,7 @@ test_that("filter mz rt featmax",{
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter mz rt",{
-  #expect_true(FALSE, info = "abort filter mz rt")
+test_that("filter mz rt", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_mzrt_variableMetadata.tsv"
@@ -335,12 +322,12 @@ test_that("filter mz rt",{
     , sampleMetadata_out = sampleMetadata_out
     , sampleMetadata_in = sampleMetadata_in
     , classes = classes_to_filter
-    , include = false_to_exclude_classes_in_filter 
+    , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("mz:125:850","rt:250:850")
+    , variable_range_filter = c("mz:125:850", "rt:250:850")
   )
   expect_true(filter_result, info = "filter_result should be true")
-  #expect_true(FALSE, info = "first checkpoint - filter mz rt")
+
   # read actual output files
   data_matrix_output_env <- read_data_frame(dataMatrix_out, "data matrix output")
   expect_true(data_matrix_output_env$success, info = "read data matrix output")
@@ -363,4 +350,3 @@ test_that("filter mz rt",{
   expect_equivalent(sample_metadata_output_env$data, sample_metadata_expected_env$data, info = "validate sample metadata")
   expect_equivalent(variable_metadata_output_env$data, variable_metadata_expected_env$data, info = "validate variable metadata")
 })
-

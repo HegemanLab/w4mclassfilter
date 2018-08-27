@@ -43,4 +43,5 @@ expected <- matrix(
 rownames(expected) <- c("A", "C", "D")
 colnames(expected) <- c("W", "X", "Y")
 all.equal(w4m__nonzero_var(m), expected)
+
 }
