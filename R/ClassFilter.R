@@ -7,7 +7,7 @@
 #' @param m  matrix: W4M data matrix potentially containing NA or negative values
 #'
 #' @return matrix: input data matrix with zeros substituted for negative or NA values
-#' 
+#'
 #' @author Art Eschenlauer, \email{esch0041@@umn.edu}
 #' @concept w4m workflow4metabolomics
 #' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
@@ -27,12 +27,12 @@
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
-w4m_filter_imputation <- 
+w4m_filter_imputation <-
   function(m) {
     # replace NA values with zero
     m[is.na(m)] <- 0
     # replace negative values with zero, if applicable (It should never be applicable!)
-    m[m<0] <- 0
+    m[m < 0] <- 0
     # return matrix as the result
     return (m)
   }
@@ -75,19 +75,19 @@ w4m_filter_imputation <-
 #' @export
 w4m__var_by_rank_or_file <- function(m, dim = 1) {
   if (dim == 1) {
-    dim.x.2 <- dim(m)[2]
-    if ( dim.x.2 == 0 )
+    dim_x_2 <- dim(m)[2]
+    if ( dim_x_2 == 0 )
       stop("w4m__var_by_rank_or_file: there are zero columns")
-    if ( dim.x.2 == 1 ) {
+    if ( dim_x_2 == 1 ) {
       stop("w4m__var_by_rank_or_file: a single column is insufficient to calculate a variance")
     }
   }
   else if (dim == 2) {
-    dim.x.1 <- dim(m)[1]
-    if ( dim.x.1 == 0 ) {
+    dim_x_1 <- dim(m)[1]
+    if ( dim_x_1 == 0 ) {
       stop("w4m__var_by_rank_or_file: there are zero rows")
     }
-    if ( dim.x.1 == 1 ) {
+    if ( dim_x_1 == 1 ) {
       stop("w4m__var_by_rank_or_file: a single row is insufficient to calculate a variance")
     }
     m <- t(m)
@@ -95,10 +95,10 @@ w4m__var_by_rank_or_file <- function(m, dim = 1) {
   else {
     stop("w4m__var_by_rank_or_file: dim is invalid; for rows, use dim = 1; for colums, use dim = 2")
   }
-  return(rowSums((m - rowMeans(m))^2)/(dim(m)[2] - 1))
+  return(rowSums( (m - rowMeans(m)) ^ 2) / (dim(m)[2] - 1) )
 }
 
-# produce matrix from matrix xpre where all rows and columns having zero variance have been removed 
+# produce matrix from matrix xpre where all rows and columns having zero variance have been removed
 #' @title
 #' Support function to eliminate rows or columns that have zero variance
 #'
@@ -137,7 +137,7 @@ w4m__var_by_rank_or_file <- function(m, dim = 1) {
 #' rownames(expected) <- c("A", "C", "D")
 #' colnames(expected) <- c("W", "X", "Y")
 #' all.equal(w4m__nonzero_var(m), expected)
-#' 
+#'
 #' @export
 w4m__nonzero_var <- function(m) {
   nonzero_var_internal <- function(x) {
@@ -150,21 +150,21 @@ w4m__nonzero_var <- function(m) {
       stop("matrix has no columns")
     }
       # exclude any rows with zero variance
-      row.vars <- w4m__var_by_rank_or_file(x, dim = 1)
-      nonzero.row.vars <- row.vars > 0
-      nonzero.rows <- row.vars[nonzero.row.vars]
+      row_vars <- w4m__var_by_rank_or_file(x, dim = 1)
+      nonzero_row_vars <- row_vars > 0
+      nonzero_rows <- row_vars[nonzero_row_vars]
     if ( is.numeric(x) ) {
-      if ( length(rownames(x)) != length(rownames(nonzero.rows)) ) {
-        row.names <- attr(nonzero.rows,"names")
+      if ( length(rownames(x)) != length(rownames(nonzero_rows)) ) {
+        row.names <- attr(nonzero_rows, "names")
         x <- x[ row.names, , drop = FALSE ]
       }
 
       # exclude any columns with zero variance
-      column.vars <- w4m__var_by_rank_or_file(x, dim = 2)
-      nonzero.column.vars <- column.vars > 0
-      nonzero.columns <- column.vars[nonzero.column.vars]
-      if ( length(colnames(x)) != length(colnames(nonzero.columns)) ) {
-        column.names <- attr(nonzero.columns,"names")
+      column_vars <- w4m__var_by_rank_or_file(x, dim = 2)
+      nonzero_column_vars <- column_vars > 0
+      nonzero_columns <- column_vars[nonzero_column_vars]
+      if ( length(colnames(x)) != length(colnames(nonzero_columns)) ) {
+        column.names <- attr(nonzero_columns, "names")
         x <- x[ , column.names, drop = FALSE ]
       }
     }
@@ -194,7 +194,7 @@ w4m__nonzero_var <- function(m) {
 #' Filter a set of retention-corrected W4M files (dataMatrix, sampleMetadata, variableMetadata) by sample-class or feature-attributes
 #'
 #' @details
-#' The W4M files dataMatrix, sampleMetadata, and variableMetadata must be a consistent set, i.e., 
+#' The W4M files dataMatrix, sampleMetadata, and variableMetadata must be a consistent set, i.e.,
 #' there must be metadata in the latter two files for all (and only for) the samples and variables named in the columns and rows of dataMatrix.
 #'
 #' For multivariate statistics functions, samples and variables with zero variance must be eliminated, and missing values are problematic.
@@ -212,7 +212,7 @@ w4m__nonzero_var <- function(m) {
 #' * list: must have a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_in, sampleMetadata_in, or variableMetadata_in, respectively.
 #' * environment: must have a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_in, sampleMetadata_in, or variableMetadata_in, respectively.
 #'
-#' Outputs (dataMatrix_out, sampleMetadata_out, variableMetadata_out) may be: 
+#' Outputs (dataMatrix_out, sampleMetadata_out, variableMetadata_out) may be:
 #' * character: path to write a tab-separated-values-file (TSV)
 #' * list: will add a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_out, sampleMetadata_out, or variableMetadata_out, respectively.
 #' * environment: will add a member named "dataMatrix", "sampleMetadata", or "variableMetadata" for dataMatrix_out, sampleMetadata_out, or variableMetadata_out, respectively.
@@ -236,7 +236,7 @@ w4m__nonzero_var <- function(m) {
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
-#' 
+#'
 #' @author Art Eschenlauer, \email{esch0041@@umn.edu}
 #' @concept w4m workflow4metabolomics
 #' @keywords multivariate
@@ -288,20 +288,29 @@ w4m_filter_by_sample_class <- function(
 , name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
 , data_imputation = w4m_filter_imputation # function(m):        default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA
-, failure_action = print                  # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
+, failure_action = function(...) {
+    cat(paste(..., SEP = "\n"))           # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
+  }
 ) {
+
+  (my_failure_action <- (failure_action))
   # ---
   # define internal functions
   # ...
 
   # read_data_frame - read a w4m data frame, with error handling
   #   e.g., data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
-  read_data_frame <- function(file_path, kind_string, failure_action = failure_action) {
+  read_data_frame <- function(file_path, kind_string, failure_action = my_failure_action) {
     # ---
     # read in the data frame
     my.env <- new.env()
     my.env$success <- FALSE
     my.env$msg <- sprintf("no message reading %s", kind_string)
+    if (!file.exists(file_path)) {
+      my.env$msg <- sprintf("file '%s' not found when trying to read %s", file_path, kind_string)
+      failure_action(my.env$msg)
+      return ( NULL )
+    }
     tryCatch(
       expr = {
         my.env$data    <- utils::read.delim( fill = FALSE, file = file_path )
@@ -313,18 +322,18 @@ w4m_filter_by_sample_class <- function(
     )
     if (!my.env$success) {
       failure_action(my.env$msg)
-      return ( FALSE )
+      return ( NULL )
     }
     return (my.env)
   }
-  
+
   # get names of columns that do not have only NA
   nonempty_column_names <-
     function(x) {
       # compute column sums; result is zero for columns having no non-NA values
-      column_sum      <- sapply(1:ncol(x), function(i) sum(x[,i], na.rm = TRUE))
-      
-      # return names of columns 
+      column_sum      <- sapply(1:ncol(x), function(i) sum(x[, i], na.rm = TRUE))
+
+      # return names of columns
       return ( as.character( colnames(x)[column_sum > 0.0] ) )
     }
 
@@ -351,7 +360,17 @@ w4m_filter_by_sample_class <- function(
   tryCatchFunc <- function(expr) {
     # format error for logging
     format_error <- function(e) {
-      paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
+      return(
+        paste(
+          c("Error { message:"
+          , e$message
+          , ", call:"
+          , e$call
+          , "}"
+          )
+        , collapse = " "
+        )
+      )
     }
     retval <- NULL
     tryCatch(
@@ -364,28 +383,42 @@ w4m_filter_by_sample_class <- function(
     )
     return (retval)
   }
-  
+
   # read one of three XCMS data elements: dataMatrix, sampleMetadata, variableMetadata
   # returns respectively: matrix, data.frame, data.frame, or FALSE if there is a failure
   read_xcms_data_element <- function(xcms_data_in, xcms_data_type, failure_action = stop) {
-    my_failure_action <- function(...) { failure_action("w4mclassfilter::read_xcms_data_element: ", ...) }
+    my_failure_action <- function(...) {
+      failure_action("w4mclassfilter::w4m_filter_by_sample_class::read_xcms_data_element: ", ...)
+    }
     # xcms_data_type must be in c("sampleMetadata", "variableMetadata", "dataMatrix")
     if ( ! is.character(xcms_data_type) ) {
       my_failure_action(sprintf("bad parameter xcms_data_type '%s'", deparse(xcms_data_type)))
-      return ( FALSE )
+      return ( NULL )
     }
     if ( 1 != length(xcms_data_type)
-         || ! ( xcms_data_type %in% c("sampleMetadata", "variableMetadata", "dataMatrix") ) 
+         || ! ( xcms_data_type %in% c("sampleMetadata", "variableMetadata", "dataMatrix") )
     ) {
       my_failure_action( sprintf("bad parameter xcms_data_type '%s'", xcms_data_type) )
-      return ( FALSE )
+      return ( NULL )
     }
     if ( is.character(xcms_data_in) ){
       # case: xcms_data_in is a path to a file
-      xcms_data_input_env <- read_data_frame( xcms_data_in, sprintf("%s input", xcms_data_type) )
+      xcms_data_input_env <- read_data_frame(
+        xcms_data_in
+      , sprintf("%s input", xcms_data_type)
+      )
+      if (is.null(xcms_data_input_env)) {
+        action_msg <- sprintf(
+            "read_data_frame failed for '%s', data type '%s'"
+          , toString(xcms_data_in)
+          , xcms_data_type)
+        my_failure_action(action_msg)
+        return ( NULL )
+      }
       if (!xcms_data_input_env$success) {
         my_failure_action(xcms_data_input_env$msg)
-        return ( FALSE )
+        my_failure_action("w4mclassfilter::w4m_filter_by_sample_class::read_xcms_data_element is returning NULL")
+        return ( NULL )
       }
       return (xcms_data_input_env$data)
     } else if ( is.data.frame(xcms_data_in) || is.matrix(xcms_data_in) ) {
@@ -395,8 +428,18 @@ w4m_filter_by_sample_class <- function(
       # NOTE WELL: is.list succeeds for data.frame, so the is.data.frame test must appear before the is.list test
       # case: xcms_data_in is a list
       if ( ! exists(xcms_data_type, where = xcms_data_in) ) {
-        my_failure_action(sprintf("%s xcms_data_in is missing member '%s'", ifelse(is.environment(xcms_data_in),"environment","list"), xcms_data_type))
-        return (FALSE)
+        my_failure_action(
+          sprintf(
+            "%s xcms_data_in is missing member '%s'"
+          , ifelse(
+              is.environment(xcms_data_in)
+            , "environment"
+            , "list"
+            )
+          , xcms_data_type
+          )
+        )
+        return (NULL)
       }
       prospect <- getElement(name = xcms_data_type, object = xcms_data_in)
       if ( ! is.data.frame(prospect) && ! is.matrix(prospect) ) {
@@ -410,14 +453,14 @@ w4m_filter_by_sample_class <- function(
         return (prospect)
       }
       # stop("stopping here for a snapshot")
-      return (prospect) 
+      return (prospect)
     } else {
       # case: xcms_data_in is invalid
       my_failure_action( sprintf("xcms_data_in has unexpected type %s", typeof(xcms_data_in)) )
-      return (FALSE)
+      return (NULL)
     }
   }
-  
+
   # ---
   # entrypoint
   # ...
@@ -426,9 +469,15 @@ w4m_filter_by_sample_class <- function(
   # read in the sample metadata
   read_data_result <- tryCatchFunc(
     expr = {
-      read_xcms_data_element(xcms_data_in = sampleMetadata_in, xcms_data_type = "sampleMetadata")
+      read_xcms_data_element(
+        xcms_data_in = sampleMetadata_in
+      , xcms_data_type = "sampleMetadata"
+      )
     }
   )
+  if (is.null(read_data_result)) {
+    failure_action("read_xcms_data_element returnd null; aborting w4m_filter_by_sample_class")
+  }
   if ( read_data_result$success ) {
     smpl_metadata <- read_data_result$value
   } else {
@@ -441,14 +490,14 @@ w4m_filter_by_sample_class <- function(
     colnames(smpl_metadata)[1] <- "sampleMetadata"
   }
   rownames(smpl_metadata) <- smpl_metadata[ , samplename_column]
-  
+
   if (nchar(class_column) > 0 && length(classes) > 0) {
     # select the first column of the rows indicated by classes, include, & class_column, but don't drop dimension
     #   > Reduce(`|`,list(c(TRUE,FALSE,FALSE),c(FALSE,TRUE,FALSE),c(FALSE,FALSE,FALSE)))
     #   [1]  TRUE  TRUE FALSE
     #   > Reduce(`|`,lapply(X=c("[aC]", "[Ab]"), FUN = function(pattern) {grepl(pattern = pattern, x = c("b", "ba", "c", "ab", "bcb")) }))
     #   [1]  TRUE  TRUE FALSE  TRUE  TRUE
-    selected_rows <- smpl_metadata[ 
+    selected_rows <- smpl_metadata[
       xor(
         !include
       , Reduce(
@@ -476,13 +525,16 @@ w4m_filter_by_sample_class <- function(
       read_xcms_data_element(xcms_data_in = variableMetadata_in, xcms_data_type = "variableMetadata")
     }
   )
+  if (is.null(read_data_result)) {
+    failure_action("read_xcms_data_element returnd null; aborting w4m_filter_by_sample_class")
+  }
   if ( read_data_result$success ) {
     vrbl_metadata <- read_data_result$value
   } else {
     failure_action(read_data_result$msg)
     return (FALSE)
   }
-  
+
 
   # extract rownames (using make.names to handle degenerate feature names)
   err.env <- new.env()
@@ -498,7 +550,7 @@ w4m_filter_by_sample_class <- function(
       err.env$success     <- TRUE
     }
   , error = function(e) {
-     err.env$ msg <- sprintf("failed to set rownames for vrbl_metadata read because '%s'", e$message) 
+     err.env$ msg <- sprintf("failed to set rownames for vrbl_metadata read because '%s'", e$message)
     }
   )
   if (!err.env$success) {
@@ -514,6 +566,9 @@ w4m_filter_by_sample_class <- function(
       read_xcms_data_element(xcms_data_in = dataMatrix_in, xcms_data_type = "dataMatrix")
     }
   )
+  if (is.null(read_data_result)) {
+    failure_action("read_xcms_data_element returnd null; aborting w4m_filter_by_sample_class")
+  }
   if ( read_data_result$success ) {
     data_matrix <- read_data_result$value
   } else {
@@ -528,11 +583,11 @@ w4m_filter_by_sample_class <- function(
     err.env$msg <- "no message setting data_matrix rownames"
     tryCatch(
       expr = {
-        rownames(data_matrix) <- make.names( data_matrix[,1], unique = TRUE )
+        rownames(data_matrix) <- make.names( data_matrix[ , 1 ], unique = TRUE )
         err.env$success     <- TRUE
       }
     , error = function(e) {
-       err.env$msg <- sprintf("failed to set rownames for data_matrix read because '%s'", e$message) 
+       err.env$msg <- sprintf("failed to set rownames for data_matrix read because '%s'", e$message)
       }
     )
     if (!err.env$success) {
@@ -541,10 +596,10 @@ w4m_filter_by_sample_class <- function(
     }
 
     # remove rownames column
-    data_matrix <- data_matrix[,2:ncol(data_matrix)]
+    data_matrix <- data_matrix[ , 2:ncol(data_matrix) ]
 
     # select the subset of samples indicated by classes, include, & class_column
-    data_matrix <- data_matrix[,intersect(sample_names,colnames(data_matrix)), drop = FALSE]
+    data_matrix <- data_matrix[ , intersect(sample_names, colnames(data_matrix)), drop = FALSE ]
 
     # convert data_matrix to matrix from data.frame
     data_matrix <- as.matrix(data_matrix)
@@ -565,7 +620,7 @@ w4m_filter_by_sample_class <- function(
     # run filters for variable metadata and maximum intensity for each feature
     if (length(variable_range_filter) > 0) {
       # filter variables having out-of-range metadata or intensity maximum
-      for (variable_range_filter_string in variable_range_filter) { 
+      for (variable_range_filter_string in variable_range_filter) {
         variable_range_filter_string <- sub(":$", ":NA",  variable_range_filter_string)
         variable_range_filter_string <- sub("::", ":NA:", variable_range_filter_string)
         split_list <- strsplit(x = variable_range_filter_string, split = ":", fixed = TRUE)
@@ -573,8 +628,6 @@ w4m_filter_by_sample_class <- function(
           split_strings <- split_list[[1]]
           if ( length(split_strings) == 3 ) {
             filter_col <- split_strings[1]
-            # TODO test infininte filter_max and -infinite filter_min
-            # sub(":$",":NA","foo:5:")
             filter_min <- tryCatch({ as.numeric(split_strings[2]) }, warning = function(w){ -Inf })
             filter_max <- tryCatch({ as.numeric(split_strings[3]) }, warning = function(w){ Inf })
             vrbl_colnames <- colnames(vrbl_metadata)
@@ -587,14 +640,14 @@ w4m_filter_by_sample_class <- function(
                 # filter specifies an exclusion range
                 keep_row <- row_value > filter_min | row_value < filter_max
               }
-              vrbl_metadata <- vrbl_metadata[keep_row,]
+              vrbl_metadata <- vrbl_metadata[ keep_row , ]
             } else if (filter_col == "FEATMAX") {
               # apply the function 'max' to rows (1, columns would be 2) of data_matrix
               row_maxima <- apply(data_matrix, 1, max)
               if (filter_min <= filter_max) {
                 # filter specifies an inclusion range
                 keep_row <- row_maxima >= filter_min & row_maxima <= filter_max
-                data_matrix <- data_matrix[keep_row,]
+                data_matrix <- data_matrix[ keep_row , ]
               } else {
                 warning("w4m_filter_by_sample_class: FEATMAX filter specified but not applied")
               }
@@ -608,14 +661,14 @@ w4m_filter_by_sample_class <- function(
 
     # purge data_matrix of rows and columns that have zero variance
     data_matrix <- w4m__nonzero_var(data_matrix)
-    
+
     # count rows and columns after elimination
     nrow_after <- nrow(data_matrix)
     ncol_after <- ncol(data_matrix)
     some_data_were_eliminated <- nrow_before != nrow_after | ncol_before != ncol_after
   }
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
-  sample_names <- intersect(sample_names,colnames(data_matrix))
+  sample_names <- intersect(sample_names, colnames(data_matrix))
   sample_names <- sample_names[order(sample_names)]
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
   variable_names <- variable_names[order(variable_names)]
@@ -642,7 +695,7 @@ w4m_filter_by_sample_class <- function(
       if ( is.character(dataMatrix_out) ){
 
         # write the results
-        utils::write.table(  x = sorted_matrix  
+        utils::write.table(  x = sorted_matrix
                            , file = dataMatrix_out
                            , sep = "\t"
                            , quote = FALSE
@@ -711,7 +764,7 @@ w4m_filter_by_sample_class <- function(
       err.env$success     <- TRUE
     }
   , error = function(e) {
-     err.env$ msg <- sprintf("failed to write output files because '%s'; trace %s", e$message, err.env$trace) 
+     err.env$ msg <- sprintf("failed to write output files because '%s'; trace %s", e$message, err.env$trace)
     }
   )
   # ...
@@ -726,4 +779,3 @@ w4m_filter_by_sample_class <- function(
   }
   # ...
 }
-
