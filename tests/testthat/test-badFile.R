@@ -37,7 +37,7 @@ my_read_df <- function(file_path, kind_string, my_failure_action = print) {
 
 run_nofilter_test <- function(classes_to_filter, class_column, samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter) {
   # set up variables
-  variableMetadata_in  <- "missing_input_variableMetadata.tsv"
+  variableMetadata_in  <- "bad_input_variableMetadata.tsv"
   variableMetadata_out <- "output_variableMetadata.tsv"
   variableMetadata_exp <- "expected_nofilter_variableMetadata.tsv"
   sampleMetadata_in <- "input_sampleMetadata.tsv"
@@ -58,6 +58,12 @@ run_nofilter_test <- function(classes_to_filter, class_column, samplename_column
   , "variable metadata input"
   , my_failure_action = invisible
   )
+  if (!is.null(variable_metadata_input_env)) {
+    print(ls(variable_metadata_input_env))
+    print(variable_metadata_input_env$success)
+    print(variable_metadata_input_env$msg)
+    print(variable_metadata_input_env$data)
+  }
   expect_true(is.null(variable_metadata_input_env), info = "read variable metadata input")
   rm(variable_metadata_input_env)
   error_list <- c("Error list:")
@@ -78,7 +84,7 @@ run_nofilter_test <- function(classes_to_filter, class_column, samplename_column
   , class_column = class_column
   , failure_action = add_error
   )
-  expect_false(filter_result, info = "filter_result should be false in the case of a missing file")
+  expect_false(filter_result, info = "filter_result should be false in the case of a bad file")
   expect_equal(length(error_list), 3, info = "error_result should be length 3.")
   if (filter_result) {
     cat(paste("\n", error_list))
@@ -89,6 +95,6 @@ run_nofilter_test <- function(classes_to_filter, class_column, samplename_column
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("missing file test", {
+test_that("bad file test", {
   run_nofilter_test(classes_to_filter = c("M"), class_column = "", samplename_column = "sampleMetadata", false_to_exclude_classes_in_filter = TRUE)
 })
