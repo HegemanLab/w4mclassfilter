@@ -62,6 +62,18 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.9
+
+#### NEW FEATURES
+
+* none
+
+#### INTERNAL MODIFICATIONS
+
+* Fix https://github.com/HegemanLab/w4mclassfilter/issues/3 -
+  "a single column is insufficient to calculate a variance"
+* Built with R version 3.4.1 (2017-06-30) "Single Candle"
+
 ### CHANGES IN VERSION 0.98.8
 
 #### NEW FEATURES
