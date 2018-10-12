@@ -78,18 +78,18 @@ w4m__var_by_rank_or_file <- function(m, dim = 1) {
     dim_x_2 <- dim(m)[2]
     if ( dim_x_2 == 0 )
       stop("w4m__var_by_rank_or_file: there are zero columns")
-    if ( dim_x_2 == 1 ) {
-      stop("w4m__var_by_rank_or_file: a single column is insufficient to calculate a variance")
-    }
+    # if ( dim_x_2 == 1 ) {
+    #   stop("w4m__var_by_rank_or_file: a single column is insufficient to calculate a variance")
+    # }
   }
   else if (dim == 2) {
     dim_x_1 <- dim(m)[1]
     if ( dim_x_1 == 0 ) {
       stop("w4m__var_by_rank_or_file: there are zero rows")
     }
-    if ( dim_x_1 == 1 ) {
-      stop("w4m__var_by_rank_or_file: a single row is insufficient to calculate a variance")
-    }
+    # if ( dim_x_1 == 1 ) {
+    #   stop("w4m__var_by_rank_or_file: a single row is insufficient to calculate a variance")
+    # }
     m <- t(m)
   }
   else {
@@ -149,23 +149,27 @@ w4m__nonzero_var <- function(m) {
       utils::str(x)
       stop("matrix has no columns")
     }
-      # exclude any rows with zero variance
-      row_vars <- w4m__var_by_rank_or_file(x, dim = 1)
-      nonzero_row_vars <- row_vars > 0
-      nonzero_rows <- row_vars[nonzero_row_vars]
+    # exclude any rows or columns with zero variance
     if ( is.numeric(x) ) {
-      if ( length(rownames(x)) != length(rownames(nonzero_rows)) ) {
-        row.names <- attr(nonzero_rows, "names")
-        x <- x[ row.names, , drop = FALSE ]
+      # exclude any rows with zero variance
+      if ( nrow(x) > 0) {
+        row_vars <- w4m__var_by_rank_or_file(x, dim = 1)
+        nonzero_row_vars <- row_vars > 0
+        nonzero_rows <- row_vars[nonzero_row_vars]
+        if ( length(rownames(x)) != length(rownames(nonzero_rows)) ) {
+          row.names <- attr(nonzero_rows, "names")
+          x <- x[ row.names, , drop = FALSE ]
+        }
       }
-
       # exclude any columns with zero variance
-      column_vars <- w4m__var_by_rank_or_file(x, dim = 2)
-      nonzero_column_vars <- column_vars > 0
-      nonzero_columns <- column_vars[nonzero_column_vars]
-      if ( length(colnames(x)) != length(colnames(nonzero_columns)) ) {
-        column.names <- attr(nonzero_columns, "names")
-        x <- x[ , column.names, drop = FALSE ]
+      if ( ncol(x) > 0) {
+        column_vars <- w4m__var_by_rank_or_file(x, dim = 2)
+        nonzero_column_vars <- column_vars > 0
+        nonzero_columns <- column_vars[nonzero_column_vars]
+        if ( length(colnames(x)) != length(colnames(nonzero_columns)) ) {
+          column.names <- attr(nonzero_columns, "names")
+          x <- x[ , column.names, drop = FALSE ]
+        }
       }
     }
     return (x)
