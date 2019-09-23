@@ -45,6 +45,4 @@ base::all.equal(colvars, expecteds)
 \author{
 Art Eschenlauer, \email{esch0041@umn.edu}
 }
-\concept{
-w4m workflow4metabolomics
-}
+\concept{w4m workflow4metabolomics}

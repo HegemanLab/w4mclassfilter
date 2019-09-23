@@ -2,7 +2,7 @@
 % Please edit documentation in R/ClassFilter.R
 \name{w4m_filter_imputation}
 \alias{w4m_filter_imputation}
-\title{Impute values for W4M data matrix}
+\title{Impute missing intensities to zero for W4M data matrix (deprecated)}
 \usage{
 w4m_filter_imputation(m)
 }
@@ -13,7 +13,7 @@ w4m_filter_imputation(m)
 matrix: input data matrix with zeros substituted for negative or NA values
 }
 \description{
-Substitute zero for missing or negative values in W4M data matrix
+Substitute zero for missing or negative intensity values in W4M data matrix (synonym for w4m_filter_zero_imputation, deprecated)
 }
 \examples{
 # input contains negative and missing values
@@ -37,6 +37,4 @@ all.equal(my_output, my_expected, check.attributes = FALSE)
 \author{
 Art Eschenlauer, \email{esch0041@umn.edu}
 }
-\concept{
-w4m workflow4metabolomics
-}
+\concept{w4m workflow4metabolomics}

@@ -5,12 +5,13 @@
 \title{Filter W4M data matrix by sample-class}
 \usage{
 w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
-  variableMetadata_in, dataMatrix_out, sampleMetadata_out, variableMetadata_out,
-  classes = c(), include = FALSE, class_column = "class",
-  samplename_column = "sampleMetadata", name_varmetadata_col1 = TRUE,
-  name_smplmetadata_col1 = TRUE, variable_range_filter = c(),
-  data_imputation = w4m_filter_imputation, failure_action = function(...) { 
-     cat(paste(..., SEP = "\\n")) })
+  variableMetadata_in, dataMatrix_out, sampleMetadata_out,
+  variableMetadata_out, classes = c(), include = FALSE,
+  class_column = "class", samplename_column = "sampleMetadata",
+  name_varmetadata_col1 = TRUE, name_smplmetadata_col1 = TRUE,
+  variable_range_filter = c(),
+  data_imputation = w4m_filter_zero_imputation,
+  failure_action = function(...) {     cat(paste(..., SEP = "\\n")) })
 }
 \arguments{
 \item{dataMatrix_in}{input  data matrix (rows are feature names, columns are sample names}
@@ -115,7 +116,5 @@ Please see the package vignette for further details.
 \author{
 Art Eschenlauer, \email{esch0041@umn.edu}
 }
-\concept{
-w4m workflow4metabolomics
-}
+\concept{w4m workflow4metabolomics}
 \keyword{multivariate}

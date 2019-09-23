@@ -1,8 +1,8 @@
 #' @title
-#' Impute values for W4M data matrix
+#' Impute missing intensities to zero for W4M data matrix (deprecated)
 #'
 #' @description
-#' Substitute zero for missing or negative values in W4M data matrix
+#' Substitute zero for missing or negative intensity values in W4M data matrix (synonym for w4m_filter_zero_imputation, deprecated) 
 #'
 #' @param m  matrix: W4M data matrix potentially containing NA or negative values
 #'
@@ -27,7 +27,8 @@
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
-w4m_filter_imputation <-
+w4m_filter_imputation <- 
+  zero_imputation <-
   function(m) {
     # replace NA values with zero
     m[is.na(m)] <- 0
@@ -35,6 +36,132 @@ w4m_filter_imputation <-
     m[m < 0] <- 0
     # return matrix as the result
     return (m)
+  }
+
+#' @title
+#' Impute missing values to zero for W4M data matrix
+#'
+#' @description
+#' Substitute zero for missing or negative intensity values in W4M data matrix
+#'
+#' @param m  matrix: W4M data matrix potentially containing NA or negative values
+#'
+#' @return matrix: input data matrix with zeros substituted for negative or NA values
+#'
+#' @author Art Eschenlauer, \email{esch0041@@umn.edu}
+#' @concept w4m workflow4metabolomics
+#' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
+#' @seealso \url{http://workflow4metabolomics.org/}
+#'
+#' @examples
+#' # input contains negative and missing values
+#' my_input <- matrix(c(NA,1,-1,2), ncol = 2, nrow = 2)
+#'
+#' # expected output converts negative and missing values to zero
+#' my_expected <- matrix(c(0,1,0,2), ncol = 2, nrow = 2)
+#'
+#' # run the imputation method to generate actual output
+#' my_output <- w4m_filter_zero_imputation(my_input)
+#'
+#' # validate actual output against expected output
+#' all.equal(my_output, my_expected, check.attributes = FALSE)
+#'
+#' @export
+w4m_filter_zero_imputation <- 
+  zero_imputation
+
+#' @title
+#' Do not impute missing intensities to zero for W4M data matrix, but convert negative intensities to zero
+#'
+#' @description
+#' Substitute zero for negative intensity values in W4M data matrix, but not for missing intensity values
+#'
+#' @param m  matrix: W4M data matrix potentially containing negative values
+#'
+#' @return matrix: input data matrix with zeros substituted for negative values
+#'
+#' @author Art Eschenlauer, \email{esch0041@@umn.edu}
+#' @concept w4m workflow4metabolomics
+#' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
+#' @seealso \url{http://workflow4metabolomics.org/}
+#'
+#' @examples
+#' # input contains negative and missing values
+#' my_input <- matrix(c(NA,1,-1,2), ncol = 2, nrow = 2)
+#'
+#' # expected output converts negative and missing values to zero
+#' my_expected <- matrix(c(NA,1,0,2), ncol = 2, nrow = 2)
+#'
+#' # run the imputation method to generate actual output
+#' my_output <- w4m_filter_no_imputation(my_input)
+#'
+#' # validate actual output against expected output
+#' all.equal(my_output, my_expected, check.attributes = FALSE)
+#'
+#' @export
+w4m_filter_no_imputation <- 
+  function(m) {
+    # replace negative values with zero, if applicable
+    m[m < 0] <- 0
+    return (m)
+  }
+
+#' @title
+#' Impute missing intensities to median for W4M data matrix
+#'
+#' @description
+#' Substitute median feature intensity (across all samples) for missing values and zero for negative values in W4M data matrix
+#'
+#' @param m  matrix: W4M data matrix potentially containing NA or negative values
+#'
+#' @return matrix: input data matrix with zeros substituted for negative values and median substituted for missing values
+#'
+#' @author Art Eschenlauer, \email{esch0041@@umn.edu}
+#' @concept w4m workflow4metabolomics
+#' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
+#' @seealso \url{http://workflow4metabolomics.org/}
+#'
+#' @examples
+#' # input contains negative and missing values
+#' my_input <- matrix(c(NA,-1,3,2), ncol = 2, nrow = 2)
+#'
+#' # expected output converts negative and missing values to zero
+#' my_expected <- matrix(c(2,0,3,2), ncol = 2, nrow = 2)
+#'
+#' # run the imputation method to generate actual output
+#' my_output <- w4m_filter_imputation(my_input)
+#'
+#' # validate actual output against expected output
+#' all.equal(my_output, my_expected, check.attributes = FALSE)
+#'
+#' @export
+w4m_filter_median_imputation <- 
+  function(m) {
+    # Substitute NA with median for the row.
+    # For W4M datamatrix:
+    #   - each row has intensities for one feature
+    #   - each column has intensities for one sample 
+    interpolate_row_median <- function(m) {
+      # ref: https://stats.stackexchange.com/a/28578
+      #   - Create a data.frame whose columns are features and rows are samples.
+      #   - For each feature, substitute NA with the median value for the feature.
+      t_result <- sapply(
+          as.data.frame(t(m))
+        , function(x) {
+            x[is.na(x)] <- median(x, na.rm = TRUE)
+            x
+          }
+        , simplify = TRUE
+        )
+      #   - Recover the rownames discarded by sapply.
+      rownames(t_result) <- colnames(m)
+      #   - Transform result so that rows are features and columns are samples.
+      m <- t(t_result)
+      # eliminate negative values
+      m[m < 0] <- 0
+      return (m)
+    }
+    return (interpolate_row_median(m))
   }
 
 #' @title
@@ -248,6 +375,7 @@ w4m__nonzero_var <- function(m) {
 #' @seealso \url{http://workflow4metabolomics.org/}
 #'
 #' @importFrom utils read.delim write.table str
+#' @importFrom stats median
 #'
 #' @examples
 #' \dontrun{
@@ -291,7 +419,7 @@ w4m_filter_by_sample_class <- function(
 , name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
-, data_imputation = w4m_filter_imputation # function(m):        default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA
+, data_imputation = w4m_filter_zero_imputation # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
 , failure_action = function(...) {
     cat(paste(..., SEP = "\n"))           # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
   }
@@ -330,17 +458,6 @@ w4m_filter_by_sample_class <- function(
     }
     return (my.env)
   }
-
-  # get names of columns that do not have only NA
-  nonempty_column_names <-
-    function(x) {
-      # compute column sums; result is zero for columns having no non-NA values
-      column_sum      <- sapply(1:ncol(x), function(i) sum(x[, i], na.rm = TRUE))
-
-      # return names of columns
-      return ( as.character( colnames(x)[column_sum > 0.0] ) )
-    }
-
 
   # return FALSE if any paths are exact duplicates
   #   N.B. This does not check for different relative paths that resolve to the same file.
@@ -565,6 +682,7 @@ w4m_filter_by_sample_class <- function(
 
   # ---
   # read in the data matrix
+  #   For W4M, each row has intensities for one feature and each column has intensities for one sample 
   read_data_result <- tryCatchFunc(
     expr = {
       read_xcms_data_element(xcms_data_in = dataMatrix_in, xcms_data_type = "dataMatrix")
@@ -611,7 +729,8 @@ w4m_filter_by_sample_class <- function(
   # ...
 
   # impute missing values with supplied or default method
-  data_matrix <- data_imputation(data_matrix)
+  data_matrix_old <- data_matrix
+  data_matrix <- zero_imputation(data_matrix)
 
   # ---
   # purge unwanted data from data_matrix
@@ -671,11 +790,15 @@ w4m_filter_by_sample_class <- function(
     ncol_after <- ncol(data_matrix)
     some_data_were_eliminated <- nrow_before != nrow_after | ncol_before != ncol_after
   }
+
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   sample_names <- intersect(sample_names, colnames(data_matrix))
   sample_names <- sample_names[order(sample_names)]
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
   variable_names <- variable_names[order(variable_names)]
+  
+  # impute missing values with supplied or default method
+  data_matrix <- data_imputation(data_matrix_old)
   # ...
 
   # ---

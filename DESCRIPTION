@@ -1,12 +1,12 @@
 Package: w4mclassfilter
-Version: 0.98.9
-Date: 2018-10-12
+Version: 0.98.12
+Date: 2019-09-23
 Title: W4M Class Filter
 Description: Filter Workflow4Metabolomics dataMatrix, sampleMetadata, and variableMetadata files by sample-class or variable-attribute range, imputing zero for NA values and eliminating zero-variance rows and columns from the data-matrix.
 Author: Arthur C Eschenlauer <esch0041@umn.edu>
 Maintainer: Arthur C Eschenlauer <eschen@alumni.princeton.edu>
 License: MIT + file LICENSE
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/HegemanLab/w4mclassfilter
 Imports: utils

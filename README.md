@@ -62,6 +62,21 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.12
+
+#### NEW FEATURES
+
+* Enhancement https://github.com/HegemanLab/w4mclassfilter/issues/4 - "add and test no-imputation and centering-imputation functions":
+  - Support no imputation.
+  - Support imputating missing feature-intensities as median intensity for the corresponding feature.  
+
+#### INTERNAL MODIFICATIONS
+
+* Support and tests for new features.
+* Built with R 3.6.1 (2019-07-05) "Action of the Toes"
+* Version numbers 0.98.10 and 0.98.10 were skipped to synchronize with w4mclassfilter_galaxy_wrapper
+
+
 ### CHANGES IN VERSION 0.98.9
 
 #### NEW FEATURES
@@ -70,8 +85,7 @@ SOFTWARE.
 
 #### INTERNAL MODIFICATIONS
 
-* Fix https://github.com/HegemanLab/w4mclassfilter/issues/3 -
-  "a single column is insufficient to calculate a variance"
+* Fix https://github.com/HegemanLab/w4mclassfilter/issues/3 - "a single column is insufficient to calculate a variance"
 * Built with R version 3.4.1 (2017-06-30) "Single Candle"
 
 ### CHANGES IN VERSION 0.98.8
@@ -82,8 +96,7 @@ SOFTWARE.
 
 #### INTERNAL MODIFICATIONS
 
-* Fix https://github.com/HegemanLab/w4mclassfilter/issues/1 -
-  "bad error handling when input file cannot be found"
+* Fix https://github.com/HegemanLab/w4mclassfilter/issues/1 - "bad error handling when input file cannot be found"
 * Add tests for missing and invalid input files
 * Built with R version 3.4.1 (2017-06-30) "Single Candle"
 

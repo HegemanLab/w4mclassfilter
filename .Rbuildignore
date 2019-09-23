@@ -1,3 +1,5 @@
 ^cran-comments\.md$
 ^revdep$
 ^R/x86_64-pc-linux-gnu-library$
+^doc$
+^Meta$
