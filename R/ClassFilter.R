@@ -792,13 +792,18 @@ w4m_filter_by_sample_class <- function(
   }
 
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
+  # column names
   sample_names <- intersect(sample_names, colnames(data_matrix))
   sample_names <- sample_names[order(sample_names)]
+  # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
   variable_names <- variable_names[order(variable_names)]
   
-  # impute missing values with supplied or default method
+  # Impute missing values with supplied or default method and the ORIGINAL dataMatrix
+  #   This is to avoid biasing median-imputation toward the center of the selected features and samples.
   data_matrix <- data_imputation(data_matrix_old)
+  # filter out undesired features and samples
+  data_matrix <- data_matrix[variable_names, sample_names, drop = FALSE ]
   # ...
 
   # ---

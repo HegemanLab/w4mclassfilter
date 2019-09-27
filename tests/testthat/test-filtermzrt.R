@@ -289,17 +289,17 @@ test_that("filter mz rt featmax F", {
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("filter mz rt featmax", {
+test_that("filter mz rt featmax M", {
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
-  variableMetadata_out <- "output_mzrtfeatmax_variableMetadata.tsv"
-  variableMetadata_exp <- "expected_mzrtfeatmax_variableMetadata.tsv"
+  variableMetadata_out <- "output_mzrtfeatmax_m_variableMetadata.tsv"
+  variableMetadata_exp <- "expected_mzrtfeatmax_m_variableMetadata.tsv"
   sampleMetadata_in <- "input_sampleMetadata.tsv"
-  sampleMetadata_out <- "output_mzrtfeatmax_sampleMetadata.tsv"
-  sampleMetadata_exp <- "expected_mzrtfeatmax_sampleMetadata.tsv"
+  sampleMetadata_out <- "output_mzrtfeatmax_m_sampleMetadata.tsv"
+  sampleMetadata_exp <- "expected_mzrtfeatmax_m_sampleMetadata.tsv"
   dataMatrix_in <- "input_dataMatrix.tsv"
-  dataMatrix_out <- "output_mzrtfeatmax_dataMatrix.tsv"
-  dataMatrix_exp <- "expected_mzrtfeatmax_dataMatrix.tsv"
+  dataMatrix_out <- "output_mzrtfeatmax_m_dataMatrix.tsv"
+  dataMatrix_exp <- "expected_mzrtfeatmax_m_dataMatrix.tsv"
   classes_to_filter <- c("M")
   class_column <- "gender"
   false_to_exclude_classes_in_filter <- TRUE
@@ -324,7 +324,7 @@ test_that("filter mz rt featmax", {
     , classes = classes_to_filter
     , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("FEATMAX:9e5:")
+    , variable_range_filter = c("FEATMAX:2e6:","mz:200:","rt::800")
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files
