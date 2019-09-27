@@ -766,7 +766,7 @@ w4m_filter_by_sample_class <- function(
               vrbl_metadata <- vrbl_metadata[ keep_row , ]
             } else if (filter_col == "FEATMAX") {
               # apply the function 'max' to rows (1, columns would be 2) of data_matrix
-              row_maxima <- apply(data_matrix, 1, max)
+              row_maxima <- apply(data_matrix, 1, max, na.rm = TRUE)
               if (filter_min <= filter_max) {
                 # filter specifies an inclusion range
                 keep_row <- row_maxima >= filter_min & row_maxima <= filter_max
