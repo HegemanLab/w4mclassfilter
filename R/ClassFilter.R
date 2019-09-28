@@ -2,7 +2,7 @@
 #' Impute missing intensities to zero for W4M data matrix (deprecated)
 #'
 #' @description
-#' Substitute zero for missing or negative intensity values in W4M data matrix (synonym for w4m_filter_zero_imputation, deprecated) 
+#' Substitute zero for missing or negative intensity values in W4M data matrix (synonym for w4m_filter_zero_imputation, deprecated)
 #'
 #' @param m  matrix: W4M data matrix potentially containing NA or negative values
 #'
@@ -27,7 +27,7 @@
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
-w4m_filter_imputation <- 
+w4m_filter_imputation <-
   zero_imputation <-
   function(m) {
     # replace NA values with zero
@@ -67,7 +67,7 @@ w4m_filter_imputation <-
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
-w4m_filter_zero_imputation <- 
+w4m_filter_zero_imputation <-
   zero_imputation
 
 #' @title
@@ -99,7 +99,7 @@ w4m_filter_zero_imputation <-
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
-w4m_filter_no_imputation <- 
+w4m_filter_no_imputation <-
   function(m) {
     # replace negative values with zero, if applicable
     m[m < 0] <- 0
@@ -135,12 +135,12 @@ w4m_filter_no_imputation <-
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
 #'
 #' @export
-w4m_filter_median_imputation <- 
+w4m_filter_median_imputation <-
   function(m) {
     # Substitute NA with median for the row.
     # For W4M datamatrix:
     #   - each row has intensities for one feature
-    #   - each column has intensities for one sample 
+    #   - each column has intensities for one sample
     interpolate_row_median <- function(m) {
       # ref: https://stats.stackexchange.com/a/28578
       #   - Create a data.frame whose columns are features and rows are samples.
@@ -682,7 +682,7 @@ w4m_filter_by_sample_class <- function(
 
   # ---
   # read in the data matrix
-  #   For W4M, each row has intensities for one feature and each column has intensities for one sample 
+  #   For W4M, each row has intensities for one feature and each column has intensities for one sample
   read_data_result <- tryCatchFunc(
     expr = {
       read_xcms_data_element(xcms_data_in = dataMatrix_in, xcms_data_type = "dataMatrix")
@@ -728,8 +728,9 @@ w4m_filter_by_sample_class <- function(
   }
   # ...
 
-  # impute missing values with supplied or default method
   data_matrix_old <- data_matrix
+  # impute missing values with supplied or default method
+  #   (necessary for w4m__nonzero_var)
   data_matrix <- zero_imputation(data_matrix)
 
   # ---
@@ -798,7 +799,7 @@ w4m_filter_by_sample_class <- function(
   # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
   variable_names <- variable_names[order(variable_names)]
-  
+
   # Impute missing values with supplied or default method and the ORIGINAL dataMatrix
   #   This is to avoid biasing median-imputation toward the center of the selected features and samples.
   data_matrix <- data_imputation(data_matrix_old)
