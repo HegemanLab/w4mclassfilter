@@ -62,6 +62,18 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.13
+
+#### NEW FEATURES
+
+* none
+
+#### INTERNAL MODIFICATIONS
+
+* Fix https://github.com/HegemanLab/w4mclassfilter/issues/5 - "MAXFEAT does not work for imputation functions that include data transformation"
+* Built with R 3.6.1 (2019-07-05) "Action of the Toes"
+
+
 ### CHANGES IN VERSION 0.98.12
 
 #### NEW FEATURES
