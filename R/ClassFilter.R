@@ -729,9 +729,13 @@ w4m_filter_by_sample_class <- function(
   # ...
 
   data_matrix_old <- data_matrix
-  # impute missing values with supplied or default method
+  # Impute missing values with supplied or default method
   #   (necessary for w4m__nonzero_var)
   data_matrix <- zero_imputation(data_matrix)
+  # The user-supplied data_imputation function may include transformation, so it's necessary
+  #   to apply it here.  The MAXFEAT filter won't work correctly without this step.
+  #   (This addresses https://github.com/HegemanLab/w4mclassfilter/issues/5)
+  data_matrix <- data_imputation(data_matrix)
 
   # ---
   # purge unwanted data from data_matrix

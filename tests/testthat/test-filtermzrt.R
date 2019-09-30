@@ -290,6 +290,21 @@ test_that("filter mz rt featmax F", {
 #' @import testthat w4mclassfilter
 #' @export
 test_that("filter mz rt featmax M", {
+  my_transformation_imputation <-
+    function(m) {
+      if (!is.matrix(m))
+        stop("Cannot transform and impute data - the supplied data is not in matrix form")
+      if (nrow(m) == 0)
+        stop("Cannot transform and impute data - data matrix has no rows")
+      if (ncol(m) == 0)
+        stop("Cannot transform and impute data - data matrix has no columns")
+      suppressWarnings({
+        # suppress warnings here since non-positive values will produce NaN's that will be fixed in the next step
+        m <- log10(m)
+        m[is.na(m)] <- NA
+      })
+      return ( w4m_filter_zero_imputation(m) )
+    }
   # set up variables
   variableMetadata_in  <- "input_variableMetadata.tsv"
   variableMetadata_out <- "output_mzrtfeatmax_m_variableMetadata.tsv"
@@ -324,7 +339,8 @@ test_that("filter mz rt featmax M", {
     , classes = classes_to_filter
     , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("FEATMAX:2e6:","mz:200:","rt::800")
+    , variable_range_filter = c("FEATMAX:6.30103:","mz:200:","rt::800")
+    , data_imputation = my_transformation_imputation
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files
