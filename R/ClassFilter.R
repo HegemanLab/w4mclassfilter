@@ -401,6 +401,15 @@ w4m__nonzero_var <- function(m) {
 #'   , sampleMetadata_in = sampleMetadata_in
 #'   , classes = c("blankpos")
 #'   , include = FALSE
+#'   , class_column = "class"
+#'   , samplename_column = "sampleMetadata"
+#'   , name_varmetadata_col1 = TRUE
+#'   , name_smplmetadata_col1 = TRUE
+#'   , variable_range_filter = c()
+#'   , data_imputation = w4m_filter_zero_imputation
+#'   , order_vrbl = "variableMetadata"
+#'   , order_smpl = "sampleMetadata"
+#'   , failure_action = function(...) { cat(paste(..., SEP = "\n")) }
 #'   )
 #' }
 #'
@@ -420,6 +429,8 @@ w4m_filter_by_sample_class <- function(
 , name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
 , data_imputation = w4m_filter_zero_imputation # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
+, order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
+, order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
 , failure_action = function(...) {
     cat(paste(..., SEP = "\n"))           # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
   }
@@ -799,10 +810,12 @@ w4m_filter_by_sample_class <- function(
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   # column names
   sample_names <- intersect(sample_names, colnames(data_matrix))
-  sample_names <- sample_names[order(sample_names)]
+  sample_order <- order(smpl_metadata[sample_names, order_smpl])
+  sample_names <- sample_names[sample_order]
   # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
-  variable_names <- variable_names[order(variable_names)]
+  variable_order <- order(vrbl_metadata[variable_names, order_vrbl])
+  variable_names <- variable_names[variable_order]
 
   # Impute missing values with supplied or default method and the ORIGINAL dataMatrix
   #   This is to avoid biasing median-imputation toward the center of the selected features and samples.
