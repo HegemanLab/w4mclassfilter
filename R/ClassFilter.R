@@ -364,6 +364,8 @@ w4m__nonzero_var <- function(m) {
 #' @param name_smplmetadata_col1 logical: TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE
 #' @param variable_range_filter  character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
 #' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
+#' @param order_vrbl             character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
+#' @param order_smpl             character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
