@@ -428,14 +428,12 @@ w4m_filter_by_sample_class <- function(
 , class_column = "class"                  # character:          name of "class" column, defaults to "class"
 , samplename_column = "sampleMetadata"    # character:          name of column with sample name, defaults to "sampleMetadata"
 , name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
-, name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
+, name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE
 , variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
-, data_imputation = w4m_filter_zero_imputation # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
+# , data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
 , order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
 , order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
-, failure_action = function(...) {
-    cat(paste(..., SEP = "\n"))           # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
-  }
+, failure_action = function(...) { cat(paste(..., SEP = "\n")) }   # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
 
   (my_failure_action <- (failure_action))
