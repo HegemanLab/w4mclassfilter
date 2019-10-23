@@ -11,6 +11,7 @@ w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
   name_varmetadata_col1 = TRUE, name_smplmetadata_col1 = TRUE,
   variable_range_filter = c(),
   data_imputation = w4m_filter_zero_imputation,
+  order_vrbl = "variableMetadata", order_smpl = "sampleMetadata",
   failure_action = function(...) {     cat(paste(..., SEP = "\\n")) })
 }
 \arguments{
@@ -41,6 +42,10 @@ w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
 \item{variable_range_filter}{character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array}
 
 \item{data_imputation}{function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA}
+
+\item{order_vrbl}{character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)}
+
+\item{order_smpl}{character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)}
 
 \item{failure_action}{function(x, ...): action to take upon failure - defaults to 'print(x,...)'}
 }
@@ -102,8 +107,17 @@ Please see the package vignette for further details.
   , variableMetadata_out = variableMetadata_out
   , sampleMetadata_out = sampleMetadata_out
   , sampleMetadata_in = sampleMetadata_in
-  , classes = c("blankpos")
-  , include = FALSE
+  , classes = c("M")
+  , include = TRUE
+  , class_column = "gender"
+  , samplename_column = "sampleMetadata"
+  , name_varmetadata_col1 = TRUE
+  , name_smplmetadata_col1 = TRUE
+  , variable_range_filter = c()
+  , data_imputation = w4m_filter_zero_imputation
+  , order_vrbl = "variableMetadata"
+  , order_smpl = "sampleMetadata"
+  , failure_action = function(...) { cat(paste(..., SEP = "\\n")) }
   )
 }
 

@@ -126,10 +126,10 @@ w4m_filter_no_imputation <-
 #' my_input <- matrix(c(NA,-1,3,2), ncol = 2, nrow = 2)
 #'
 #' # expected output converts negative and missing values to zero
-#' my_expected <- matrix(c(2,0,3,2), ncol = 2, nrow = 2)
+#' my_expected <- matrix(c(3,0,3,2), ncol = 2, nrow = 2)
 #'
 #' # run the imputation method to generate actual output
-#' my_output <- w4m_filter_imputation(my_input)
+#' my_output <- w4m_filter_median_imputation(my_input)
 #'
 #' # validate actual output against expected output
 #' all.equal(my_output, my_expected, check.attributes = FALSE)
@@ -401,9 +401,9 @@ w4m__nonzero_var <- function(m) {
 #'   , variableMetadata_out = variableMetadata_out
 #'   , sampleMetadata_out = sampleMetadata_out
 #'   , sampleMetadata_in = sampleMetadata_in
-#'   , classes = c("blankpos")
-#'   , include = FALSE
-#'   , class_column = "class"
+#'   , classes = c("M")
+#'   , include = TRUE
+#'   , class_column = "gender"
 #'   , samplename_column = "sampleMetadata"
 #'   , name_varmetadata_col1 = TRUE
 #'   , name_smplmetadata_col1 = TRUE
@@ -430,7 +430,7 @@ w4m_filter_by_sample_class <- function(
 , name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE
 , variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
-# , data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
+, data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
 , order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
 , order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
 , failure_action = function(...) { cat(paste(..., SEP = "\n")) }   # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'

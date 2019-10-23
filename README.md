@@ -62,7 +62,21 @@ SOFTWARE.
 
 ## NEWS
 
+### CHANGES IN VERSION 0.98.14
+
+* Built with R 3.6.1 (2019-07-05) "Action of the Toes"
+
+#### NEW FEATURES
+
+* Enhancement https://github.com/HegemanLab/w4mclassfilter_galaxy_wrapper/issues/6 - "Provide sort options for features and samples"
+
+#### INTERNAL MODIFICATIONS
+
+* Support the enhancement
+
 ### CHANGES IN VERSION 0.98.13
+
+* Built with R 3.6.1 (2019-07-05) "Action of the Toes"
 
 #### NEW FEATURES
 
@@ -71,7 +85,6 @@ SOFTWARE.
 #### INTERNAL MODIFICATIONS
 
 * Fix https://github.com/HegemanLab/w4mclassfilter/issues/5 - "MAXFEAT does not work for imputation functions that include data transformation"
-* Built with R 3.6.1 (2019-07-05) "Action of the Toes"
 
 
 ### CHANGES IN VERSION 0.98.12
