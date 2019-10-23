@@ -1,112 +1,100 @@
-CHANGES IN VERSION 0.98.14
-------------------------------
+# CHANGES IN VERSION 0.98.14
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
 * Enhancement https://github.com/HegemanLab/w4mclassfilter_galaxy_wrapper/issues/6 - "Provide sort options for features and samples"
 * Built with R 3.6.1 (2019-07-05) "Action of the Toes"
 
-CHANGES IN VERSION 0.98.13
-------------------------------
+# CHANGES IN VERSION 0.98.13
 
-INTERNAL MODIFICATIONS
+## INTERNAL MODIFICATIONS
 
 * Fix https://github.com/HegemanLab/w4mclassfilter/issues/5 - "MAXFEAT does not work for imputation functions that include data transformation"
 * Built with R 3.6.1 (2019-07-05) "Action of the Toes"
 
 
-CHANGES IN VERSION 0.98.12
-------------------------------
+# CHANGES IN VERSION 0.98.12
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
 * Enhancement https://github.com/HegemanLab/w4mclassfilter/issues/4 - "add and test no-imputation and centering-imputation functions":
   - Support no imputation.
   - Support imputating missing feature-intensities as median intensity for the corresponding feature.  
 
-INTERNAL MODIFICATIONS
+## INTERNAL MODIFICATIONS
 
 * Support and tests for new features.
 * Built with R 3.6.1 (2019-07-05) "Action of the Toes"
 * Version numbers 0.98.10 and 0.98.10 were skipped to synchronize with w4mclassfilter_galaxy_wrapper
 
 
-### CHANGES IN VERSION 0.98.9
-------------------------------
+# CHANGES IN VERSION 0.98.9
 
-INTERNAL MODIFICATIONS
+## INTERNAL MODIFICATIONS
 
 * Fix https://github.com/HegemanLab/w4mclassfilter/issues/3 - "a single column is insufficient to calculate a variance"
 * Built with R version 3.4.1 (2017-06-30) "Single Candle"
 
-### CHANGES IN VERSION 0.98.8
-------------------------------
+# CHANGES IN VERSION 0.98.8
 
-INTERNAL MODIFICATIONS
+## INTERNAL MODIFICATIONS
 
 * Fix https://github.com/HegemanLab/w4mclassfilter/issues/1 - "bad error handling when input file cannot be found"
 * Add tests for missing and invalid input files
 * Built with R version 3.4.1 (2017-06-30) "Single Candle"
 
-CHANGES IN VERSION 0.98.7
-------------------------------
+# CHANGES IN VERSION 0.98.7
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
-    o First column of sample metadata is by default renamed to "sampleMetadata" unless  argument 'name_smplmetadata_col1' is supplied and set to FALSE.
+* First column of sample metadata is by default renamed to "sampleMetadata" unless  argument 'name_smplmetadata_col1' is supplied and set to FALSE.
   
-CHANGES IN VERSION 0.98.6
-------------------------------
+# CHANGES IN VERSION 0.98.6
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
-    o Support eliminating features whose attributes fall outside specified ranges.
-    o Sort sample names and feature names because some statistical tools expect the same order in dataMatrix row and column names as in the corresponding metadata files.
+* Support eliminating features whose attributes fall outside specified ranges.
+* Sort sample names and feature names because some statistical tools expect the same order in dataMatrix row and column names as in the corresponding metadata files.
 
-OTHER
+## OTHER
 
-    o Support and tests for new features.
+* Support and tests for new features.
 
 
-CHANGES IN VERSION 0.98.3
-------------------------------
+# CHANGES IN VERSION 0.98.3
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
-    o Provide for more flexible input and output from env, list, or matrix/data.frame, 
+* Provide for more flexible input and output from env, list, or matrix/data.frame, 
       to facilitate use with XCMS outside of the context of Galaxy Workflow4Metabolomics.
 
-OTHER
+## OTHER
 
-    o Support and tests for new features.
-
-
-CHANGES IN VERSION 0.98.2
-------------------------------
-
-SIGNIFICANT USER-VISIBLE CHANGES
-
-    o Added support for R-flavored regular expression pattern matching.
-    o Empty classes argument or zero-length class_column result in no samples filtered out.
-
-OTHER
-
-    o Support and tests for new features.
+* Support and tests for new features.
 
 
-CHANGES IN VERSION 0.98.1
-------------------------------
+# CHANGES IN VERSION 0.98.2
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
-    o fixed defects in: w4m_filter_by_sample_class w4m_filter_imputation
-    o added: test data that exercises changes
+* Added support for R-flavored regular expression pattern matching.
+* Empty classes argument or zero-length class_column result in no samples filtered out.
+
+## OTHER
+
+* Support and tests for new features.
 
 
-CHANGES IN VERSION 0.98.0
-------------------------------
+# CHANGES IN VERSION 0.98.1
 
-SIGNIFICANT USER-VISIBLE CHANGES
+## SIGNIFICANT USER-VISIBLE CHANGES
 
-    o added: w4m_filter_by_sample_class w4m_filter_imputation
+* fixed defects in: w4m_filter_by_sample_class w4m_filter_imputation
+* added: test data that exercises changes
 
+
+# CHANGES IN VERSION 0.98.0
+
+## SIGNIFICANT USER-VISIBLE CHANGES
+
+* added: w4m_filter_by_sample_class w4m_filter_imputation
