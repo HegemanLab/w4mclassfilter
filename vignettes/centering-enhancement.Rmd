@@ -64,3 +64,15 @@ $$ \text{distance}_{treatment_i} = \sqrt{\sum_{k=1}^j \Big(mad(intensity_{i,k,p}
 $$ \text{center}_{overall,{intensity_j}} = median(\text{center}_{{treatment_i},{intensity_j}} \; \forall i \in [1,m]) $$ 
 $$ \text{distance}_{overall} = \sqrt{\sum_{k=1}^m \Big(mad(\text{center}_{{treatment_i},{intensity_k}})\Big)^2} $$
 $$ \text{relative distance}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+## Confidence Interval
+
+Note that the Kibria (2006) evalues the `median t` confidence interval for the *mean* of an assymetric distribution, defined as:
+
+$$ \bar{x} \pm t_{\frac{\alpha}{2},n-1} \frac{\tilde{s}_1}{\sqrt{n}} \; \Bigg| \; \tilde{s}_1 = \sqrt{\frac{1}{n-1} \sum_{i=1}^n (x_i - \tilde{x})^2}, \tilde{x} = \text{sample median}$$
+
+Presumably, the confidence interval for the *median* would be centered on the sample median:
+
+$$ {\bf\tilde{x}} \pm t_{\frac{\alpha}{2},n-1} \frac{\tilde{s}_1}{\sqrt{n}} \; \Bigg| \; \tilde{s}_1 = \sqrt{\frac{1}{n-1} \sum_{i=1}^n (x_i - \tilde{x})^2}, \tilde{x} = \text{sample median}$$
+## References
+
+Kibria, B. M. Golam (2006) **Modified confidence intervals for the mean of the Asymmetric distribution.* Pakistan Journal of Statistics. **22**(2): 109-120.
