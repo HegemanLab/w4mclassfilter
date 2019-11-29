@@ -41,38 +41,74 @@ The resulting treatment metadata include the following column:
 
 - `trt`, the name of the treatment (i.e., the content of a specified column from `sampleMetadata`)
 - `n`, the number of replicates for the treatment
-- `relative_distance`, which indicates the ratio of the spread of the replicates for the treatment to the spread between the treatments.
+- `d_dot` ($D^{\circ}$ or $D^{\bullet}$), which indicates the ratio of the spread of the replicates for the treatment to the spread between the treatments (analogous to D--ratio).
 
 ## Normally distributed data
 
 For an example with normally distributed data, for each of $m$ treatments $i$ and each of $n_i$ replicates $p$ for each feature $j$:
 
-$$ center_{{treatment_i},{intensity_j}} = mean(intensity_{i,j,p} \; \forall p \in [1,n_i]) $$ 
+$$ \text{center}_{{treatment_i},{intensity_j}} = mean(intensity_{i,j,p} \; \forall p \in [1,n_i]) $$ 
 
 $$ \text{distance}_{treatment_i} = \sqrt{\sum_{k=1}^j \Big(stdev(intensity_{i,k,p} \; \forall p \in [1,n_i])\Big)^2} $$
 $$ \text{center}_{overall,{intensity_j}} = mean(\text{center}_{{treatment_i},{intensity_j}} \; \forall i \in [1,m]) $$ 
 $$ \text{distance}_{overall} = \sqrt{\sum_{k=1}^m \Big(stdev(\text{center}_{{treatment_i},{intensity_k}})\Big)^2} $$
-$$ \text{relative distance}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+$$ \text{$D^{\circ}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
 
 ## Unkown distribution
 
 For an example with data having an unknown distribution, for each of $m$ treatments $i$ and each of $n_i$ replicates $p$ for each feature $j$:
 
-$$ center_{{treatment_i},{intensity_j}} = median(intensity_{i,j,p} \; \forall p \in [1,n_i]) $$ 
+$$ \text{center}_{{treatment_i},{intensity_j}} = median(intensity_{i,j,p} \; \forall p \in [1,n_i]) $$ 
 
 $$ \text{distance}_{treatment_i} = \sqrt{\sum_{k=1}^j \Big(mad(intensity_{i,k,p} \; \forall p \in [1,n_i])\Big)^2} $$
 $$ \text{center}_{overall,{intensity_j}} = median(\text{center}_{{treatment_i},{intensity_j}} \; \forall i \in [1,m]) $$ 
 $$ \text{distance}_{overall} = \sqrt{\sum_{k=1}^m \Big(mad(\text{center}_{{treatment_i},{intensity_k}})\Big)^2} $$
-$$ \text{relative distance}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+$$ \text{$D^{\bullet}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+
+## Most representative sample for each treatment
+
+In summary, compute the center for each treatment, then choose the sample closest to the center.
+
+For each treatment $i$:
+
+First compute the center 
+$$\vec{c_i} = \text{center}_{{treatment_i},{intensity_j}} \forall j$$
+as appropriate for the distribution of the data.
+
+Next, compute the residual each sample $k$
+$$\vec{{\text{residual}_{i_k}}} = \vec{x_{i,k}}-\vec{c_{i,k}})$$
+
+Next, create the residual matrix having a column for the residual of each sample $k$ for treatment $i$
+$${\text{residual}_{i}}$$
+
+Next, compute the covariance matrix of $\text{residual}_i$
+$$S_i = ({\text{residual}_{i}})^T ({\text{residual}_{i}})$$
+
+Next, compute the Mahalanobis distance from the location of each sample $k$
+$$\vec{x_{i,k}}$$
+to the center for the corresponding treatment, $\vec{c_i}$, 
+as
+$$D_M(\vec{x_{i,k}},\vec{\text{c}_i})=\sqrt{({\text{residual}_{i_k}})^T {S_i}^{-1} ({\text{residual}_{i_k}})}$$
+
+Finally, choose the sample with the lowest $D_M$ as the most representative sample for the treatment.
+
+## Options for output
+
+- `center` - replace all replicates of a treatment with the center for the treatment.
+- `append` - append the treatment centers to the samples.  Set `n` and `D_dot` for samples to `NA`.  This might be useful to calculate the distance between samples and (their own or other) treatment centers.
+- `nearest` - replace all replicates with the replicate nearest to its treatment center.
+- `note` - do not replace samples.  Set `n` and `D_dot` to `NA` for all replicates for a treatment except the replicate nearest to its treatment center. 
+
 ## Confidence Interval
 
-Note that the Kibria (2006) evalues the `median t` confidence interval for the *mean* of an assymetric distribution, defined as:
+Note that the Kibria (2006) evaluates the `median t` confidence interval for the *mean* of an assymetric distribution, defined as:
 
 $$ \bar{x} \pm t_{\frac{\alpha}{2},n-1} \frac{\tilde{s}_1}{\sqrt{n}} \; \Bigg| \; \tilde{s}_1 = \sqrt{\frac{1}{n-1} \sum_{i=1}^n (x_i - \tilde{x})^2}, \tilde{x} = \text{sample median}$$
 
 Presumably, the confidence interval for the *median* would be centered on the sample median:
 
 $$ {\bf\tilde{x}} \pm t_{\frac{\alpha}{2},n-1} \frac{\tilde{s}_1}{\sqrt{n}} \; \Bigg| \; \tilde{s}_1 = \sqrt{\frac{1}{n-1} \sum_{i=1}^n (x_i - \tilde{x})^2}, \tilde{x} = \text{sample median}$$
+
 ## References
 
 Kibria, B. M. Golam (2006) **Modified confidence intervals for the mean of the Asymmetric distribution.* Pakistan Journal of Statistics. **22**(2): 109-120.
