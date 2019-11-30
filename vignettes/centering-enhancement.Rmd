@@ -3,15 +3,15 @@ title: "Centering Treatments"
 author: "Art Eschenlauer"
 date: "11/16/2019"
 output:
-  html_document:
-    df_print: paged
-    toc: no
-    toc_depth: '4'
   pdf_document:
     highlight: null
     number_sections: no
     toc: no
     toc_depth: 4
+  html_document:
+    df_print: paged
+    toc: no
+    toc_depth: '4'
   knitr:::html_vignette:
     fig_caption: yes
     toc: no
@@ -72,25 +72,57 @@ In summary, compute the center for each treatment, then choose the sample closes
 For each treatment $i$:
 
 First compute the center 
-$$\vec{c_i} = \text{center}_{{treatment_i},{intensity_j}} \forall j$$
+$$\vec{c}_i = \text{center}_{{treatment_i},{intensity_j}} \forall j$$
 as appropriate for the distribution of the data.
 
 Next, compute the residual each sample $k$
-$$\vec{{\text{residual}_{i_k}}} = \vec{x_{i,k}}-\vec{c_{i,k}})$$
+$$\vec{{\text{residual}_{i_k}}} = \vec{x}_{i,k}-\vec{c}_{i,k})$$
 
 Next, create the residual matrix having a column for the residual of each sample $k$ for treatment $i$
-$${\text{residual}_{i}}$$
+$${\textbf{residual}_{i}}$$
 
-Next, compute the covariance matrix of $\text{residual}_i$
-$$S_i = ({\text{residual}_{i}})^T ({\text{residual}_{i}})$$
+Next (but see alternative below), compute $S_i$, the covariance matrix of $\textbf{residual}_i$
+$$S_i = ({\textbf{residual}_{i}})^T ({\textbf{residual}_{i}})$$
 
 Next, compute the Mahalanobis distance from the location of each sample $k$
-$$\vec{x_{i,k}}$$
-to the center for the corresponding treatment, $\vec{c_i}$, 
-as
-$$D_M(\vec{x_{i,k}},\vec{\text{c}_i})=\sqrt{({\text{residual}_{i_k}})^T {S_i}^{-1} ({\text{residual}_{i_k}})}$$
+$$\vec{x}_{i,k}$$
+to the center for the corresponding treatment, $\vec{c}_i$, as
+$$D_M(\vec{x}_{i,k},\vec{\text{c}}_i)=\sqrt{(\vec{\text{residual}_{i_k}})^T {S_i}^{-1} (\vec{\text{residual}_{i_k}})}$$
+Rather than computing $S_i$ for each sample, a (possibly better) alternative is to compute an overall, robust $S$ as described below and compute $D_M$ as
+$$D_M(\vec{x}_{i,k},\vec{\text{c}}_i)=\sqrt{(\vec{\text{residual}_{i_k}})^T S^{-1} (\vec{\text{residual}_{i_k}})}$$
 
-Finally, choose the sample with the lowest $D_M$ as the most representative sample for the treatment.
+Next, choose the sample with the lowest $D_M$ as the most representative sample for the treatment.
+$$\vec{c}_i = \text{center}_{\text{treatment}_i,\text{intensity}_j}$$
+
+Next, recompute the residual each sample $k$
+$$\vec{{\text{residual}_{i_k}}} = \vec{x}_{i,k}-\vec{c}_{i,k})$$
+
+Next, recreate the residual matrix having a column for the residual of each sample $k$ for treatment $i$
+$${\textbf{residual}_{i}}$$
+
+Recompute the Mahalanobis distance for treatement $i$
+$$D_M(\vec{x}_{i,k},\vec{\text{c}}_i)=\sqrt{(\vec{\text{residual}_{i_k}})^T S^{-1} (\vec{\text{residual}_{i_k}})}$$
+
+For all $m$ treatments $i$, compute the center
+$$ \vec{c} = \text{center}_{overall,{intensity_j}} = mean({\vec{c}_i,intensity_j} \; \forall i \in [1,m]) $$ 
+
+Next, compute the residual each treatment $i$
+$$\vec{{\text{residual}_{i}}} = \vec{x}_{i}-\vec{c}$$
+
+Next, create the residual matrix having a column for the residual of each treatment $i$
+$$\textbf{residual}$$
+
+Next, compute the overall Mahalanobis distance
+$$D_{M,\text{overall}} = \sqrt{(\textbf{residual})^T S^{-1} (\textbf{residual})}$$
+
+Finally, for each treatment $i$ compute
+$$ \text{$D^{\bullet}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+
+### Alternative estimation of covariance
+
+As an alternative to computing $S_i$ for each treatment, it may be better to produce a robust estimate of the overall $S$ using `MASS::cov.mcd`.  This may be computationally more intensive but more robust.  It also does not necessitate computing the corresponding residual.
+
+I imagine (as a compromise) that a sampling strategy (randomly picking samples) might make this faster.  (To determine the number of samples required, you may want to try increasing the number of samples from 20 or so until the the point of diminishing returns is reached).
 
 ## Options for output
 
