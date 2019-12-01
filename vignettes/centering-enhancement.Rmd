@@ -35,7 +35,7 @@ An extension to convert a data matrix for a replicated design to a data matrix h
 
 W4M does not have tools to contrast treaments *per se*.  Sample metadata annotations can indicate replicates of a common treatment, but predictive tools like Heat Map (i.e., hierarchical clustering) and Multivariate (running as PLS-DA) can predict multiple predicted treatments for samples from the same treatment.  This confounds examination of relationships among the treatments themselves.
 
-This example collapses a data matrix having one column per sample to a data matrix having one column per treatment.  Each column is the "center" for the respective set of replicates for that treatment.  Normally distributed data may be analayzed using mean and standard deviation respectively for assessment of the center and the spread; data with unknown distribution, with median and the median absolute deviation.
+This example collapses a data matrix having one column per sample to a data matrix having one column per treatment.  Each column is the "center" for the respective set of replicates for that treatment.  Although normally distributed data could be analayzed using mean and standard deviation respectively for assessment of the center and the spread, I see no advantage of not treating all data as having an unknown distribution and using median to estimate the center and the median absolute deviation or Mahalanobis distance to estimate the spread.
 
 The resulting treatment metadata include the following column:
 
@@ -43,80 +43,60 @@ The resulting treatment metadata include the following column:
 - `n`, the number of replicates for the treatment
 - `d_dot` ($D^{\circ}$ or $D^{\bullet}$), which indicates the ratio of the spread of the replicates for the treatment to the spread between the treatments (analogous to D--ratio).
 
-## Normally distributed data
+## Center of data with an unknown (possibly normal) distribution
 
-For an example with normally distributed data, for each of $m$ treatments $i$ and each of $n_i$ replicates $p$ for each feature $j$:
+For an example with data having an unknown (possibly normal) distribution, for each of $m$ treatments $i$ and each of $n_i$ samples $k$ for each feature $j$:
 
-$$ \text{center}_{{treatment_i},{intensity_j}} = mean(intensity_{i,j,p} \; \forall p \in [1,n_i]) $$ 
+$$ \text{center}_{{treatment_i},{intensity_j}} = median(intensity_{i,j,k} \; \forall k \in [1,n_i]) $$ 
 
-$$ \text{distance}_{treatment_i} = \sqrt{\sum_{k=1}^j \Big(stdev(intensity_{i,k,p} \; \forall p \in [1,n_i])\Big)^2} $$
-$$ \text{center}_{overall,{intensity_j}} = mean(\text{center}_{{treatment_i},{intensity_j}} \; \forall i \in [1,m]) $$ 
-$$ \text{distance}_{overall} = \sqrt{\sum_{k=1}^m \Big(stdev(\text{center}_{{treatment_i},{intensity_k}})\Big)^2} $$
-$$ \text{$D^{\circ}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
-
-## Unkown distribution
-
-For an example with data having an unknown distribution, for each of $m$ treatments $i$ and each of $n_i$ replicates $p$ for each feature $j$:
-
-$$ \text{center}_{{treatment_i},{intensity_j}} = median(intensity_{i,j,p} \; \forall p \in [1,n_i]) $$ 
-
-$$ \text{distance}_{treatment_i} = \sqrt{\sum_{k=1}^j \Big(mad(intensity_{i,k,p} \; \forall p \in [1,n_i])\Big)^2} $$
+$$ \text{distance}_{treatment_i} = \sqrt{\sum_{r=1}^j \Big(mad(intensity_{i,r,k} \; \forall k \in [1,n_i])\Big)^2} $$
 $$ \text{center}_{overall,{intensity_j}} = median(\text{center}_{{treatment_i},{intensity_j}} \; \forall i \in [1,m]) $$ 
-$$ \text{distance}_{overall} = \sqrt{\sum_{k=1}^m \Big(mad(\text{center}_{{treatment_i},{intensity_k}})\Big)^2} $$
-$$ \text{$D^{\bullet}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+$$ \text{distance}_{overall} = \sqrt{\sum_{r=1}^m \Big(mad(\text{center}_{{treatment_i},{intensity_r}})\Big)^2} $$
+$$ \text{$D^{\circ}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
 
 ## Most representative sample for each treatment
 
 In summary, compute the center for each treatment, then choose the sample closest to the center.
 
-For each treatment $i$:
+### Robust inverse covariance
+
+First, compute $\textbf{S}$, the "Minimum Covariance Determinant" of the data matrix $\textbf{X}$, and its inverse $\textbf{S}^{-1}$, using `MASS::cov.mcd` ([https://stat.ethz.ch/R-manual/R-patched/library/MASS/html/cov.rob.html](https://stat.ethz.ch/R-manual/R-patched/library/MASS/html/cov.rob.html)):
+$$\textbf{S} = \text{MASS::cov.mcd}(\textbf{X})$$
+$$\textbf{S}^{-1} = (\textbf{S})^{-1}$$
+
+### For each treatment $i$:
 
 First compute the center 
-$$\vec{c}_i = \text{center}_{{treatment_i},{intensity_j}} \forall j$$
+$$\vec{c}_i = \text{center}_{{treatment_i}} = median(intensity_{i,j,k} \; \forall k \in [1,n_i]) \; \forall j$$
 as appropriate for the distribution of the data.
 
-Next, compute the residual each sample $k$
-$$\vec{{\text{residual}_{i_k}}} = \vec{x}_{i,k}-\vec{c}_{i,k})$$
-
-Next, create the residual matrix having a column for the residual of each sample $k$ for treatment $i$
-$${\textbf{residual}_{i}}$$
-
-Next (but see alternative below), compute $S_i$, the covariance matrix of $\textbf{residual}_i$
-$$S_i = ({\textbf{residual}_{i}})^T ({\textbf{residual}_{i}})$$
-
-Next, compute the Mahalanobis distance from the location of each sample $k$
-$$\vec{x}_{i,k}$$
-to the center for the corresponding treatment, $\vec{c}_i$, as
-$$D_M(\vec{x}_{i,k},\vec{\text{c}}_i)=\sqrt{(\vec{\text{residual}_{i_k}})^T {S_i}^{-1} (\vec{\text{residual}_{i_k}})}$$
-Rather than computing $S_i$ for each sample, a (possibly better) alternative is to compute an overall, robust $S$ as described below and compute $D_M$ as
-$$D_M(\vec{x}_{i,k},\vec{\text{c}}_i)=\sqrt{(\vec{\text{residual}_{i_k}})^T S^{-1} (\vec{\text{residual}_{i_k}})}$$
+Next, compute the Mahalanobis distance (`stats::mahalonobis`, [https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html)) to $\vec{c}_i$ from the location $\vec{x}_{i,k}$ of each sample $k$:
+$$\begin{aligned}
+D_M(\vec{x}_{i,k},\vec{\text{c}}_i)
+= \sqrt{(\vec{\text{residual}_{i_k}})^T S^{-1} (\vec{\text{residual}_{i_k}})} \; \Big| \; \vec{{\text{residual}_{i_k}}} = \vec{x}_{i,k}-\vec{c}_{i,k} \\
+= \sqrt{\text{mahalanobis}(\text{x} = \vec{x}_{i,k}, \text{center} = \vec{\text{c}}_i, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
+\end{aligned}$$
 
 Next, choose the sample with the lowest $D_M$ as the most representative sample for the treatment.
 $$\vec{c}_i = \text{center}_{\text{treatment}_i,\text{intensity}_j}$$
 
-Next, recompute the residual each sample $k$
-$$\vec{{\text{residual}_{i_k}}} = \vec{x}_{i,k}-\vec{c}_{i,k})$$
-
-Next, recreate the residual matrix having a column for the residual of each sample $k$ for treatment $i$
-$${\textbf{residual}_{i}}$$
-
-Recompute the Mahalanobis distance for treatement $i$
-$$D_M(\vec{x}_{i,k},\vec{\text{c}}_i)=\sqrt{(\vec{\text{residual}_{i_k}})^T S^{-1} (\vec{\text{residual}_{i_k}})}$$
+Next, recompute the Mahalanobis distance for $\textbf{x}_i$, the slice of the data matrix for samples subjected to treatement $i$
+$$D_M(\textbf{x}_{i},\vec{\text{c}}_i)
+= \sqrt{\text{mahalanobis}(\text{x} = \textbf{x}_{i}, \text{center} = \vec{\text{c}}_i, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
+$$
 
 For all $m$ treatments $i$, compute the center
-$$ \vec{c} = \text{center}_{overall,{intensity_j}} = mean({\vec{c}_i,intensity_j} \; \forall i \in [1,m]) $$ 
+$$ \vec{c} = \text{center}_\text{overall} = mean({\vec{c}_i} \; \forall i \in [1,m]) $$ 
 
-Next, compute the residual each treatment $i$
-$$\vec{{\text{residual}_{i}}} = \vec{x}_{i}-\vec{c}$$
-
-Next, create the residual matrix having a column for the residual of each treatment $i$
-$$\textbf{residual}$$
+Next, bind the centers $\vec{c}_i$ into a matrix $\textbf{c}$.
 
 Next, compute the overall Mahalanobis distance
-$$D_{M,\text{overall}} = \sqrt{(\textbf{residual})^T S^{-1} (\textbf{residual})}$$
+$$D_{M,\text{overall}}
+= \sqrt{\text{mahalanobis}(\text{x} = \textbf{c}, \text{center} = \vec{c}, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
+$$
 
 Finally, for each treatment $i$ compute
-$$ \text{$D^{\bullet}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text{distance}_{overall}}$$
+$$ \text{$D^{\bullet}$}_{treatment_i} = \frac{D_M(\textbf{x}_{i},\vec{\text{c}}_i)}{D_{M,\text{overall}}}$$
 
 ### Alternative estimation of covariance
 
