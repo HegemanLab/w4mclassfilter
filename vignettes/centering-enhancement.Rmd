@@ -29,26 +29,25 @@ vignette: |
 
 # Summary
 
-An extension to convert a data matrix for a replicated design to a data matrix having one column per treatment.   
+This document describes an extension to convert a data matrix for a replicated design to a data matrix having one column per treatment.   
 
 ## Motivation
 
-W4M does not have tools to contrast treaments *per se*.  Sample metadata annotations can indicate replicates of a common treatment, but predictive tools like Heat Map (i.e., hierarchical clustering) and Multivariate (running as PLS-DA) can predict multiple predicted treatments for samples from the same treatment.  This confounds examination of relationships among the treatments themselves.
+W4M does not have tools to contrast treaments *per se*.  Sample metadata annotations can indicate replicates of a common treatment, but sometimes predictive tools like Heat Map (i.e., hierarchical clustering) and Multivariate (running as PLS-DA) assign different predicted treatments to samples from the same treatment.  This confounds examination of relationships among the treatments themselves.
 
-This example collapses a data matrix having one column per sample to a data matrix having one column per treatment.  Each column is the "center" for the respective set of replicates for that treatment.  Although normally distributed data could be analayzed using mean and standard deviation respectively for assessment of the center and the spread, I see no advantage of not treating all data as having an unknown distribution and using median to estimate the center and the median absolute deviation or Mahalanobis distance to estimate the spread.
+This extension collapses a data matrix having one column per sample to a data matrix having one column per treatment.  Each column is the "center" for the respective set of replicates for that treatment.  Although normally distributed data could be analayzed using mean and standard deviation respectively for assessment of the center and the spread, I see no advantage of not treating all data as having an unknown distribution and using median to estimate the center and the median absolute deviation or Mahalanobis distance to estimate the spread.
 
 The resulting treatment metadata include the following column:
 
 - `trt`, the name of the treatment (i.e., the content of a specified column from `sampleMetadata`)
 - `n`, the number of replicates for the treatment
-- `d_dot` ($D^{\circ}$ or $D^{\bullet}$), which indicates the ratio of the spread of the replicates for the treatment to the spread between the treatments (analogous to D--ratio).
+- `d_dot` ($D^{\circ}$ or $D^{\bullet}$), which indicates the spread of the replicates for the treatment relative to the spread between the treatments (analogous to D--ratio).
 
 ## Center of data with an unknown (possibly normal) distribution
 
-For an example with data having an unknown (possibly normal) distribution, for each of $m$ treatments $i$ and each of $n_i$ samples $k$ for each feature $j$:
+For data having an unknown (possibly normal) distribution, for each of $m$ treatments $i$ and each of $n_i$ samples $k$ for each feature $j$:
 
 $$ \text{center}_{{treatment_i},{intensity_j}} = median(intensity_{i,j,k} \; \forall k \in [1,n_i]) $$ 
-
 $$ \text{distance}_{treatment_i} = \sqrt{\sum_{r=1}^j \Big(mad(intensity_{i,r,k} \; \forall k \in [1,n_i])\Big)^2} $$
 $$ \text{center}_{overall,{intensity_j}} = median(\text{center}_{{treatment_i},{intensity_j}} \; \forall i \in [1,m]) $$ 
 $$ \text{distance}_{overall} = \sqrt{\sum_{r=1}^m \Big(mad(\text{center}_{{treatment_i},{intensity_r}})\Big)^2} $$
@@ -56,53 +55,47 @@ $$ \text{$D^{\circ}$}_{treatment_i} = \frac{\text{distance}_{treatment_i}}{\text
 
 ## Most representative sample for each treatment
 
-In summary, compute the center for each treatment, then choose the sample closest to the center.
+In summary, compute the center for each treatment, then choose as the sample closest to the center that sample which has the lowest Mahalanobis distance (which takes into account covariance among the features.)
 
 ### Robust inverse covariance
 
-First, compute $\textbf{S}$, the "Minimum Covariance Determinant" of the data matrix $\textbf{X}$, and its inverse $\textbf{S}^{-1}$, using `MASS::cov.mcd` ([https://stat.ethz.ch/R-manual/R-patched/library/MASS/html/cov.rob.html](https://stat.ethz.ch/R-manual/R-patched/library/MASS/html/cov.rob.html)):
-$$\textbf{S} = \text{MASS::cov.mcd}(\textbf{X})$$
-$$\textbf{S}^{-1} = (\textbf{S})^{-1}$$
+First, compute $\textbf{S}$, **the "Minimum Covariance Determinant" of the data matrix $\textbf{X}$**, and its inverse $\textbf{S}^{-1}$, using `MASS::cov.mcd` ([https://stat.ethz.ch/R-manual/R-patched/library/MASS/html/cov.rob.html](https://stat.ethz.ch/R-manual/R-patched/library/MASS/html/cov.rob.html)):
+$$\textbf{S} = \text{MASS::cov.mcd}(\textbf{X}), \quad \textbf{S}^{-1} = (\textbf{S})^{-1}$$
 
 ### For each treatment $i$:
 
-First compute the center 
-$$\vec{c}_i = \text{center}_{{treatment_i}} = median(intensity_{i,j,k} \; \forall k \in [1,n_i]) \; \forall j$$
-as appropriate for the distribution of the data.
+First compute **the center for the $n_i$ samples from $treatment_i$**:
+$$\vec{c}_i = \text{center}_{{treatment_i}} = median\Big(intensity_{i,j,k} \; \forall k \in [1,n_i]\Big) \; \forall j$$
 
-Next, compute the Mahalanobis distance (`stats::mahalonobis`, [https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html)) to $\vec{c}_i$ from the location $\vec{x}_{i,k}$ of each sample $k$:
+Next, for each sample $k$ from $treatment_i$, compute **the Mahalanobis distance to $\vec{c}_i$ from the location $\vec{x}_{i,k}$** (`stats::mahalonobis`, [https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html)):
 $$\begin{aligned}
 D_M(\vec{x}_{i,k},\vec{\text{c}}_i)
 = \sqrt{(\vec{\text{residual}_{i_k}})^T S^{-1} (\vec{\text{residual}_{i_k}})} \; \Big| \; \vec{{\text{residual}_{i_k}}} = \vec{x}_{i,k}-\vec{c}_{i,k} \\
-= \sqrt{\text{mahalanobis}(\text{x} = \vec{x}_{i,k}, \text{center} = \vec{\text{c}}_i, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
+= \sqrt{\text{stats::mahalanobis}(\text{x} = \vec{x}_{i,k}, \text{center} = \vec{\text{c}}_i, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
 \end{aligned}$$
 
-Next, choose the sample with the lowest $D_M$ as the most representative sample for the treatment.
-$$\vec{c}_i = \text{center}_{\text{treatment}_i,\text{intensity}_j}$$
+Next, choose the sample with the lowest $D_M$ as **the most representative sample for the treatment.**
+$$\vec{c}_i = \text{center}_{\text{treatment}_i,\text{intensity}_j} \forall j$$
 
-Next, recompute the Mahalanobis distance for $\textbf{x}_i$, the slice of the data matrix for samples subjected to treatement $i$
+Next, compute **the Mahalanobis distance across the treatment** using the $\textbf{x}_i$, the $n_i \times j$ slice of the data matrix for samples subjected to treatement $i$
 $$D_M(\textbf{x}_{i},\vec{\text{c}}_i)
-= \sqrt{\text{mahalanobis}(\text{x} = \textbf{x}_{i}, \text{center} = \vec{\text{c}}_i, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
+= \sqrt{\text{stats::mahalanobis}(\text{x} = \textbf{x}_{i}, \text{center} = \vec{\text{c}}_i, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
 $$
 
-For all $m$ treatments $i$, compute the center
+### Overall center and Mahalanobis distance:
+
+Compute **the center for all $m$ treatments $i$** 
 $$ \vec{c} = \text{center}_\text{overall} = mean({\vec{c}_i} \; \forall i \in [1,m]) $$ 
 
-Next, bind the centers $\vec{c}_i$ into a matrix $\textbf{c}$.
-
-Next, compute the overall Mahalanobis distance
+Next, bind the centers $\vec{c}_i$ into an $m \times j$ matrix $\textbf{c}$, and then **compute the overall Mahalanobis distance among all the treatments**.
 $$D_{M,\text{overall}}
-= \sqrt{\text{mahalanobis}(\text{x} = \textbf{c}, \text{center} = \vec{c}, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
+= \sqrt{\text{stats::mahalanobis}(\text{x} = \textbf{c}, \text{center} = \vec{c}, \text{cov} = \textbf{S}^{-1}, \text{inverted} = \text{TRUE})}
 $$
 
-Finally, for each treatment $i$ compute
+### For each treatment $i$:
+
+Finally, compute **the relative dispersion for each treatment $i$** (analogous to a D-ratio):
 $$ \text{$D^{\bullet}$}_{treatment_i} = \frac{D_M(\textbf{x}_{i},\vec{\text{c}}_i)}{D_{M,\text{overall}}}$$
-
-### Alternative estimation of covariance
-
-As an alternative to computing $S_i$ for each treatment, it may be better to produce a robust estimate of the overall $S$ using `MASS::cov.mcd`.  This may be computationally more intensive but more robust.  It also does not necessitate computing the corresponding residual.
-
-I imagine (as a compromise) that a sampling strategy (randomly picking samples) might make this faster.  (To determine the number of samples required, you may want to try increasing the number of samples from 20 or so until the the point of diminishing returns is reached).
 
 ## Options for output
 
@@ -111,7 +104,7 @@ I imagine (as a compromise) that a sampling strategy (randomly picking samples) 
 - `nearest` - replace all replicates with the replicate nearest to its treatment center.
 - `note` - do not replace samples.  Set `n` and `D_dot` to `NA` for all replicates for a treatment except the replicate nearest to its treatment center. 
 
-## Confidence Interval
+## Confidence Interval for the median
 
 Note that the Kibria (2006) evaluates the `median t` confidence interval for the *mean* of an assymetric distribution, defined as:
 
@@ -123,4 +116,4 @@ $$ {\bf\tilde{x}} \pm t_{\frac{\alpha}{2},n-1} \frac{\tilde{s}_1}{\sqrt{n}} \; \
 
 ## References
 
-Kibria, B. M. Golam (2006) **Modified confidence intervals for the mean of the Asymmetric distribution.* Pakistan Journal of Statistics. **22**(2): 109-120.
+Kibria, B. M. Golam (2006) **Modified confidence intervals for the mean of the Asymmetric distribution.** Pakistan Journal of Statistics. **22**(2): 109-120.
