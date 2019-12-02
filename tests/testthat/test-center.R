@@ -64,24 +64,30 @@ run_center_test <- function(
   class_column,
   samplename_column = "sampleMetadata",
   false_to_exclude_classes_in_filter, 
-  centering = c("none","median","mean")
+  centering = c("none","median","representative")
   ) {
   # set up variables
   variableMetadata_in  <- "input_center_vm.tsv"
   variableMetadata_out <- "output_center_vm.tsv"
   variableMetadata_exp <- "expected_center_vm.tsv"
   sampleMetadata_in <- "input_center_sm.tsv"
-  sampleMetadata_out <- "output_center_sm.tsv"
+  sampleMetadata_out <- switch(centering,
+                              "none" = "output_center_sm.tsv",
+                              "median" = "output_center_median_sm.tsv",
+                              "representative" = "output_center_representative_sm.tsv")
   sampleMetadata_exp <- switch(centering,
                               "none" = "expected_center_sm.tsv",
                               "median" = "expected_center_median_sm.tsv",
-                              "mean" = "expected_center_mean_sm.tsv")
+                              "representative" = "expected_center_representative_sm.tsv")
   dataMatrix_in <- "input_center_dm.tsv"
-  dataMatrix_out <- "output_center_dm.tsv"
+  dataMatrix_out <- switch(centering,
+                           "none" = "output_center_dm.tsv",
+                           "median" = "output_center_median_dm.tsv",
+                           "representative" = "output_center_representative_dm.tsv")
   dataMatrix_exp <- switch(centering,
                            "none" = "expected_center_dm.tsv",
                            "median" = "expected_center_median_dm.tsv",
-                           "mean" = "expected_center_mean_dm.tsv")
+                           "representative" = "expected_center_representative_dm.tsv")
   # test input files
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   expect_true(data_matrix_input_env$success, info = "read data matrix input")
@@ -104,6 +110,7 @@ run_center_test <- function(
   , classes = classes_to_filter
   , include = false_to_exclude_classes_in_filter
   , class_column = class_column
+  , centering = centering
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files
@@ -134,7 +141,7 @@ run_center_test <- function(
 test_that("center none test", {
   run_center_test(
     classes_to_filter = c()
-  , class_column = ""
+  , class_column = "trt"
   , samplename_column = "sampleMetadata"
   , false_to_exclude_classes_in_filter = TRUE
   , centering = "none"
@@ -146,7 +153,7 @@ test_that("center none test", {
 test_that("center median test", {
   run_center_test(
     classes_to_filter = c()
-    , class_column = ""
+    , class_column = "trt"
     , samplename_column = "sampleMetadata"
     , false_to_exclude_classes_in_filter = TRUE
     , centering = "median"
@@ -155,12 +162,12 @@ test_that("center median test", {
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("center mean test", {
+test_that("center representative test", {
   run_center_test(
     classes_to_filter = c()
-    , class_column = ""
+    , class_column = "trt"
     , samplename_column = "sampleMetadata"
     , false_to_exclude_classes_in_filter = TRUE
-    , centering = "mean"
+    , centering = "representative"
   )
 })

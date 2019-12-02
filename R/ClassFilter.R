@@ -366,6 +366,7 @@ w4m__nonzero_var <- function(m) {
 #' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
 #' @param order_vrbl             character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
 #' @param order_smpl             character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
+#' @param centering              character: center samples by class column (which names treatment)
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
@@ -433,6 +434,7 @@ w4m_filter_by_sample_class <- function(
 , data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
 , order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
 , order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
+, centering  = c("none", "median", "representative")[1]   # character: center samples by class column (which names treatment)
 , failure_action = function(...) { cat(paste(..., SEP = "\n")) }   # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
 
@@ -456,7 +458,7 @@ w4m_filter_by_sample_class <- function(
     }
     tryCatch(
       expr = {
-        my.env$data    <- utils::read.delim( fill = FALSE, file = file_path )
+        my.env$data    <- utils::read.delim( fill = FALSE, file = file_path, stringsAsFactors = FALSE )
         my.env$success <- TRUE
       }
     , error = function(e) {
@@ -825,6 +827,44 @@ w4m_filter_by_sample_class <- function(
   # ...
 
   # ---
+  if (centering == "median") {
+    treatments <- smpl_metadata[class_column][[1]]
+    nrow_dm <- nrow(data_matrix)
+    unitrts <- unique(treatments)
+    ntrts <- length(unitrts)
+    smpl_metadata <- data.frame(
+      trt = unitrts,
+      n = sapply(X = unitrts, FUN = function(x) sum(x == treatments)),
+      stringsAsFactors = FALSE
+    )
+    sample_names <- unitrts[order(unitrts)]
+    # for each treatment, calculate the median intensity for each feature
+    new_df <- as.data.frame(
+      sapply(
+        X = unitrts,
+        FUN = function(x) {
+          unitrt <- x
+          sapply(
+            X = 1:nrow_dm,
+            FUN = function(x) {
+              median(data_matrix[x, unitrt == treatments])
+            }
+          )
+        }
+      ),
+      stringsAsFactors = FALSE
+    )
+    rownames(new_df) <- rownames(data_matrix)
+    str(new_df)
+    data_matrix <- as.matrix(new_df)
+    #stop("centering == 'median'")
+  }
+  else if (centering == "representative") {
+    stop("centering == 'representative'")
+  }
+  # ...
+
+  # ---
   # write out the results
   err.env <- new.env()
   err.env$success <- FALSE
@@ -837,9 +877,18 @@ w4m_filter_by_sample_class <- function(
                     , colnames(data_matrix) %in% sample_names      # column selector
                     , drop = FALSE                                 # keep two dimensions
                     ]
+      if (centering == "median") {
+        print(sub_matrix)
+      }
       err.env$trace <- paste(err.env$trace, "B")
       # sort matrix to match order of variable_names and sample_names
       sorted_matrix <- sub_matrix[variable_names, sample_names]
+      if (centering == "median") {
+        err.env$trace <- paste(err.env$trace, "B2")
+        print(sub_matrix)
+        err.env$trace <- paste(err.env$trace, "B3")
+        print(smpl_metadata)
+      }
       err.env$trace <- paste(err.env$trace, "C")
       # write the data matrix
       if ( is.character(dataMatrix_out) ){
@@ -914,7 +963,7 @@ w4m_filter_by_sample_class <- function(
       err.env$success     <- TRUE
     }
   , error = function(e) {
-     err.env$ msg <- sprintf("failed to write output files because '%s'; trace %s", e$message, err.env$trace)
+     err.env$ msg <- sprintf("failed to write output files because '%s'; %s", e$message, err.env$trace)
     }
   )
   # ...

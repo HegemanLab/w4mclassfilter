@@ -97,8 +97,12 @@ $$
 Finally, compute **the relative dispersion for each treatment $i$** (analogous to a D-ratio):
 $$ \text{$D^{\bullet}$}_{treatment_i} = \frac{D_M(\textbf{x}_{i},\vec{\text{c}}_i)}{D_{M,\text{overall}}}$$
 
-## Options for output
+## Options for output (planned for future)
 
+Implemented presently:
+- Behave as `center` immediately below.
+
+Planned, along with a choice dropdown:
 - `center` - replace all replicates of a treatment with the center for the treatment.
 - `append` - append the treatment centers to the samples.  Set `n` and `D_dot` for samples to `NA`.  This might be useful to calculate the distance between samples and (their own or other) treatment centers.
 - `nearest` - replace all replicates with the replicate nearest to its treatment center.
