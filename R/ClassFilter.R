@@ -205,18 +205,12 @@ w4m__var_by_rank_or_file <- function(m, dim = 1) {
     dim_x_2 <- dim(m)[2]
     if ( dim_x_2 == 0 )
       stop("w4m__var_by_rank_or_file: there are zero columns")
-    # if ( dim_x_2 == 1 ) {
-    #   stop("w4m__var_by_rank_or_file: a single column is insufficient to calculate a variance")
-    # }
   }
   else if (dim == 2) {
     dim_x_1 <- dim(m)[1]
     if ( dim_x_1 == 0 ) {
       stop("w4m__var_by_rank_or_file: there are zero rows")
     }
-    # if ( dim_x_1 == 1 ) {
-    #   stop("w4m__var_by_rank_or_file: a single row is insufficient to calculate a variance")
-    # }
     m <- t(m)
   }
   else {
@@ -336,6 +330,12 @@ w4m__nonzero_var <- function(m) {
 #' Secondly, it provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
 #' Thirdly, it provides a selection-capability for features based on whether their metadata lie within the ranges specified by 'variable_range_filter'.
 #'
+#' Finally, it provides for the option of computing one of three types of centers for each treatment:
+#' * "none" - Return all samples without computing centers
+#' * "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
+#' * "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
+#' * "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+#'
 #' Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:
 #' * character: path to input tab-separated-values-file (TSV)
 #' * data.frame
@@ -366,7 +366,7 @@ w4m__nonzero_var <- function(m) {
 #' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
 #' @param order_vrbl             character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
 #' @param order_smpl             character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
-#' @param centering              character: center samples by class column (which names treatment)
+#' @param centering              character: center samples by class column (which names treatment): none, centroid, mediod, or feature-medians
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
@@ -378,7 +378,7 @@ w4m__nonzero_var <- function(m) {
 #' @seealso \url{http://workflow4metabolomics.org/}
 #'
 #' @importFrom utils read.delim write.table str
-#' @importFrom stats median
+#' @importFrom stats median prcomp dist
 #'
 #' @examples
 #' \dontrun{
@@ -434,7 +434,7 @@ w4m_filter_by_sample_class <- function(
 , data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
 , order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
 , order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
-, centering  = c("none", "median", "representative")[1]   # character: center samples by class column (which names treatment)
+, centering  = c("none", "centroid", "median", "mediod")[1]   # character: center samples by class column (which names treatment)
 , failure_action = function(...) { cat(paste(..., SEP = "\n")) }   # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
 
@@ -586,7 +586,6 @@ w4m_filter_by_sample_class <- function(
         }
         return (prospect)
       }
-      # stop("stopping here for a snapshot")
       return (prospect)
     } else {
       # case: xcms_data_in is invalid
@@ -827,7 +826,37 @@ w4m_filter_by_sample_class <- function(
   # ...
 
   # ---
-  if (centering == "median") {
+  if (centering == "centroid") {
+    treatments <- smpl_metadata[class_column][[1]]
+    nrow_dm <- nrow(data_matrix)
+    unitrts <- unique(treatments)
+    ntrts <- length(unitrts)
+    smpl_metadata <- data.frame(
+      trt = unitrts,
+      n = sapply(X = unitrts, FUN = function(x) sum(x == treatments)),
+      stringsAsFactors = FALSE
+    )
+    sample_names <- unitrts[order(unitrts)]
+    # for each treatment, calculate the mean intensity for each feature
+    new_df <- as.data.frame(
+      sapply(
+        X = unitrts,
+        FUN = function(x) {
+          unitrt <- x
+          sapply(
+            X = 1:nrow_dm,
+            FUN = function(x) {
+              mean(data_matrix[x, unitrt == treatments])
+            }
+          )
+        }
+      ),
+      stringsAsFactors = FALSE
+    )
+    rownames(new_df) <- rownames(data_matrix)
+    data_matrix <- as.matrix(new_df)
+  }
+  else if (centering == "median") {
     treatments <- smpl_metadata[class_column][[1]]
     nrow_dm <- nrow(data_matrix)
     unitrts <- unique(treatments)
@@ -855,12 +884,30 @@ w4m_filter_by_sample_class <- function(
       stringsAsFactors = FALSE
     )
     rownames(new_df) <- rownames(data_matrix)
-    str(new_df)
     data_matrix <- as.matrix(new_df)
-    #stop("centering == 'median'")
   }
-  else if (centering == "representative") {
-    stop("centering == 'representative'")
+  else if (centering == "mediod") {
+    # compute medoid (ref: https://www.biostars.org/p/11987/#11989)
+    mediod_col   <- function(trt) names(which.min(rowSums(as.matrix(dist(t(trt))))))
+    # mediod_row <- function(trt) names(which.min(rowSums(as.matrix(dist(  trt )))))
+
+    treatments <- smpl_metadata[,class_column]
+    my_pca <- prcomp(data_matrix)
+    my_scores <- t(my_pca$rotation)
+    unitrts <- unique(treatments)
+    # For each treatment, calculate the mediod, i.e.,
+    #   the sample with the minimum distance to the other samples in the trt
+    my_sapply_result <- sapply(
+      X = unitrts,
+      FUN = function(x) {
+        unitrt <- x
+        my_trt_scores <- my_scores[,treatments == unitrt]
+        my_trt_mediod <- mediod_col(my_trt_scores)
+        return (my_trt_mediod)
+      }
+    )
+    data_matrix <- data_matrix[ , my_sapply_result ]
+    sample_names <- colnames(data_matrix)
   }
   # ...
 
@@ -877,18 +924,9 @@ w4m_filter_by_sample_class <- function(
                     , colnames(data_matrix) %in% sample_names      # column selector
                     , drop = FALSE                                 # keep two dimensions
                     ]
-      if (centering == "median") {
-        print(sub_matrix)
-      }
       err.env$trace <- paste(err.env$trace, "B")
       # sort matrix to match order of variable_names and sample_names
       sorted_matrix <- sub_matrix[variable_names, sample_names]
-      if (centering == "median") {
-        err.env$trace <- paste(err.env$trace, "B2")
-        print(sub_matrix)
-        err.env$trace <- paste(err.env$trace, "B3")
-        print(smpl_metadata)
-      }
       err.env$trace <- paste(err.env$trace, "C")
       # write the data matrix
       if ( is.character(dataMatrix_out) ){
@@ -978,3 +1016,5 @@ w4m_filter_by_sample_class <- function(
   }
   # ...
 }
+
+# vim: sw=2 ts=2 et ai :

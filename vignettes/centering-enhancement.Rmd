@@ -35,13 +35,23 @@ This document describes an extension to convert a data matrix for a replicated d
 
 W4M does not have tools to contrast treaments *per se*.  Sample metadata annotations can indicate replicates of a common treatment, but sometimes predictive tools like Heat Map (i.e., hierarchical clustering) and Multivariate (running as PLS-DA) assign different predicted treatments to samples from the same treatment.  This confounds examination of relationships among the treatments themselves.
 
-This extension collapses a data matrix having one column per sample to a data matrix having one column per treatment.  Each column is the "center" for the respective set of replicates for that treatment.  Although normally distributed data could be analayzed using mean and standard deviation respectively for assessment of the center and the spread, I see no advantage of not treating all data as having an unknown distribution and using median to estimate the center and the median absolute deviation or Mahalanobis distance to estimate the spread.
+With an appropriate output mode, this extension collapses a data matrix having one column per sample to a data matrix having one column per treatment, where column is the "center" for the respective set of replicates for that treatment.  
 
-The resulting treatment metadata include the following column:
+## Choices
 
-- `trt`, the name of the treatment (i.e., the content of a specified column from `sampleMetadata`)
-- `n`, the number of replicates for the treatment
-- `d_dot` ($D^{\circ}$ or $D^{\bullet}$), which indicates the spread of the replicates for the treatment relative to the spread between the treatments (analogous to D--ratio).
+### Choice of median versus mean
+
+Although normally distributed data could be analayzed using mean and standard deviation respectively for assessment of the center and the spread, I see no advantage of not treating all data as having an unknown distribution and using median to estimate the center and the median absolute deviation or Mahalanobis distance to estimate the spread.
+
+### Choice of input to covariance calculation
+
+The number of cells in the covariance matrix is the square of the number of features, and its computation increases linearly with the number of samples.
+
+I chose to use a single computation of the covariance matrix to save computation time and ensure that all distances are computed for the same basis.  Perhaps I can by:
+
+- Compute the covariance matrix $\textbf{S}_{centers}$ for the matrix of sample-centers $\times$ features.
+    - Because this spans all treatments but minmizes the influence of outliers, it should capture the full range of variation of the features and, hence, provide a complete representation of the span of their covariation.
+- For computing the Mahalanobis distance for treatment $i$ it is necessary to apply an appropriately scaled $\textbf{S}_{i}$, obtained by dividing $\textbf{S}_{centers}$ by $n_{centers}$ and multiplying by $n_i$.
 
 ## Center of data with an unknown (possibly normal) distribution
 
@@ -97,16 +107,29 @@ $$
 Finally, compute **the relative dispersion for each treatment $i$** (analogous to a D-ratio):
 $$ \text{$D^{\bullet}$}_{treatment_i} = \frac{D_M(\textbf{x}_{i},\vec{\text{c}}_i)}{D_{M,\text{overall}}}$$
 
-## Options for output (planned for future)
+## Options for output
+
+Depending on the output mode, the resulting treatment metadata include the following column:
+
+- `trt`, the name of the treatment (i.e., the content of a specified column from `sampleMetadata`)
+- `n`, the number of replicates for the treatment
+- `d_dot` ($D^{\circ}$ or $D^{\bullet}$), the spread of the replicates for the treatment relative to the spread between the treatments (analogous to D--ratio).
+- `d_mc` ($D_{M_{center_i}}$), the Mahalanobis distance between the sample and the center for treatment $i$.
 
 Implemented presently:
+
 - Behave as `center` immediately below.
 
 Planned, along with a choice dropdown:
+
 - `center` - replace all replicates of a treatment with the center for the treatment.
 - `append` - append the treatment centers to the samples.  Set `n` and `D_dot` for samples to `NA`.  This might be useful to calculate the distance between samples and (their own or other) treatment centers.
+- `annotate` - do not replace samples.  Set `n` and `D_dot` to `NA` for all replicates for a treatment except the replicate nearest to its treatment center. 
+
+Abandoned:
+
 - `nearest` - replace all replicates with the replicate nearest to its treatment center.
-- `note` - do not replace samples.  Set `n` and `D_dot` to `NA` for all replicates for a treatment except the replicate nearest to its treatment center. 
+
 
 ## Confidence Interval for the median
 

@@ -4,15 +4,26 @@
 \alias{w4m_filter_by_sample_class}
 \title{Filter W4M data matrix by sample-class}
 \usage{
-w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
-  variableMetadata_in, dataMatrix_out, sampleMetadata_out,
-  variableMetadata_out, classes = c(), include = FALSE,
-  class_column = "class", samplename_column = "sampleMetadata",
-  name_varmetadata_col1 = TRUE, name_smplmetadata_col1 = TRUE,
+w4m_filter_by_sample_class(
+  dataMatrix_in,
+  sampleMetadata_in,
+  variableMetadata_in,
+  dataMatrix_out,
+  sampleMetadata_out,
+  variableMetadata_out,
+  classes = c(),
+  include = FALSE,
+  class_column = "class",
+  samplename_column = "sampleMetadata",
+  name_varmetadata_col1 = TRUE,
+  name_smplmetadata_col1 = TRUE,
   variable_range_filter = c(),
   data_imputation = w4m_filter_zero_imputation,
-  order_vrbl = "variableMetadata", order_smpl = "sampleMetadata",
-  failure_action = function(...) {     cat(paste(..., SEP = "\\n")) })
+  order_vrbl = "variableMetadata",
+  order_smpl = "sampleMetadata",
+  centering = c("none", "centroid", "median", "mediod")[1],
+  failure_action = function(...) {     cat(paste(..., SEP = "\\n")) }
+)
 }
 \arguments{
 \item{dataMatrix_in}{input  data matrix (rows are feature names, columns are sample names}
@@ -47,6 +58,8 @@ w4m_filter_by_sample_class(dataMatrix_in, sampleMetadata_in,
 
 \item{order_smpl}{character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)}
 
+\item{centering}{character: center samples by class column (which names treatment): none, centroid, mediod, or feature-medians}
+
 \item{failure_action}{function(x, ...): action to take upon failure - defaults to 'print(x,...)'}
 }
 \value{
@@ -66,6 +79,14 @@ Furthermore, frequently, it is desirable to analyze a subset of samples (or feat
 This function manipulates produces a set of files with imputed missing values, omitting features and samples that are not consistently present within the set or have zero variance.
 Secondly, it provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
 Thirdly, it provides a selection-capability for features based on whether their metadata lie within the ranges specified by 'variable_range_filter'.
+
+Finally, it provides for the option of computing one of three types of centers for each treatment:
+\itemize{
+\item "none" - Return all samples without computing centers
+\item "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
+\item "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
+\item "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+}
 
 Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:
 \itemize{
@@ -117,7 +138,7 @@ Please see the package vignette for further details.
   , data_imputation = w4m_filter_zero_imputation
   , order_vrbl = "variableMetadata"
   , order_smpl = "sampleMetadata"
-  , failure_action = function(...) { cat(paste(..., SEP = "\\n")) }
+  , failure_action = function(...) { cat(paste(..., SEP = "\n")) }
   )
 }
 
