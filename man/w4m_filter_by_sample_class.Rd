@@ -21,7 +21,7 @@ w4m_filter_by_sample_class(
   data_imputation = w4m_filter_zero_imputation,
   order_vrbl = "variableMetadata",
   order_smpl = "sampleMetadata",
-  centering = c("none", "centroid", "median", "mediod")[1],
+  centering = c("none", "centroid", "median", "medoid")[1],
   failure_action = function(...) {     cat(paste(..., SEP = "\\n")) }
 )
 }
@@ -58,7 +58,7 @@ w4m_filter_by_sample_class(
 
 \item{order_smpl}{character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)}
 
-\item{centering}{character: center samples by class column (which names treatment): none, centroid, mediod, or feature-medians}
+\item{centering}{character: center samples by class column (which names treatment): none, centroid, medoid, or feature-medians}
 
 \item{failure_action}{function(x, ...): action to take upon failure - defaults to 'print(x,...)'}
 }
@@ -80,12 +80,12 @@ This function manipulates produces a set of files with imputed missing values, o
 Secondly, it provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
 Thirdly, it provides a selection-capability for features based on whether their metadata lie within the ranges specified by 'variable_range_filter'.
 
-Finally, it provides for the option of computing one of three types of centers for each treatment:
+Finally, this function provides as an advanced option to compute one of three types of centers for each treatment:
 \itemize{
-\item "none" - Return all samples without computing centers
 \item "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
 \item "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
 \item "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+\item "none" - Return all samples; do not computing centers
 }
 
 Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:

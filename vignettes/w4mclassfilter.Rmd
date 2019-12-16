@@ -1,7 +1,7 @@
 ---
 title: "Filter W4M data by sample class or feature attributes"
 author: Arthur Eschenlauer
-date: 22 October 2019
+date: 16 December 2019
 output:
   pdf_document:
     highlight: null
@@ -301,3 +301,12 @@ To support XCMS outside the context of Galaxy, `w4mclassfilter::w4m_filter_by_sa
   - *if a string*, treat as a file path (i.e., same as in previous releases)
   - *else if an env or list*, write `sampleMetadata_out$sampleMetadata`
   - *else* error
+
+### Computing Treatment Centers
+
+`w4mclassfilter::w4m_filter_by_sample_class` supports provides as an advanced option to compute one of three types of centers for each treatment:
+
+- "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
+- "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
+- "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+- "none" - Return all samples; do not computing centers

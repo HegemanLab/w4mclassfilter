@@ -6,6 +6,7 @@ Description: Filter Workflow4Metabolomics dataMatrix, sampleMetadata, and variab
 Author: Arthur C Eschenlauer <esch0041@umn.edu>
 Maintainer: Arthur C Eschenlauer <eschen@alumni.princeton.edu>
 License: MIT + file LICENSE
+Encoding: UTF-8
 RoxygenNote: 7.0.2
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/HegemanLab/w4mclassfilter

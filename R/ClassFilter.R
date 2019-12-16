@@ -330,11 +330,11 @@ w4m__nonzero_var <- function(m) {
 #' Secondly, it provides a selection-capability for samples based on whether their sample names match a regular expression pattern; this capability can be used either to select for samples with matching sample names or to exclude them.
 #' Thirdly, it provides a selection-capability for features based on whether their metadata lie within the ranges specified by 'variable_range_filter'.
 #'
-#' Finally, it provides for the option of computing one of three types of centers for each treatment:
-#' * "none" - Return all samples without computing centers
+#' Finally, this function provides as an advanced option to compute one of three types of centers for each treatment:
 #' * "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
 #' * "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
 #' * "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+#' * "none" - Return all samples; do not computing centers
 #'
 #' Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:
 #' * character: path to input tab-separated-values-file (TSV)
@@ -366,7 +366,7 @@ w4m__nonzero_var <- function(m) {
 #' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
 #' @param order_vrbl             character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
 #' @param order_smpl             character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
-#' @param centering              character: center samples by class column (which names treatment): none, centroid, mediod, or feature-medians
+#' @param centering              character: center samples by class column (which names treatment): none, centroid, medoid, or feature-medians
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
@@ -434,7 +434,7 @@ w4m_filter_by_sample_class <- function(
 , data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
 , order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
 , order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
-, centering  = c("none", "centroid", "median", "mediod")[1]   # character: center samples by class column (which names treatment)
+, centering  = c("none", "centroid", "median", "medoid")[1]   # character: center samples by class column (which names treatment)
 , failure_action = function(...) { cat(paste(..., SEP = "\n")) }   # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
 
@@ -886,24 +886,24 @@ w4m_filter_by_sample_class <- function(
     rownames(new_df) <- rownames(data_matrix)
     data_matrix <- as.matrix(new_df)
   }
-  else if (centering == "mediod") {
+  else if (centering == "medoid") {
     # compute medoid (ref: https://www.biostars.org/p/11987/#11989)
-    mediod_col   <- function(trt) names(which.min(rowSums(as.matrix(dist(t(trt))))))
-    # mediod_row <- function(trt) names(which.min(rowSums(as.matrix(dist(  trt )))))
+    medoid_col   <- function(trt) names(which.min(rowSums(as.matrix(dist(t(trt))))))
+    # medoid_row <- function(trt) names(which.min(rowSums(as.matrix(dist(  trt )))))
 
     treatments <- smpl_metadata[,class_column]
     my_pca <- prcomp(data_matrix)
     my_scores <- t(my_pca$rotation)
     unitrts <- unique(treatments)
-    # For each treatment, calculate the mediod, i.e.,
+    # For each treatment, calculate the medoid, i.e.,
     #   the sample with the minimum distance to the other samples in the trt
     my_sapply_result <- sapply(
       X = unitrts,
       FUN = function(x) {
         unitrt <- x
         my_trt_scores <- my_scores[,treatments == unitrt]
-        my_trt_mediod <- mediod_col(my_trt_scores)
-        return (my_trt_mediod)
+        my_trt_medoid <- medoid_col(my_trt_scores)
+        return (my_trt_medoid)
       }
     )
     data_matrix <- data_matrix[ , my_sapply_result ]

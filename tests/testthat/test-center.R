@@ -64,7 +64,7 @@ run_center_test <- function(
   class_column,
   samplename_column = "sampleMetadata",
   false_to_exclude_classes_in_filter, 
-  centering = c("none","centroid","median","mediod")
+  centering = c("none","centroid","median","medoid")
   ) {
   # set up variables
   variableMetadata_in  <- "input_center_vm.tsv"
@@ -75,23 +75,23 @@ run_center_test <- function(
                               "none" = "output_center_sm.tsv",
                               "centroid" = "output_center_centroid_sm.tsv",
                               "median" = "output_center_median_sm.tsv",
-                              "mediod" = "output_center_mediod_sm.tsv")
+                              "medoid" = "output_center_medoid_sm.tsv")
   sampleMetadata_exp <- switch(centering,
                               "none" = "expected_center_sm.tsv",
                               "centroid" = "expected_center_centroid_sm.tsv",
                               "median" = "expected_center_median_sm.tsv",
-                              "mediod" = "expected_center_mediod_sm.tsv")
+                              "medoid" = "expected_center_medoid_sm.tsv")
   dataMatrix_in <- "input_center_dm.tsv"
   dataMatrix_out <- switch(centering,
                            "none" = "output_center_dm.tsv",
                            "centroid" = "output_center_centroid_dm.tsv",
                            "median" = "output_center_median_dm.tsv",
-                           "mediod" = "output_center_mediod_dm.tsv")
+                           "medoid" = "output_center_medoid_dm.tsv")
   dataMatrix_exp <- switch(centering,
                            "none" = "expected_center_dm.tsv",
                            "centroid" = "expected_center_centroid_dm.tsv",
                            "median" = "expected_center_median_dm.tsv",
-                           "mediod" = "expected_center_mediod_dm.tsv")
+                           "medoid" = "expected_center_medoid_dm.tsv")
   # test input files
   data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
   expect_true(data_matrix_input_env$success, info = "read data matrix input")
@@ -180,12 +180,12 @@ test_that("center median test", {
 
 #' @import testthat w4mclassfilter
 #' @export
-test_that("center mediod test", {
+test_that("center medoid test", {
   run_center_test(
     classes_to_filter = c()
     , class_column = "trt"
     , samplename_column = "sampleMetadata"
     , false_to_exclude_classes_in_filter = TRUE
-    , centering = "mediod"
+    , centering = "medoid"
   )
 })
