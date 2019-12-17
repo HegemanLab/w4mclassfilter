@@ -4,7 +4,7 @@
 
 * Enhancement https://github.com/HegemanLab/w4mclassfilter/issues/6 - "compute center for each treatment"
 * Built with R 3.6.1 (2019-07-05) "Action of the Toes"
-
+* Built with the command `R CMD build w4mclassfilter` to assure that vignettes are built as intended.
 
 # CHANGES IN VERSION 0.98.14
 

@@ -14,11 +14,11 @@ output:
     fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Filter W4M data by sample class}
-  %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
   \usepackage[all]{nowidow}
   \widowpenalty10000
   \clubpenalty10000
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ### Purpose of the `w4mclassfilter` package
@@ -48,6 +48,7 @@ or to address several data issues that may impede downstream statistical analysi
   - The column for sorting `variableMetadata` or `sampleMetadata` may be specified or defaults to the first column.
 - By default, the name of the first column `sampleMetadata` is set to `"sampleMetadata"`.
 - The name of the first column `variableMetadata` is set to `"variableMetadata"`.
+- An advanced option enables producing a "center" for each treatment in lieu of the samples for each treatment.
 
 ### How the `w4m_filter_by_sample_class` function is used
 
@@ -309,4 +310,4 @@ To support XCMS outside the context of Galaxy, `w4mclassfilter::w4m_filter_by_sa
 - "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
 - "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
 - "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
-- "none" - Return all samples; do not computing centers
+- "none" - Return all samples; do not computing centers.
