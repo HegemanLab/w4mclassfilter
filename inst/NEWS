@@ -6,7 +6,7 @@
 
 ## INTERNAL CHANGES
 
-* Corrected internal calculation of medoids (to use principal components for distance calculations).  See https://github.com/HegemanLab/w4mclassfilter/issues/6#issuecomment-566770411 for details.
+* Corrected internal calculation of medoids (to use principal-component scores as coordinates for distance calculations).  See https://github.com/HegemanLab/w4mclassfilter/issues/6#issuecomment-566770411 for details.
 
 # CHANGES IN VERSION 0.98.15
 

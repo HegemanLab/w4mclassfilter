@@ -414,6 +414,7 @@ w4m__nonzero_var <- function(m) {
 #'   , data_imputation = w4m_filter_zero_imputation
 #'   , order_vrbl = "variableMetadata"
 #'   , order_smpl = "sampleMetadata"
+#'   , centering  = "none"
 #'   , failure_action = function(...) { cat(paste(..., SEP = "\n")) }
 #'   )
 #' }
