@@ -933,6 +933,7 @@ w4m_filter_by_sample_class <- function(
     smpl_metadata_colnames <- colnames(smpl_metadata)
     smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
     smpl_metadata <- smpl_metadata[c("sampleMetadata",smpl_metadata_colnames)]
+    rownames(smpl_metadata) <- smpl_metadata$sampleMetadata
     # rename data_matrix columns as class
     colnames(data_matrix) <- smpl_metadata[,class_column]
     # reset sample_names
