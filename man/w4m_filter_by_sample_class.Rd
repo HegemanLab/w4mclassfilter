@@ -58,7 +58,7 @@ w4m_filter_by_sample_class(
 
 \item{order_smpl}{character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)}
 
-\item{centering}{character: center samples by class column (which names treatment): none, centroid, medoid, or feature-medians}
+\item{centering}{character: center samples by class column (which names treatment).  Possible choices: "none", "centroid", "medoid", or "median"}
 
 \item{failure_action}{function(x, ...): action to take upon failure - defaults to 'print(x,...)'}
 }
@@ -84,7 +84,14 @@ Finally, this function provides as an advanced option to compute one of three ty
 \itemize{
 \item "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
 \item "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
-\item "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+\item "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples (the medoid).
+\itemize{
+\item By definition, the medoid is the sample having the smallest sum of its distances from other samples in the treatment.
+\item Distances computed in principal-components space.
+\itemize{
+\item Principal components are uncorrelated, so they are used here to minimize the impact of correlated features on distances.
+}
+}
 \item "none" - Return all samples; do not computing centers
 }
 
@@ -152,4 +159,3 @@ Please see the package vignette for further details.
 Art Eschenlauer, \email{esch0041@umn.edu}
 }
 \concept{w4m workflow4metabolomics}
-\keyword{multivariate}

@@ -333,7 +333,10 @@ w4m__nonzero_var <- function(m) {
 #' Finally, this function provides as an advanced option to compute one of three types of centers for each treatment:
 #' * "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
 #' * "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
-#' * "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+#' * "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples (the medoid).
+#'   * By definition, the medoid is the sample having the smallest sum of its distances from other samples in the treatment.
+#'   * Distances computed in principal-components space.
+#'     * Principal components are uncorrelated, so they are used here to minimize the distortion of computed distances by correlated features.
 #' * "none" - Return all samples; do not computing centers
 #'
 #' Inputs (dataMatrix_in, sampleMetadata_in, variableMetadata_in) may be:
@@ -366,14 +369,13 @@ w4m__nonzero_var <- function(m) {
 #' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
 #' @param order_vrbl             character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
 #' @param order_smpl             character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
-#' @param centering              character: center samples by class column (which names treatment): none, centroid, medoid, or feature-medians
+#' @param centering              character: center samples by class column (which names treatment).  Possible choices: "none", "centroid", "medoid", or "median"
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
 #' @return logical: TRUE only if filtration succeeded
 #'
 #' @author Art Eschenlauer, \email{esch0041@@umn.edu}
 #' @concept w4m workflow4metabolomics
-#' @keywords multivariate
 #' @seealso \url{https://github.com/HegemanLab/w4mclassfilter}
 #' @seealso \url{http://workflow4metabolomics.org/}
 #'
@@ -813,10 +815,12 @@ w4m_filter_by_sample_class <- function(
   sample_names <- intersect(sample_names, colnames(data_matrix))
   sample_order <- order(smpl_metadata[sample_names, order_smpl])
   sample_names <- sample_names[sample_order]
+  smpl_metadata <- smpl_metadata[sample_names, ]
   # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
   variable_order <- order(vrbl_metadata[variable_names, order_vrbl])
   variable_names <- variable_names[variable_order]
+  vrbl_metadata <- vrbl_metadata[variable_names, ]
 
   # Impute missing values with supplied or default method and the ORIGINAL dataMatrix
   #   This is to avoid biasing median-imputation toward the center of the selected features and samples.
@@ -888,21 +892,35 @@ w4m_filter_by_sample_class <- function(
   }
   else if (centering == "medoid") {
     # compute medoid (ref: https://www.biostars.org/p/11987/#11989)
-    medoid_col   <- function(trt) names(which.min(rowSums(as.matrix(dist(t(trt))))))
-    # medoid_row <- function(trt) names(which.min(rowSums(as.matrix(dist(  trt )))))
+    #medoid_col <- function(trt) names(which.min(rowSums(as.matrix(dist(t(trt))))))
+    medoid_row  <- function(trt) names(which.min(rowSums(as.matrix(dist(  trt )))))
 
     treatments <- smpl_metadata[,class_column]
-    my_pca <- prcomp(data_matrix)
-    my_scores <- t(my_pca$rotation)
     unitrts <- unique(treatments)
+    # When computing principal components with prcomp, set scale. to TRUE because, according to
+    #   https://stat.ethz.ch/R-manual/R-devel/library/stats/html/prcomp.html,
+    #   "in general scaling is advisable".
+    my_pca <- prcomp(t(data_matrix), scale. = TRUE, tol = sqrt(.Machine$double.eps))
+    # Extract eigenvalues to determine how many are < 1
+    # ref for extraction: https://stat.ethz.ch/pipermail/r-help/2005-August/076610.html
+    ev <- my_pca$sdev^2
+    # The cut-off for the scree is somewhat arbitrary,
+    #   https://en.wikipedia.org/wiki/Scree_plot, which cites
+    #   Norman and Steiner, Biostatistics: The Bare Essentials, p. 201
+    #   (https://books.google.com/books?id=8rkqWafdpuoC&pg=PA201)
+    # To be conservative, limit the number of PCs to twice the number of eigenvalues that are greater than 1.
+    #   It might be better instead to keep adding components until the residual approaches some threshold.
+    my_rank <- min(length(ev),2*sum(ev > 1))
+    my_scores <- my_pca$x
+    my_scores <- my_scores[,1:min(ncol(my_scores),my_rank)]
     # For each treatment, calculate the medoid, i.e.,
     #   the sample with the minimum distance to the other samples in the trt
     my_sapply_result <- sapply(
       X = unitrts,
       FUN = function(x) {
         unitrt <- x
-        my_trt_scores <- my_scores[,treatments == unitrt]
-        my_trt_medoid <- medoid_col(my_trt_scores)
+        my_trt_scores <- my_scores[treatments == unitrt,]
+        my_trt_medoid <- medoid_row(my_trt_scores)
         return (my_trt_medoid)
       }
     )

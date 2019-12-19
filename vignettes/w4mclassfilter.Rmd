@@ -1,7 +1,7 @@
 ---
 title: "Filter W4M data by sample class or feature attributes"
 author: Arthur Eschenlauer
-date: 16 December 2019
+date: 17 December 2019
 output:
   pdf_document:
     highlight: null
@@ -309,5 +309,9 @@ To support XCMS outside the context of Galaxy, `w4mclassfilter::w4m_filter_by_sa
 
 - "centroid" - Return only treatment-centers computed for each treatment as the mean intensity for each feature.
 - "median" - Return only treatment-centers computed for each treatment as the median intensity for each feature.
-- "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples, using distances computed in principal-components space.
+- "medoid" - Return only treatment-centers computed for each treatement as the sample most similar to the other samples (the medoid).
+  - By definition, the medoid is the sample having the smallest sum of its distances from other samples in the treatment. 
+  - Distances computed in principal-components space.
+    - Principal components are uncorrelated, so they are used here to minimize the distortion of computed distances by correlated features.
+    - The scores are used to identify the medoid using code adapted from [https://www.biostars.org/p/11987/#11989](https://www.biostars.org/p/11987/#11989)
 - "none" - Return all samples; do not computing centers.

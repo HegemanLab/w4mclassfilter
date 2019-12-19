@@ -1,6 +1,6 @@
 Package: w4mclassfilter
-Version: 0.98.15
-Date: 2019-12-16
+Version: 0.98.16
+Date: 2019-12-17
 Title: W4M Class Filter
 Description: Filter Workflow4Metabolomics dataMatrix, sampleMetadata, and variableMetadata files by sample-class or variable-attribute range, imputing zero for NA values and eliminating zero-variance rows and columns from the data-matrix.
 Author: Arthur C Eschenlauer <esch0041@umn.edu>
