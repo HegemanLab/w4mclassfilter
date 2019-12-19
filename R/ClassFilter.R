@@ -925,7 +925,20 @@ w4m_filter_by_sample_class <- function(
       }
     )
     data_matrix <- data_matrix[ , my_sapply_result ]
-    sample_names <- colnames(data_matrix)
+    # rewrite smpl_metadata:
+    #   - rename column 1 as "medoid"
+    #   - copy class_column into column 1 as "sampleMetadata"
+    smpl_metadata <- smpl_metadata[my_sapply_result,]
+    colnames(smpl_metadata)[1] <- "medoid"
+    smpl_metadata_colnames <- colnames(smpl_metadata)
+    smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
+    smpl_metadata <- smpl_metadata[c("sampleMetadata",smpl_metadata_colnames)]
+    # rename data_matrix columns as class
+    colnames(data_matrix) <- smpl_metadata[,class_column]
+    # reset sample_names
+    sample_names <- smpl_metadata$sampleMetadata
+    sample_order <- order(smpl_metadata[sample_names, order_smpl])
+    sample_names <- sample_names[sample_order]
   }
   # ...
 

@@ -89,7 +89,7 @@ Finally, this function provides as an advanced option to compute one of three ty
 \item By definition, the medoid is the sample having the smallest sum of its distances from other samples in the treatment.
 \item Distances computed in principal-components space.
 \itemize{
-\item Principal components are uncorrelated, so they are used here to minimize the impact of correlated features on distances.
+\item Principal components are uncorrelated, so they are used here to minimize the distortion of computed distances by correlated features.
 }
 }
 \item "none" - Return all samples; do not computing centers
