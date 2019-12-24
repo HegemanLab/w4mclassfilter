@@ -64,12 +64,24 @@ run_center_test <- function(
   class_column,
   samplename_column = "sampleMetadata",
   false_to_exclude_classes_in_filter, 
-  centering = c("none","centroid","median","medoid")
+  centering = c("none","centroid","median","medoid"),
+  order_smpl,
+  order_vrbl
   ) {
+  #### print("order_smpl")
+  #### print(order_smpl)
   # set up variables
-  variableMetadata_in  <- "input_center_vm.tsv"
-  variableMetadata_out <- "output_center_vm.tsv"
-  variableMetadata_exp <- "expected_center_vm.tsv"
+  variableMetadata_in <- "input_center_vm.tsv"
+  variableMetadata_out <- switch(centering,
+                               "none" = "output_center_vm.tsv",
+                               "centroid" = "output_center_centroid_vm.tsv",
+                               "median" = "output_center_median_vm.tsv",
+                               "medoid" = "output_center_medoid_vm.tsv")
+  variableMetadata_exp <- switch(centering,
+                               "none" = "expected_center_vm.tsv",
+                               "centroid" = "expected_center_centroid_vm.tsv",
+                               "median" = "expected_center_median_vm.tsv",
+                               "medoid" = "expected_center_medoid_vm.tsv")
   sampleMetadata_in <- "input_center_sm.tsv"
   sampleMetadata_out <- switch(centering,
                               "none" = "output_center_sm.tsv",
@@ -115,6 +127,8 @@ run_center_test <- function(
   , include = false_to_exclude_classes_in_filter
   , class_column = class_column
   , centering = centering
+  , order_smpl = order_smpl
+  , order_vrbl = order_vrbl
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files
@@ -145,47 +159,59 @@ run_center_test <- function(
 #' @import testthat w4mclassfilter
 #' @export
 test_that("center none test", {
+  #print("*** center none test ***")
   run_center_test(
     classes_to_filter = c()
   , class_column = "trt"
   , samplename_column = "sampleMetadata"
   , false_to_exclude_classes_in_filter = TRUE
   , centering = "none"
+  , order_smpl = c("order,trt")
+  , order_vrbl = c("order,mz")
   )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
 test_that("center centroid test", {
+  #print("*** center centroid test ***")
   run_center_test(
     classes_to_filter = c()
     , class_column = "trt"
     , samplename_column = "sampleMetadata"
     , false_to_exclude_classes_in_filter = TRUE
     , centering = "centroid"
+    , order_smpl = c("sampleMetadata")
+    , order_vrbl = c("variableMetadata")
   )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
 test_that("center median test", {
+  #print("*** center median test ***")
   run_center_test(
     classes_to_filter = c()
     , class_column = "trt"
     , samplename_column = "sampleMetadata"
     , false_to_exclude_classes_in_filter = TRUE
     , centering = "median"
+    , order_smpl = c("sampleMetadata")
+    , order_vrbl = c("mz")
   )
 })
 
 #' @import testthat w4mclassfilter
 #' @export
 test_that("center medoid test", {
+  #print("*** center medoid test ***")
   run_center_test(
     classes_to_filter = c()
     , class_column = "trt"
     , samplename_column = "sampleMetadata"
     , false_to_exclude_classes_in_filter = TRUE
     , centering = "medoid"
+    , order_smpl = c("order,trt")
+    , order_vrbl = c("order,rt")
   )
 })

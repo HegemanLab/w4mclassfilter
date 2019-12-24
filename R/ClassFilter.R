@@ -743,6 +743,22 @@ w4m_filter_by_sample_class <- function(
   }
   # ...
 
+  # order_metadata( metadata_df, metadata_names, order_csv )
+  order_metadata <- function(metadata_df, metadata_names, order_csv) {
+    order_split <- unlist(strsplit( order_csv, "," ))
+    metadata_order <-
+      Reduce(
+        function(a1,a2) {
+          order(
+            metadata_df[metadata_names,a1],
+            metadata_df[metadata_names,a2]
+          )
+        },
+        order_split
+      )
+    return (metadata_order)
+  }
+
   data_matrix_old <- data_matrix
   # Impute missing values with supplied or default method
   #   (necessary for w4m__nonzero_var)
@@ -814,12 +830,21 @@ w4m_filter_by_sample_class <- function(
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   # column names
   sample_names <- intersect(sample_names, colnames(data_matrix))
-  sample_order <- order(smpl_metadata[sample_names, order_smpl])
+  sample_order <- if ( ! grepl( ",", order_smpl ) ) {
+    order(smpl_metadata[sample_names, order_smpl])
+  } else {
+    order_metadata( smpl_metadata, sample_names, order_smpl )
+  }
   sample_names <- sample_names[sample_order]
   smpl_metadata <- smpl_metadata[sample_names, ]
   # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
-  variable_order <- order(vrbl_metadata[variable_names, order_vrbl])
+  #variable_order <- order(vrbl_metadata[variable_names, order_vrbl])
+  variable_order <- if ( ! grepl( ",", order_vrbl ) ) {
+    order(vrbl_metadata[variable_names, order_vrbl])
+  } else {
+    order_metadata( vrbl_metadata, variable_names, order_vrbl )
+  }
   variable_names <- variable_names[variable_order]
   vrbl_metadata <- vrbl_metadata[variable_names, ]
 
@@ -939,7 +964,11 @@ w4m_filter_by_sample_class <- function(
     colnames(data_matrix) <- smpl_metadata[,class_column]
     # reset sample_names
     sample_names <- smpl_metadata$sampleMetadata
-    sample_order <- order(smpl_metadata[sample_names, order_smpl])
+    sample_order <- if ( ! grepl( ",", order_smpl ) ) {
+      order(smpl_metadata[sample_names, order_smpl])
+    } else {
+      order_metadata( smpl_metadata, sample_names, order_smpl )
+    }
     sample_names <- sample_names[sample_order]
   }
   # ...

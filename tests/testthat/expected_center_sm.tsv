@@ -1,13 +1,13 @@
-sampleMetadata	trt
-a1	a
-a2	a
-a3	a
-b1	b
-b2	b
-b3	b
-b4	b
-b5	b
-c1	c
-c2	c
-c3	c
-c4	c
+sampleMetadata	trt	order
+a3	a	1
+b2	b	1
+c1	c	1
+a2	a	2
+b5	b	2
+c4	c	2
+a1	a	3
+b1	b	3
+c3	c	3
+b4	b	4
+c2	c	4
+b3	b	5

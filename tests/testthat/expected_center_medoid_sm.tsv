@@ -1,4 +1,4 @@
-sampleMetadata	medoid	trt
-a	a3	a
-b	b1	b
-c	c4	c
+sampleMetadata	medoid	trt	order
+a	a3	a	1
+c	c4	c	2
+b	b1	b	3
