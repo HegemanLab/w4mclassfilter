@@ -839,7 +839,6 @@ w4m_filter_by_sample_class <- function(
   smpl_metadata <- smpl_metadata[sample_names, ]
   # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
-  #variable_order <- order(vrbl_metadata[variable_names, order_vrbl])
   variable_order <- if ( ! grepl( ",", order_vrbl ) ) {
     order(vrbl_metadata[variable_names, order_vrbl])
   } else {
@@ -883,6 +882,9 @@ w4m_filter_by_sample_class <- function(
       ),
       stringsAsFactors = FALSE
     )
+    smpl_metadata_colnames <- colnames(smpl_metadata)
+    smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
+    smpl_metadata <- smpl_metadata[c("sampleMetadata",smpl_metadata_colnames)]
     rownames(new_df) <- rownames(data_matrix)
     data_matrix <- as.matrix(new_df)
   }
@@ -913,6 +915,9 @@ w4m_filter_by_sample_class <- function(
       ),
       stringsAsFactors = FALSE
     )
+    smpl_metadata_colnames <- colnames(smpl_metadata)
+    smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
+    smpl_metadata <- smpl_metadata[c("sampleMetadata",smpl_metadata_colnames)]
     rownames(new_df) <- rownames(data_matrix)
     data_matrix <- as.matrix(new_df)
   }
