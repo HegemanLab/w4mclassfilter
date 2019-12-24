@@ -359,16 +359,16 @@ w4m__nonzero_var <- function(m) {
 #' @param dataMatrix_out         output data matrix (rows are feature names, columns are sample names
 #' @param sampleMetadata_out     output sample metadata (rows are sample names, one column's name matches class_column)
 #' @param variableMetadata_out   output variable metadata (rows are variable names)
-#' @param classes                character array: names of sample classes to include or exclude; default is an empty array
+#' @param classes                character vector or csv string: names of sample classes to include or exclude; default is an empty vector
 #' @param include                logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes
 #' @param class_column           character: name of "class" column, defaults to "class"
 #' @param samplename_column      character: name of column with sample name, defaults to "sampleMetadata"
 #' @param name_varmetadata_col1  logical: TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 #' @param name_smplmetadata_col1 logical: TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE
-#' @param variable_range_filter  character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
+#' @param variable_range_filter  character vector or csv string: vector of filters specified as 'variableMetadataColumnName:min:max'; default is empty vector
 #' @param data_imputation        function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA
-#' @param order_vrbl             character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
-#' @param order_smpl             character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
+#' @param order_vrbl             character vector or csv string: name(s) of column(s) of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)
+#' @param order_smpl             character vector or csv string: name(s) of column(s) of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)
 #' @param centering              character: center samples by class column (which names treatment).  Possible choices: "none", "centroid", "medoid", or "median"
 #' @param failure_action         function(x, ...): action to take upon failure - defaults to 'print(x,...)'
 #'
@@ -427,16 +427,16 @@ w4m_filter_by_sample_class <- function(
 , dataMatrix_out                          # character:          path to output file containing data matrix (tsv, rows are feature names, columns are sample names)
 , sampleMetadata_out                      # character:          path to output file containing sample metadata (tsv, rows are sample names, one column is "class")
 , variableMetadata_out                    # character:          path to output file containing variable metadata (tsv, rows are variable names)
-, classes = c()                           # character array:    names of sample classes to include or exclude; default is an empty array
+, classes = c()                           # char array or csv:  names of sample classes to include or exclude (as csv string or vector of strings); default is an empty array
 , include = FALSE                         # logical:            TRUE, include named sample classes; FALSE (the default), exclude named sample classes
 , class_column = "class"                  # character:          name of "class" column, defaults to "class"
 , samplename_column = "sampleMetadata"    # character:          name of column with sample name, defaults to "sampleMetadata"
 , name_varmetadata_col1 = TRUE            # logical:            TRUE, name column 1 of variable metadata as "variableMetadata"; FALSE, no change; default is TRUE
 , name_smplmetadata_col1 = TRUE           # logical:            TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE
-, variable_range_filter = c()             # character array:    array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
-, data_imputation = w4m_filter_zero_imputation   # function(m):   default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
-, order_vrbl = "variableMetadata"         # character:          order variables by column whose name is supplied here
-, order_smpl = "sampleMetadata"           # character:          order samples by column whose name is supplied here
+, variable_range_filter = c()             # char array or csv:  array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array
+, data_imputation = w4m_filter_zero_imputation   # function(m): default imputation method is for 'intb' data, where intensities have background subtracted - impute zero for NA or negative
+, order_vrbl = "variableMetadata"         # char array or csv:  order variables by column(s) whose name(s) is/are supplied here (as csv string or vector of strings)
+, order_smpl = "sampleMetadata"           # char array or csv:  order samples by column(s) whose name(s) is/are supplied here (as csv string or vector of strings)
 , centering  = c("none", "centroid", "median", "medoid")[1]   # character: center samples by class column (which names treatment)
 , failure_action = function(...) { cat(paste(..., SEP = "\n")) }   # function(x, ...):   action to take upon failure - defaults to 'print(x,...)'
 ) {
@@ -627,6 +627,9 @@ w4m_filter_by_sample_class <- function(
   }
   rownames(smpl_metadata) <- smpl_metadata[ , samplename_column]
 
+  if (length(classes) == 1) {
+    classes <- unlist(strsplit( classes, "," ))
+  }
   if (nchar(class_column) > 0 && length(classes) > 0) {
     # select the first column of the rows indicated by classes, include, & class_column, but don't drop dimension
     #   > Reduce(`|`,list(c(TRUE,FALSE,FALSE),c(FALSE,TRUE,FALSE),c(FALSE,FALSE,FALSE)))
@@ -780,6 +783,9 @@ w4m_filter_by_sample_class <- function(
     nrow_before <- nrow(data_matrix)
     ncol_before <- ncol(data_matrix)
 
+    if (length(variable_range_filter) == 1) {
+      variable_range_filter <- unlist(strsplit( variable_range_filter, "," ))
+    }
     # run filters for variable metadata and maximum intensity for each feature
     if (length(variable_range_filter) > 0) {
       # filter variables having out-of-range metadata or intensity maximum

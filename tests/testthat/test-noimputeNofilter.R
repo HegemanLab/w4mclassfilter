@@ -148,7 +148,7 @@ test_that("noimputenofilter test 2.1 - regex_include_all", {
 #' @export
 test_that("noimputenofilter test 2.2 - regex_include_all", {
   run_noimputenofilter_test(
-    classes_to_filter = c("[Mm]", "[fF]")
+    classes_to_filter = c("[Mm],[fF]")
   , class_column = "gender"
   , samplename_column = "sampleMetadata"
   , false_to_exclude_classes_in_filter = TRUE)

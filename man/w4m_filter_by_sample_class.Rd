@@ -38,7 +38,7 @@ w4m_filter_by_sample_class(
 
 \item{variableMetadata_out}{output variable metadata (rows are variable names)}
 
-\item{classes}{character array: names of sample classes to include or exclude; default is an empty array}
+\item{classes}{character vector or csv string: names of sample classes to include or exclude; default is an empty vector}
 
 \item{include}{logical: TRUE, include named sample classes; FALSE (the default), exclude named sample classes}
 
@@ -50,13 +50,13 @@ w4m_filter_by_sample_class(
 
 \item{name_smplmetadata_col1}{logical: TRUE, name column 1 of sample metadata as "sampleMetadata"; FALSE, no change; default is TRUE}
 
-\item{variable_range_filter}{character array: array of filters specified as 'variableMetadataColumnName:min:max'; default is empty array}
+\item{variable_range_filter}{character vector or csv string: vector of filters specified as 'variableMetadataColumnName:min:max'; default is empty vector}
 
 \item{data_imputation}{function(m): default imputation method for 'intb' data, where intensities have background subtracted - impute zero for NA}
 
-\item{order_vrbl}{character: name of column of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)}
+\item{order_vrbl}{character vector or csv string: name(s) of column(s) of variableMetadata on which to sort, defaults to "variableMetadata" (i.e., the first column)}
 
-\item{order_smpl}{character: name of column of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)}
+\item{order_smpl}{character vector or csv string: name(s) of column(s) of sampleMetadata on which to sort, defaults to "sampleMetadata" (i.e., the first column)}
 
 \item{centering}{character: center samples by class column (which names treatment).  Possible choices: "none", "centroid", "medoid", or "median"}
 

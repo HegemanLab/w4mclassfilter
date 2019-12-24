@@ -68,7 +68,7 @@ test_that("filter mz rt max", {
     , classes = classes_to_filter
     , include = false_to_exclude_classes_in_filter
     , class_column = class_column
-    , variable_range_filter = c("mz:125:850", "rt::850")
+    , variable_range_filter = c("mz:125:850,rt::850")
   )
   expect_true(filter_result, info = "filter_result should be true")
   # read actual output files
