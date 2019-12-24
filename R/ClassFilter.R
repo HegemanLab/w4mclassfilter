@@ -743,9 +743,13 @@ w4m_filter_by_sample_class <- function(
   }
   # ...
 
-  # order_metadata( metadata_df, metadata_names, order_csv )
-  order_metadata <- function(metadata_df, metadata_names, order_csv) {
-    order_split <- unlist(strsplit( order_csv, "," ))
+  # order_metadata( metadata_df, metadata_names, order_cols )
+  order_metadata <- function(metadata_df, metadata_names, order_cols) {
+    if ( length(order_cols) == 1 ) {
+      order_split <- unlist(strsplit( order_cols, "," ))
+    } else {
+      order_split <- order_cols
+    }
     metadata_order <-
       Reduce(
         function(a1,a2) {
@@ -830,7 +834,7 @@ w4m_filter_by_sample_class <- function(
   # purge smpl_metadata and vrbl_metadata of irrelevant rows
   # column names
   sample_names <- intersect(sample_names, colnames(data_matrix))
-  sample_order <- if ( ! grepl( ",", order_smpl ) ) {
+  sample_order <- if ( length(order_smpl) == 1 && ! grepl( ",", order_smpl ) ) {
     order(smpl_metadata[sample_names, order_smpl])
   } else {
     order_metadata( smpl_metadata, sample_names, order_smpl )
@@ -839,7 +843,7 @@ w4m_filter_by_sample_class <- function(
   smpl_metadata <- smpl_metadata[sample_names, ]
   # row names
   variable_names <- intersect( rownames(vrbl_metadata), rownames(data_matrix) )
-  variable_order <- if ( ! grepl( ",", order_vrbl ) ) {
+  variable_order <- if ( length(order_vrbl) == 1 && ! grepl( ",", order_vrbl ) ) {
     order(vrbl_metadata[variable_names, order_vrbl])
   } else {
     order_metadata( vrbl_metadata, variable_names, order_vrbl )
@@ -969,7 +973,7 @@ w4m_filter_by_sample_class <- function(
     colnames(data_matrix) <- smpl_metadata[,class_column]
     # reset sample_names
     sample_names <- smpl_metadata$sampleMetadata
-    sample_order <- if ( ! grepl( ",", order_smpl ) ) {
+    sample_order <- if ( length(order_smpl) == 1 && ! grepl( ",", order_smpl ) ) {
       order(smpl_metadata[sample_names, order_smpl])
     } else {
       order_metadata( smpl_metadata, sample_names, order_smpl )

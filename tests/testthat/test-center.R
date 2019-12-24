@@ -212,6 +212,6 @@ test_that("center medoid test", {
     , false_to_exclude_classes_in_filter = TRUE
     , centering = "medoid"
     , order_smpl = c("order,trt")
-    , order_vrbl = c("order,rt")
+    , order_vrbl = c("order","rt")
   )
 })
