@@ -1,3 +1,11 @@
+# CHANGES IN VERSION 0.98.17
+
+## SIGNIFICANT USER-VISIBLE CHANGES
+
+* Enhancement https://github.com/HegemanLab/w4mclassfilter/issues/7 - "enable sorting on multiple columns of metadata"
+* Built with R 3.6.1 (2019-07-05) "Action of the Toes"
+* Built with the command `R CMD build w4mclassfilter` to assure that vignettes are built as intended.
+
 # CHANGES IN VERSION 0.98.16
 
 ## SIGNIFICANT USER-VISIBLE CHANGES

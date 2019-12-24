@@ -1,7 +1,7 @@
 ---
 title: "Filter W4M data by sample class or feature attributes"
 author: Arthur Eschenlauer
-date: 17 December 2019
+date: 23 December 2019
 output:
   pdf_document:
     highlight: null
@@ -45,7 +45,7 @@ or to address several data issues that may impede downstream statistical analysi
   - applying a user-supplied alternative imputation function.
 - Features and samples that have zero variance are eliminated.
 - Samples and features have consistent order in `variableMetadata`, `sampleMetadata`, and `dataMatrix`.
-  - The column for sorting `variableMetadata` or `sampleMetadata` may be specified or defaults to the first column.
+  - The column(s) for sorting `variableMetadata` or `sampleMetadata` may be specified or defaults to the first column.
 - By default, the name of the first column `sampleMetadata` is set to `"sampleMetadata"`.
 - The name of the first column `variableMetadata` is set to `"variableMetadata"`.
 - An advanced option enables producing a "center" for each treatment in lieu of the samples for each treatment.
