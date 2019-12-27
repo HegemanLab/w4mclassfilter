@@ -755,10 +755,10 @@ w4m_filter_by_sample_class <- function(
     }
     metadata_order <-
       Reduce(
-        function(a1,a2) {
+        function(a1, a2) {
           order(
-            metadata_df[metadata_names,a1],
-            metadata_df[metadata_names,a2]
+            metadata_df[metadata_names, a1],
+            metadata_df[metadata_names, a2]
           )
         },
         order_split
@@ -869,7 +869,6 @@ w4m_filter_by_sample_class <- function(
     treatments <- smpl_metadata[class_column][[1]]
     nrow_dm <- nrow(data_matrix)
     unitrts <- unique(treatments)
-    ntrts <- length(unitrts)
     smpl_metadata <- data.frame(
       trt = unitrts,
       n = sapply(X = unitrts, FUN = function(x) sum(x == treatments)),
@@ -893,7 +892,7 @@ w4m_filter_by_sample_class <- function(
       stringsAsFactors = FALSE
     )
     smpl_metadata_colnames <- colnames(smpl_metadata)
-    smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
+    smpl_metadata$sampleMetadata <- smpl_metadata[,"trt"]
     smpl_metadata <- smpl_metadata[c("sampleMetadata",smpl_metadata_colnames)]
     rownames(new_df) <- rownames(data_matrix)
     data_matrix <- as.matrix(new_df)
@@ -902,7 +901,6 @@ w4m_filter_by_sample_class <- function(
     treatments <- smpl_metadata[class_column][[1]]
     nrow_dm <- nrow(data_matrix)
     unitrts <- unique(treatments)
-    ntrts <- length(unitrts)
     smpl_metadata <- data.frame(
       trt = unitrts,
       n = sapply(X = unitrts, FUN = function(x) sum(x == treatments)),
@@ -926,7 +924,7 @@ w4m_filter_by_sample_class <- function(
       stringsAsFactors = FALSE
     )
     smpl_metadata_colnames <- colnames(smpl_metadata)
-    smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
+    smpl_metadata$sampleMetadata <- smpl_metadata[,"trt"]
     smpl_metadata <- smpl_metadata[c("sampleMetadata",smpl_metadata_colnames)]
     rownames(new_df) <- rownames(data_matrix)
     data_matrix <- as.matrix(new_df)
@@ -944,14 +942,14 @@ w4m_filter_by_sample_class <- function(
     my_pca <- prcomp(t(data_matrix), scale. = TRUE, tol = sqrt(.Machine$double.eps))
     # Extract eigenvalues to determine how many are < 1
     # ref for extraction: https://stat.ethz.ch/pipermail/r-help/2005-August/076610.html
-    ev <- my_pca$sdev^2
+    ev <- my_pca$sdev ^ 2
     # The cut-off for the scree is somewhat arbitrary,
     #   https://en.wikipedia.org/wiki/Scree_plot, which cites
     #   Norman and Steiner, Biostatistics: The Bare Essentials, p. 201
     #   (https://books.google.com/books?id=8rkqWafdpuoC&pg=PA201)
     # To be conservative, limit the number of PCs to twice the number of eigenvalues that are greater than 1.
     #   It might be better instead to keep adding components until the residual approaches some threshold.
-    my_rank <- min(length(ev),2*sum(ev > 1))
+    my_rank <- min(length(ev),2 * sum(ev > 1))
     my_scores <- my_pca$x
     my_scores <- my_scores[,1:min(ncol(my_scores),my_rank)]
     # For each treatment, calculate the medoid, i.e.,
