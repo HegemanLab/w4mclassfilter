@@ -1,7 +1,7 @@
 ---
 title: "Filter W4M data by sample class or feature attributes"
 author: Arthur Eschenlauer
-date: 23 December 2019
+date: 28 December 2019
 output:
   pdf_document:
     highlight: null
