@@ -16,7 +16,11 @@ read_data_frame <- function(file_path, kind_string, failure_action = print) {
   my.env$msg <- sprintf("no message reading %s", kind_string)
   tryCatch(
     expr = {
-      my.env$data    <- utils::read.delim( fill = FALSE, file = file_path )
+      my.env$data    <- utils::read.delim(
+        fill = FALSE,
+        file = file_path,
+        stringsAsFactors = TRUE
+        )
       my.env$success <- TRUE
     }
   , error = function(e) {
