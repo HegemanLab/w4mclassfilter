@@ -995,13 +995,17 @@ w4m_filter_by_sample_class <- function(
   tryCatch(
     expr = {
       err.env$trace <- paste(err.env$trace, "A")
-      sub_matrix <- data_matrix[ rownames(data_matrix) %in% variable_names    # row selector
-                    , colnames(data_matrix) %in% sample_names      # column selector
-                    , drop = FALSE                                 # keep two dimensions
-                    ]
+      sub_matrix <- data_matrix[
+          rownames(data_matrix) %in% variable_names # row selector
+        , colnames(data_matrix) %in% sample_names   # column selector
+        , drop = FALSE                              # keep two dimensions
+        ]
       err.env$trace <- paste(err.env$trace, "B")
       # sort matrix to match order of variable_names and sample_names
-      sorted_matrix <- sub_matrix[variable_names, sample_names]
+      sorted_matrix <- sub_matrix[
+          match(rownames(sub_matrix),variable_names)
+        , match(colnames(sub_matrix),sample_names)
+        ]
       err.env$trace <- paste(err.env$trace, "C")
       # write the data matrix
       if ( is.character(dataMatrix_out) ){
