@@ -7,7 +7,7 @@ Author: Arthur C Eschenlauer <esch0041@umn.edu>
 Maintainer: Arthur C Eschenlauer <eschen@alumni.princeton.edu>
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/HegemanLab/w4mclassfilter
 Imports: utils
