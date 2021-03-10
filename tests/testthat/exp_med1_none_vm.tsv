@@ -1,0 +1,10 @@
+variableMetadata	acquisition	sampleType	sample	treatment	injection_time
+GcL_1	mhelias_rsidar_20200618_17628_g1B	sample	GcL_1	GcL	2020-06-25T23:03:23Z
+GcL_2	mhelias_rsidar_20200618_17628_G2B	sample	GcL_2	GcL	2020-06-25T22:01:58Z
+GcL_3	mhelias_rsidar_20200618_17628_G3B	sample	GcL_3	GcL	2020-06-25T20:19:37Z
+Sso_1	mhelias_rsidar_20200618_17628_S1B	sample	Sso_1	Sso	2020-06-25T21:21:01Z
+Sso_2	mhelias_rsidar_20200618_17628_S2B	sample	Sso_2	Sso	2020-06-25T19:59:11Z
+Sso_3	mhelias_rsidar_20200618_17628_S3B	sample	Sso_3	Sso	2020-06-25T22:42:56Z
+X5A8_1	mhelias_rsidar_20200618_17628_C1B	sample	X5A8_1	5A8	2020-06-25T20:40:06Z
+X5A8_2	mhelias_rsidar_20200618_17628_C2B	sample	X5A8_2	5A8	2020-06-25T23:23:53Z
+X5A8_3	mhelias_rsidar_20200618_17628_C3B	sample	X5A8_3	5A8	2020-06-25T21:41:31Z

@@ -625,7 +625,7 @@ w4m_filter_by_sample_class <- function(
   if (name_smplmetadata_col1) {
     colnames(smpl_metadata)[1] <- "sampleMetadata"
   }
-  rownames(smpl_metadata) <- smpl_metadata[ , samplename_column]
+  rownames(smpl_metadata) <- make.names(smpl_metadata[ , samplename_column], unique = TRUE)
 
   if (length(classes) == 1) {
     classes <- unlist(strsplit( classes, "," ))
@@ -724,6 +724,7 @@ w4m_filter_by_sample_class <- function(
     tryCatch(
       expr = {
         rownames(data_matrix) <- make.names( data_matrix[ , 1 ], unique = TRUE )
+        colnames(data_matrix) <- make.names( colnames(data_matrix), unique = TRUE )
         err.env$success     <- TRUE
       }
     , error = function(e) {
@@ -860,6 +861,8 @@ w4m_filter_by_sample_class <- function(
   # Impute missing values with supplied or default method and the ORIGINAL dataMatrix
   #   This is to avoid biasing median-imputation toward the center of the selected features and samples.
   data_matrix <- data_imputation(data_matrix_old)
+
+
   # filter out undesired features and samples
   data_matrix <- data_matrix[variable_names, sample_names, drop = FALSE ]
   # ...
@@ -936,38 +939,50 @@ w4m_filter_by_sample_class <- function(
 
     treatments <- smpl_metadata[,class_column]
     unitrts <- unique(treatments)
+
     # When computing principal components with prcomp, set scale. to TRUE because, according to
     #   https://stat.ethz.ch/R-manual/R-devel/library/stats/html/prcomp.html,
-    #   "in general scaling is advisable".
+    # "in general scaling is advisable".
     my_pca <- prcomp(t(data_matrix), scale. = TRUE, tol = sqrt(.Machine$double.eps))
     # Extract eigenvalues to determine how many are < 1
     # ref for extraction: https://stat.ethz.ch/pipermail/r-help/2005-August/076610.html
     ev <- my_pca$sdev ^ 2
-    # The cut-off for the scree is somewhat arbitrary,
-    #   https://en.wikipedia.org/wiki/Scree_plot, which cites
+    # The cut-off for the scree (the point of diminishing returns when adding additional
+    # principal components) is somewhat arbitrary:
+    #   https://en.wikipedia.org/wiki/Scree_plot
+    # which cites
     #   Norman and Steiner, Biostatistics: The Bare Essentials, p. 201
     #   (https://books.google.com/books?id=8rkqWafdpuoC&pg=PA201)
     # To be conservative, limit the number of PCs to twice the number of eigenvalues that are greater than 1.
-    #   It might be better instead to keep adding components until the residual approaches some threshold.
+    # It might be better instead to keep adding components until the residual approaches some threshold.
     my_rank <- min(length(ev),2 * sum(ev > 1))
     my_scores <- my_pca$x
     my_scores <- my_scores[,1:min(ncol(my_scores),my_rank)]
+
     # For each treatment, calculate the medoid, i.e.,
-    #   the sample with the minimum distance to the other samples in the trt
+    #   the name of the sample with the minimum distance to the other samples in the trt;
+    #   That sample is the the one with the lowest distance from the center in principal components space.
     my_sapply_result <- sapply(
       X = unitrts,
       FUN = function(x) {
         unitrt <- x
-        my_trt_scores <- my_scores[treatments == unitrt,]
-        my_trt_medoid <- medoid_row(my_trt_scores)
-        return (my_trt_medoid)
+        if (sum(treatments == unitrt) > 1) {
+          my_trt_scores <- my_scores[treatments == unitrt, ]
+          my_trt_medoid <- medoid_row(my_trt_scores)
+          return (my_trt_medoid)
+        } else {
+          my_trt_medoid <- rownames(my_scores[treatments == unitrt, , drop=FALSE])
+          return (my_trt_medoid)
+        }
       }
     )
-    data_matrix <- data_matrix[ , my_sapply_result ]
+
+    data_matrix <- data_matrix[ , my_sapply_result, drop = FALSE ]
     # rewrite smpl_metadata:
     #   - rename column 1 as "medoid"
     #   - copy class_column into column 1 as "sampleMetadata"
-    smpl_metadata <- smpl_metadata[my_sapply_result,]
+
+    smpl_metadata <- smpl_metadata[my_sapply_result, , drop = FALSE]
     colnames(smpl_metadata)[1] <- "medoid"
     smpl_metadata_colnames <- colnames(smpl_metadata)
     smpl_metadata$sampleMetadata <- smpl_metadata[,class_column]
@@ -983,6 +998,11 @@ w4m_filter_by_sample_class <- function(
       order_metadata( smpl_metadata, sample_names, order_smpl )
     }
     sample_names <- sample_names[sample_order]
+
+    colnames(data_matrix) <- make.names(colnames(data_matrix), unique = TRUE)
+    rownames(smpl_metadata) <- make.names(rownames(smpl_metadata), unique = TRUE)
+    sample_names <- make.names(sample_names, unique = TRUE)
+    smpl_metadata[1] <- make.names(smpl_metadata[,class_column], unique = TRUE)
   }
   # ...
 
@@ -995,6 +1015,7 @@ w4m_filter_by_sample_class <- function(
   tryCatch(
     expr = {
       err.env$trace <- paste(err.env$trace, "A")
+      # sort matrix by supplied criteria
       sub_matrix <- data_matrix[
           rownames(data_matrix) %in% variable_names # row selector
         , colnames(data_matrix) %in% sample_names   # column selector
@@ -1007,6 +1028,7 @@ w4m_filter_by_sample_class <- function(
         , match(colnames(sub_matrix),sample_names)
         ]
       err.env$trace <- paste(err.env$trace, "C")
+
       # write the data matrix
       if ( is.character(dataMatrix_out) ){
 
@@ -1028,7 +1050,7 @@ w4m_filter_by_sample_class <- function(
       # write the sample metadata
       if ( is.character(sampleMetadata_out) ){
         utils::write.table( x = smpl_metadata
-                             [ sample_names # row selector
+                             [ match(rownames(smpl_metadata), sample_names) # row selector
                              ,              # column selector (select all)
                              , drop = FALSE # keep two dimensions
                              ]
@@ -1039,7 +1061,7 @@ w4m_filter_by_sample_class <- function(
                            )
       } else if ( is.environment(sampleMetadata_out) || (is.list(sampleMetadata_out) && ! is.matrix(sampleMetadata_out)) ) {
         sampleMetadata_out$sampleMetadata <-
-          smpl_metadata [ sample_names # row selector
+          smpl_metadata [ match(rownames(smpl_metadata), sample_names) # row selector
                         ,              # column selector (select all)
                         , drop = FALSE # keep two dimensions
                         ]
